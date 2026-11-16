@@ -197,7 +197,7 @@
     </div>
   </div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The winner's curse (Day 1 · Topic 5) · discussion question 2</span></div>
-  <aside class="notes">We split the airway experiment in two: DESeq2 on 2 cell lines ("discovery") and, separately, on the other 2 ("replication"). Each dot is a gene: its log2 fold change in discovery (x) and in replication (y). The diagonal is "replicates perfectly". Walk through the gene buttons left to right. All genes: a cloud around the diagonal, no bias. Significant in discovery: their discovery fold changes are on average larger than the same genes' replication fold changes. Top 50 by fold change: much larger gap. Low-expression hits: the most inflated, because their estimates are the noisiest. Selection on a noisy estimate picks lucky overestimates: Day 1's winner's curse, gene by gene. Practical consequences: expect smaller effects and some failures in qPCR follow-up; DESeq2's lfcShrink exists for exactly this reason. The replication rate here understates true replication because 2 cell lines have little power.</aside>
+  <aside class="notes">We split the airway experiment in two: DESeq2 on 2 cell lines ("discovery") and, separately, on the other 2 ("replication"). Each dot is a gene: its log2 fold change in discovery (x) and in replication (y). The diagonal is "replicates perfectly"; the shaded quadrants are genes whose direction flipped (up in discovery, down in replication, or the reverse). Walk through the gene buttons left to right. All genes: a cloud around the diagonal, no bias. Significant in discovery: their discovery fold changes are on average larger than the same genes' replication fold changes. Top 50 by fold change: much larger gap. Low-expression hits: the most inflated, because their estimates are the noisiest. Selection on a noisy estimate picks lucky overestimates: Day 1's winner's curse, gene by gene. Practical consequences: expect smaller effects and some failures in qPCR follow-up; DESeq2's lfcShrink exists for exactly this reason. The replication rate here understates true replication because 2 cell lines have little power.</aside>
 </section>
 
 <!-- ============ 10 STATEMENTS ============ -->
@@ -377,6 +377,12 @@ hooks['curse']={init(){
   let si=0,sel='all';const W=580,H=420,m={l:56,r:16,t:16,b:48};const cv=document.getElementById('wcCan'),ctx=cv.getContext('2d');ctx.scale(2,2);const svg=d3.select('#wcSvg');
   const x=d3.scaleLinear().domain([-6,6]).range([m.l,W-m.r]).clamp(true),y=d3.scaleLinear().domain([-6,6]).range([H-m.b,m.t]).clamp(true);
   svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,6));svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,6,W-m.l-m.r));
+  // quadrants: upper-left and lower-right = the effect changed sign in replication
+  [[-6,0,0,6],[0,6,-6,0]].forEach(([x0,x1,y0,y1])=>svg.append('rect').attr('x',x(x0)).attr('width',x(x1)-x(x0)).attr('y',y(y1)).attr('height',y(y0)-y(y1)).attr('fill',C.sc1).attr('opacity',.05));
+  svg.append('line').attr('x1',x(0)).attr('x2',x(0)).attr('y1',y(-6)).attr('y2',y(6)).attr('stroke',C.ink2).attr('stroke-width',1.2);
+  svg.append('line').attr('x1',x(-6)).attr('x2',x(6)).attr('y1',y(0)).attr('y2',y(0)).attr('stroke',C.ink2).attr('stroke-width',1.2);
+  svg.append('text').attr('class','lbl pink').attr('x',x(-5.8)).attr('y',y(5.8)+4).style('font-size','13px').text('sign flips: down → up');
+  svg.append('text').attr('class','lbl pink').attr('x',x(5.8)).attr('y',y(-5.8)).attr('text-anchor','end').style('font-size','13px').text('sign flips: up → down');
   svg.append('line').attr('x1',x(-6)).attr('y1',y(-6)).attr('x2',x(6)).attr('y2',y(6)).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','6 4');
   svg.append('text').attr('class','lbl').attr('x',x(5.8)).attr('y',y(5.8)+18).attr('text-anchor','end').style('font-size','13px').text('replicates perfectly');
   svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-6).attr('text-anchor','middle').text('log2 fold change in discovery (2 cell lines)');
@@ -393,13 +399,14 @@ hooks['curse']={init(){
     let dm,rm;if(sel==='all'){dm=d3.mean(S,i=>Math.abs(D.lfc[i]/100));rm=d3.mean(S,i=>Math.abs(Rr.lfc[i]/100))}
     else{dm=d3.mean(S,i=>Math.abs(D.lfc[i]/100));rm=d3.mean(S,i=>Math.sign(D.lfc[i])*Rr.lfc[i]/100)}
     const rr=S.filter(i=>Rr.sig[i]==='1').length/S.length;
+    const flip=S.filter(i=>Math.sign(D.lfc[i])*Math.sign(Rr.lfc[i])<0).length/S.length;
     document.getElementById('wcN').textContent=d3.format(',')(S.length);document.getElementById('wcD').innerHTML=`${fmt2(dm)} <small>log2 = × ${fmt2(2**dm)}</small>`;
     document.getElementById('wcR').innerHTML=`${fmt2(rm)} <small>log2 = × ${fmt2(2**rm)}</small>`;
     document.getElementById('wcRep').innerHTML=sel==='all'?'–':`${d3.format('.0%')(rr)} <small>(padj &lt; 0.05)</small>`;
     document.getElementById('wcMsg').innerHTML={all:'No selection: the cloud sits around the diagonal; discovery and replication are equally noisy.',
       sig:`Genes chosen <b>because</b> they were significant in discovery shrink in replication: discovery estimates are ${d3.format('.0%')(dm/rm-1)} larger on average.`,
       top:`The 50 most dramatic discoveries: ${d3.format('.0%')(dm/rm-1)} larger in discovery than in replication. The top of the list is where luck concentrates.`,
-      low:`Low-expression hits (mean below 30 counts) have the noisiest estimates, so they are the most inflated: ${d3.format('.0%')(dm/rm-1)}.`}[sel]}
+      low:`Low-expression hits (mean below 30 counts) have the noisiest estimates, so they are the most inflated: ${d3.format('.0%')(dm/rm-1)}.`}[sel]+` <span style="color:var(--sc1)">${d3.format('.0%')(flip)} of ${sel==='all'?'all genes':'these genes'} change sign in replication (shaded quadrants).</span>`}
   segButtons('wcSplit',splits.map((s,i)=>[i,s.join(' + ')]),si,v=>{si=v;draw()});
   segButtons('wcSel',[['all','all genes'],['sig','significant in discovery'],['top','top 50 by fold change'],['low','low-expression hits']],sel,v=>{sel=v;draw()});draw();
 }};
