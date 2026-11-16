@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 1 · Confidence intervals</title>
+<style>/*CSS*/</style>
+<style>
+.formula{font-size:22px;line-height:1.75;font-variant-numeric:tabular-nums}
+.formula .lhs{display:inline-block;width:150px;color:var(--ink2)}
+.formula .res{color:var(--pc2)}
+.verdict{font-size:22px;margin-top:10px}
+.qcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+.qcard{background:var(--wash);border-radius:14px;padding:16px 20px;cursor:pointer;border:2px solid transparent;transition:border-color .2s,background .2s;min-height:150px}
+.qcard:hover{border-color:var(--line)}
+.qcard .q{font-size:21px;line-height:1.4}
+.qcard .a{font-size:17px;line-height:1.4;color:var(--ink2);margin-top:10px;opacity:0;transition:opacity .3s}
+.qcard.shown .a{opacity:1}
+.qcard.shown.ok{border-color:var(--pc2);background:#fff}
+.qcard.shown.no{border-color:var(--sc1);background:#fff}
+.qcard .tag{font-size:14px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;color:var(--muted)}
+.qcard.shown.ok .tag{color:var(--pc2)}
+.qcard.shown.no .tag{color:var(--sc1)}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">Confidence <em>intervals</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:760px;margin:0">From "the mean is 29 mm" to "somewhere between 26 and 33 mm, and here is how sure we are about the method".</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 1 · Topic 2 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">Opening (1 min). In the last topic we saw that one study's mean wobbles around the truth, and we measured that wobble: the standard error. Now we turn it into something you can report: an interval. Everything here is again live simulation on GBSG2 tumour sizes.</aside>
+</section>
+
+<!-- ============ 2 FLIP ============ -->
+<section class="slide" id="flip">
+  <h1>Flip the <em>picture</em>.</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:3">
+      <svg id="flipSvg" width="880" height="500"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <p class="small" style="margin-top:0">Last topic: 95% of study means land within about <b>±2 SE</b> of the truth (purple zone).</p>
+      <p class="small">Now draw <b>±2 SE around each study's own mean</b>. It reaches back to the truth exactly when the mean landed in the purple zone.</p>
+      <button class="btn primary" id="flipRun" style="width:100%;margin-top:6px">Run a study (n = 30)</button>
+      <button class="btn" id="flipTen" style="width:100%;margin-top:8px">Run 20</button>
+      <div class="stat" style="margin-top:12px"><span class="k">INTERVALS THAT CAUGHT THE TRUTH</span><span class="v num" id="flipCount">–</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">From sampling variability to intervals</span></div>
+  <aside class="notes">This is the one idea of the session. Top: the sampling distribution from the last topic, with the middle 95% in purple. Click "Run a study": a study's mean drops out of that distribution and we draw the same width either side of it. Purple mean → the interval reaches the dashed truth line. Pink tail → it misses. So "95% of means land near the truth" becomes "95% of intervals reach the truth". For now the width is fixed because we're pretending we know σ; next slide does it properly.</aside>
+</section>
+
+<!-- ============ 3 RECIPE ============ -->
+<section class="slide" id="recipe">
+  <h1>The <em>recipe</em>: mean ± t × SE.</h1>
+  <div class="row" style="gap:40px">
+    <div class="col" style="flex:1">
+      <div class="formula" id="recipeFormula"></div>
+      <div class="verdict" id="recipeVerdict"></div>
+      <p class="tiny" style="margin-top:4px">In a real study you can never do this check. Here we can, because we know the population.</p>
+      <div class="controls" style="margin-top:12px"><button class="btn primary" id="recipeNew">New study of 30 patients</button></div>
+    </div>
+    <div class="col" style="flex:1.05">
+      <svg id="recipeSvg" width="560" height="250"></svg>
+      <p class="small" style="margin:14px 0 6px"><b>Why t and not 2?</b> With few patients the SD is itself noisy, so the multiplier grows to pay for it.</p>
+      <table class="room" id="tTable" style="width:100%"></table>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section A</span></div>
+  <aside class="notes">Walk through the numbers once: sample mean, sample SD, SE = s/√n, the t multiplier, the interval. Click "New study" a few times: the interval moves with every study, and now and then misses the truth (pink). Point at the t table: at n = 5 the multiplier is almost 2.8, by n = 30 it's close to 2, which is why "± 2 SE" is a decent mental shortcut for moderate samples. This is exactly the code in section A of the notebook.</aside>
+</section>
+
+<!-- ============ 4 HUNDRED ============ -->
+<section class="slide" id="hundred">
+  <h1>100 studies, 100 <em>intervals</em>.</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:3">
+      <div class="controls">
+        <button class="btn primary" id="hunRun">Run 100 studies</button>
+        <button class="btn" id="hunSort">Sort by mean</button>
+      </div>
+      <svg id="hunSvg" width="880" height="470"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:52px">
+      <div class="card" style="margin-bottom:14px"><span class="small"><b>Predict first.</b> Out of 100 intervals, how many will miss the true mean?</span></div>
+      <div class="stat"><span class="k" style="color:var(--pc2)">CAUGHT THE TRUTH</span><span class="v num" id="hunHit">–</span></div>
+      <div class="stat"><span class="k" style="color:var(--sc1)">MISSED</span><span class="v num" id="hunMiss">–</span></div>
+      <p class="small" style="margin-top:12px">Each line is one study of 30 patients and its 95% CI. Hover for details.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section B</span></div>
+  <aside class="notes">Collect predictions first. Then run. Each interval is computed only from its own 30 patients, without knowing the truth. "Sort by mean" mirrors the Gemini prompt in the notebook: the picture rearranges, but the number of pink intervals can't change, because sorting doesn't change any interval. Key sentence: the 95% is a property of the procedure across many studies. Any single interval either caught the truth or it didn't.</aside>
+</section>
+
+<!-- ============ 5 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on 2: <em>confidence intervals</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day1_HO2_confidence_intervals.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">IN SECTION B, SET seed TO YOUR PAIR NUMBER</p>
+        <p style="margin:0 0 22px;font-size:22px;color:rgba(255,255,255,.85)">Every pair gets a different set of 100 studies.</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">📋 Enter <b>seed</b> and <b>intervals covering / 100</b> in the shared sheet.</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">Will every pair get exactly 95? What will the whole room get, pooled?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">IF YOU HAVE TIME</p>
+        <p style="margin:0;font-size:21px;line-height:1.5;color:rgba(255,255,255,.85)">Section C: what does a higher confidence level cost?<br>Section D ⭐: does "95%" still mean 95% with 5 patients?</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
+  <aside class="notes">Seeds = pair numbers. Remind them that n stays at 30 in section B so the shared sheet is comparable. The tutor prompt in this notebook is a known AI failure point: ask them to read the AI answer to the very end. While they work, open the next slide and type in the shared-sheet values as they arrive.</aside>
+</section>
+
+<!-- ============ 6 ROOM ============ -->
+<section class="slide" id="room">
+  <h1>What did the <em>room</em> find?</h1>
+  <div class="row" style="gap:36px">
+    <div class="col" style="flex:0 0 330px">
+      <table class="room" id="roomTable"><tr><th>Pair (seed)</th><th>Covering / 100</th></tr></table>
+      <div class="controls" style="margin-top:12px">
+        <button class="btn" id="roomFill">Fill from simulation</button>
+        <button class="btn" id="roomClear">Clear</button>
+      </div>
+    </div>
+    <div class="col">
+      <svg id="roomSvg" width="740" height="330"></svg>
+      <div class="row" style="gap:20px;margin-top:6px">
+        <div class="stat" style="flex:1"><span class="k">PAIRS REPORTING</span><span class="v num" id="roomPairs">0</span></div>
+        <div class="stat" style="flex:1"><span class="k" style="color:var(--sc1)">POOLED COVERAGE</span><span class="v num" id="roomPooled">–</span></div>
+        <div class="stat" style="flex:1.4"><span class="k">IF COVERAGE WERE EXACTLY 95%</span><span class="v num" id="roomBand"></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · after the hands-on</span></div>
+  <aside class="notes">Type in each pair's count (or "Fill from simulation"). Two messages. First: pairs differ, and that's expected. A count out of 100 is itself a sample; the shaded band is where a single pair's count falls 95% of the time even if the method were exactly 95%. Second: pooling everyone gives a much better estimate of the true coverage. Ask whether the pooled number is where they expected it. If it's a bit low, don't explain yet: that's slide "When the promise breaks".</aside>
+</section>
+
+<!-- ============ 7 LAB ============ -->
+<section class="slide" id="lab">
+  <h1>Confidence costs <em>width</em>; width costs <em>patients</em>.</h1>
+  <div class="controls">
+    <div class="seg" id="labLevel"><span class="lab">Confidence level</span></div>
+    <span style="width:24px"></span>
+    <div class="seg" id="labN"><span class="lab">n per study</span></div>
+  </div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:3">
+      <svg id="labSvg" width="860" height="420"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <div class="stat"><span class="k">t MULTIPLIER</span><span class="v num" id="labT"></span></div>
+      <div class="stat"><span class="k">AVERAGE WIDTH (5,000 STUDIES)</span><span class="v num" id="labW"></span></div>
+      <div class="stat"><span class="k">ACTUAL COVERAGE (5,000 STUDIES)</span><span class="v num" id="labC"></span></div>
+      <p class="small" style="margin-top:10px">Pilot study or pivotal trial: which level would you pick?</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section C · discussion question 2</span></div>
+  <aside class="notes">Fix n = 30 and step the level from 80% to 99.9%: more intervals catch the truth, but every one of them gets wider, and near 100% the width explodes. Then fix 95% and step n: width falls with √n, as in the last topic. The only free lunch is more data. Discussion: a pilot can live with 80–90% (you want a rough idea), a pivotal trial is judged at 95% or stricter. Show the 50 intervals at 99.9% with n = 5 for comic effect.</aside>
+</section>
+
+<!-- ============ 8 PROMISE ============ -->
+<section class="slide" id="promise">
+  <h1>When the 95% promise <em>breaks</em>.</h1>
+  <div class="row" style="gap:28px">
+    <div class="col" style="flex:2.1">
+      <div class="controls"><button class="btn primary" id="promRun">Simulate 10,000 studies per point</button></div>
+      <svg id="promSvg" width="780" height="440"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:6px">
+      <p class="small" style="margin-top:0">The t-interval assumes study means are roughly <em>normal</em>. With small samples of skewed data, they aren't yet (Topic 1, central limit theorem).</p>
+      <p class="small" style="margin:14px 0 4px"><b>In your own small experiments:</b></p>
+      <ul class="clean small" style="font-size:18px">
+        <li>more replicates if you can</li>
+        <li>log-transform skewed measurements (fold changes, concentrations)</li>
+        <li>bootstrap or non-parametric intervals</li>
+        <li>say so: "n = 4, interval approximate"</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section D · discussion question 3</span></div>
+  <aside class="notes">Click the button: each point is 10,000 simulated studies of nominal 95% t-intervals. Age is nearly symmetric and sits close to 95% even at small n. Tumour size is skewed and falls short at small n. Positive nodes is very skewed and falls short most. This explains the pooled number on the room slide. The fix list on the right is practical: most bench experiments are small, and many measurements (concentrations, expression, counts) are right-skewed.</aside>
+</section>
+
+<!-- ============ 9 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which statements are <em>correct</em>?</h1>
+  <p class="lead" style="font-size:21px">Your study gives a 95% CI for mean tumour size of <b>[26.1, 33.4] mm</b>. Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
+  <aside class="notes">Take a show of hands for each statement before revealing. Statement 1 is the one almost everyone (and many AI tutors) gets wrong. "95% confident" is accepted shorthand for statement 2; the slip is to turn it into a probability about this particular interval. Statement 3 is the SD/SE mix-up from Topic 1 in disguise.</aside>
+</section>
+
+<!-- ============ 10 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>Read the tutor's answer <em>to the end</em>.</h1>
+  <div class="row" style="gap:40px;margin-top:8px">
+    <div class="col" style="flex:1.2">
+      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook, a known failure point:</p>
+      <div class="prompt">I computed a 95% confidence interval for mean tumour size: [26.1, 33.4] mm. Does this mean there is a 95% probability that the true mean lies between 26.1 and 33.4 mm?</div>
+      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
+      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+      <p class="small" style="margin:22px 0 6px">🧮 Calculator check: after "sort the intervals by their mean", did the number of red lines change? Why not?</p>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">The typical pattern:</p>
+      <ul class="clean" style="margin-bottom:14px">
+        <li style="font-size:19px">opens correctly: "No, the 95% refers to the method…"</li>
+        <li style="font-size:19px">explains repeated sampling well</li>
+      </ul>
+      <ul class="clean x">
+        <li style="font-size:19px">then closes with "…so there is a 95% chance the true mean is in your interval"</li>
+        <li style="font-size:19px">or never says what the interval <em>is</em> useful for (values compatible with the data)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
+  <aside class="notes">Ask a pair whose AI answer slipped to read out the last paragraph. The lesson is not that AI is bad at statistics; it's that fluent explanations can contradict themselves, and the contradiction usually sits in the summary sentence people remember. For the calculator check: sorting reorders lines but changes no interval, so the count must stay the same. If it changed, the code did something else.</aside>
+</section>
+
+<!-- ============ 11 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:40px">
+    <h1 style="font-size:56px">Three things to <em>keep</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:26px 0 40px;max-width:1060px">
+      <li>A CI is <em>mean ± t × SE</em>: the values reasonably compatible with your data.</li>
+      <li>The 95% belongs to the <em>method</em>, not to your one interval.</li>
+      <li>Narrower costs <em>confidence</em> or <em>patients</em>, and small skewed samples under-deliver.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">p-values</span>: is "no effect" one of the values compatible with your data?</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
+  <aside class="notes">Bridge to Hands-on 3: a 95% CI and a test at the 5% level are two views of the same calculation. If the "no difference" value sits outside the interval, the test is significant. Next we look at the p-value directly.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const hooks = {};
+const POPT = DATA.tsize, MU = POP.tsize.mu, SIGMA = POP.tsize.sd;
+const HIT = C.pc2, MISS = C.sc1;
+function tCrit(level,n){return tQuantile(1-(1-level)/2,n-1)}
+
+/* ---- 2 flip ---- */
+hooks['flip']={init(){
+  const W=880,m={l:40,r:20};const n=30,se=SIGMA/Math.sqrt(n),z=1.96;
+  const x=d3.scaleLinear().domain([15,44]).range([m.l,W-m.r]);
+  const svg=d3.select('#flipSvg');
+  const top={t:26,b:150};
+  const y=d3.scaleLinear().domain([0,normPDF(MU,MU,se)]).range([top.b,top.t]);
+  const xs=d3.range(15,44.01,0.05);
+  const area=(lo,hi)=>d3.area().x(d=>x(d)).y0(top.b).y1(d=>y(normPDF(d,MU,se)))(xs.filter(d=>d>=lo&&d<=hi));
+  svg.append('path').attr('d',area(15,MU-z*se)).attr('fill',C.sc3).attr('opacity',.6);
+  svg.append('path').attr('d',area(MU+z*se,44)).attr('fill',C.sc3).attr('opacity',.6);
+  svg.append('path').attr('d',area(MU-z*se,MU+z*se)).attr('fill',C.pc2).attr('opacity',.28);
+  svg.append('path').attr('d',d3.line().x(d=>x(d)).y(d=>y(normPDF(d,MU,se)))(xs)).attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',2);
+  svg.append('text').attr('class','lbl purple').attr('x',x(MU)).attr('y',top.t-8).attr('text-anchor','middle').text('95% of study means land here');
+  svg.append('text').attr('class','lbl pink').attr('x',x(MU-z*se)-10).attr('y',top.b-8).attr('text-anchor','end').text('2.5%');
+  svg.append('text').attr('class','lbl pink').attr('x',x(MU+z*se)+10).attr('y',top.b-8).text('2.5%');
+  svg.append('g').attr('transform',`translate(0,${top.b})`).call(g=>axisB(g,x,10)).append('text').attr('class','axlab').attr('x',W-m.r).attr('y',36).attr('text-anchor','end').text('Mean tumour size (mm)');
+  // zone guides
+  [MU-z*se,MU+z*se].forEach(v=>svg.append('line').attr('x1',x(v)).attr('x2',x(v)).attr('y1',top.b).attr('y2',480).attr('stroke',C.pc2).attr('stroke-opacity',.25).attr('stroke-dasharray','2 4'));
+  svg.append('line').attr('x1',x(MU)).attr('x2',x(MU)).attr('y1',top.t).attr('y2',484).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl').attr('x',x(MU)+6).attr('y',496).text(`truth ${fmt1(MU)}`);
+  const rowsG=svg.append('g');const rowY0=215,rowH=19,maxRows=14;let rows=[],hits=0,total=0;
+  function one(fast){
+    const v=mean(sampleIdx(POPT.length,n).map(i=>POPT[i]));const hw=z*se;const ok=Math.abs(v-MU)<=hw;
+    total++;if(ok)hits++;
+    rows.forEach(r=>r.i++);
+    rows.forEach(r=>r.g.transition().duration(fast?150:400).attr('transform',`translate(0,${rowY0+r.i*rowH})`).attr('opacity',r.i>=maxRows?0:1));
+    rows.filter(r=>r.i>=maxRows).forEach(r=>r.g.transition().delay(400).remove());rows=rows.filter(r=>r.i<maxRows);
+    const g=rowsG.append('g').attr('transform',`translate(0,${rowY0})`);
+    const col=ok?HIT:MISS;
+    const line=g.append('line').attr('x1',x(v)).attr('x2',x(v)).attr('stroke',col).attr('stroke-width',3).attr('stroke-linecap','round');
+    const dot=g.append('circle').attr('cx',x(v)).attr('cy',fast?0:top.b-rowY0-10).attr('r',5).attr('fill',col).attr('stroke','#fff').attr('stroke-width',1.5);
+    if(fast){line.attr('x1',x(v-hw)).attr('x2',x(v+hw))}
+    else{dot.transition().duration(500).ease(d3.easeCubicIn).attr('cy',0);line.transition().delay(500).duration(450).attr('x1',x(v-hw)).attr('x2',x(v+hw))}
+    rows.unshift({g,i:0});
+    document.getElementById('flipCount').innerHTML=`${hits} <small>of ${total}</small>`;
+  }
+  let timer=null;
+  document.getElementById('flipRun').onclick=()=>{if(timer){timer.stop();timer=null}one(false)};
+  document.getElementById('flipTen').onclick=()=>{if(timer)timer.stop();let k=0;timer=d3.interval(()=>{one(true);if(++k>=20){timer.stop();timer=null}},120)};
+  this.stop=()=>{if(timer){timer.stop();timer=null}};
+},leave(){this.stop&&this.stop()}};
+
+/* ---- 3 recipe ---- */
+hooks['recipe']={init(){
+  const n=30,W=560,H=250,m={l:20,r:20};
+  const x=d3.scaleLinear().domain([0,120]).range([m.l,W-m.r]);
+  const svg=d3.select('#recipeSvg');
+  svg.append('g').attr('transform',`translate(0,${H-40})`).call(g=>axisB(g,x,12)).append('text').attr('class','axlab').attr('x',W-m.r).attr('y',36).attr('text-anchor','end').text('Tumour size (mm)');
+  svg.append('line').attr('x1',x(MU)).attr('x2',x(MU)).attr('y1',10).attr('y2',H-40).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl').attr('x',x(MU)+6).attr('y',14).text(`truth ${fmt1(MU)}`);
+  svg.append('text').attr('class','tiny').attr('x',m.l).attr('y',14).attr('fill',C.ink2).style('font-size','14px').text('your 30 patients');
+  const dg=svg.append('g'),ci=svg.append('g');
+  const ciL=ci.append('line').attr('stroke-width',4).attr('stroke-linecap','round'),ciD=ci.append('circle').attr('r',7).attr('stroke','#fff').attr('stroke-width',2);
+  const tc=tCrit(.95,n);
+  const tt=document.getElementById('tTable');
+  tt.innerHTML='<tr><th>n</th>'+[3,5,10,30,100].map(k=>`<td class="num">${k}</td>`).join('')+'</tr><tr><th>t (95%)</th>'+[3,5,10,30,100].map(k=>`<td class="num">${fmt2(tCrit(.95,k))}</td>`).join('')+'</tr>';
+  function draw(){
+    const vals=sampleIdx(POPT.length,n).map(i=>POPT[i]);const mv=mean(vals),s=sdS(vals),se=s/Math.sqrt(n),lo=mv-tc*se,hi=mv+tc*se,ok=lo<=MU&&MU<=hi;
+    const jr=mulberry32(3);
+    dg.selectAll('circle').data(vals).join('circle').attr('r',4.5).attr('fill',C.pop).attr('opacity',.8).transition().duration(450).attr('cx',d=>x(d)).attr('cy',()=>40+jr()*90);
+    const col=ok?HIT:MISS;
+    ciL.attr('stroke',col).transition().duration(450).attr('x1',x(lo)).attr('x2',x(hi)).attr('y1',170).attr('y2',170);
+    ciD.attr('fill',col).transition().duration(450).attr('cx',x(mv)).attr('cy',170);
+    document.getElementById('recipeFormula').innerHTML=
+      `<span class="lhs">mean x̄</span>${fmt1(mv)} mm<br>`+
+      `<span class="lhs">SD s</span>${fmt1(s)} mm<br>`+
+      `<span class="lhs">SE = s / √n</span>${fmt1(s)} / √${n} = ${fmt2(se)} mm<br>`+
+      `<span class="lhs">t (29 df)</span>${fmt2(tc)}<br>`+
+      `<span class="lhs">95% CI</span><span class="res">${fmt1(mv)} ± ${fmt2(tc)} × ${fmt2(se)} = [${fmt1(lo)}, ${fmt1(hi)}] mm</span>`;
+    document.getElementById('recipeVerdict').innerHTML=ok?`<span style="color:${HIT}">✓ This interval caught the true mean (${fmt1(MU)} mm).</span>`:`<span style="color:${MISS}">✗ This interval missed the true mean (${fmt1(MU)} mm).</span>`;
+  }
+  document.getElementById('recipeNew').onclick=draw;draw();
+}};
+
+/* ---- 4 hundred ---- */
+hooks['hundred']={init(){
+  const n=30,K=100,W=880,H=470,m={l:44,r:20,t:10,b:44};
+  const x=d3.scaleLinear().domain([15,45]).range([m.l,W-m.r]);
+  const svg=d3.select('#hunSvg');
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,10)).append('text').attr('class','axlab').attr('x',W-m.r).attr('y',38).attr('text-anchor','end').text('95% CI for mean tumour size (mm)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Study');
+  const g=svg.append('g');
+  svg.append('line').attr('x1',x(MU)).attr('x2',x(MU)).attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  const yr=d3.scaleBand().domain(d3.range(K)).range([m.t,H-m.b]).padding(0.25);
+  const tc=tCrit(.95,n);let data=[],sorted=false,timer=null;
+  const sortBtn=document.getElementById('hunSort');
+  function pos(){const order=sorted?[...data].sort((a,b)=>a.m-b.m):data;order.forEach((d,i)=>d.r=i)}
+  function run(){
+    if(timer)timer.stop();sorted=false;sortBtn.textContent='Sort by mean';
+    const st=studyStats(POPT,n,K);data=d3.range(K).map(i=>{const se=st.s[i]/Math.sqrt(n);return{i,m:st.m[i],lo:st.m[i]-tc*se,hi:st.m[i]+tc*se}});
+    data.forEach(d=>d.ok=d.lo<=MU&&MU<=d.hi);pos();
+    g.selectAll('line').remove();
+    let k=0,h=0;document.getElementById('hunHit').textContent='0';document.getElementById('hunMiss').textContent='0';
+    timer=d3.interval(()=>{
+      const d=data[k];if(d.ok)h++;
+      g.append('line').datum(d).attr('y1',yr(d.r)+yr.bandwidth()/2).attr('y2',yr(d.r)+yr.bandwidth()/2).attr('x1',x(d.m)).attr('x2',x(d.m))
+        .attr('stroke',d.ok?HIT:MISS).attr('stroke-width',d.ok?2.5:3.5).attr('stroke-linecap','round')
+        .on('mousemove',(ev,d)=>showTip(ev,`Study ${d.i+1}: mean ${fmt1(d.m)}, CI [${fmt1(d.lo)}, ${fmt1(d.hi)}] ${d.ok?'✓':'✗ missed'}`)).on('mouseleave',hideTip)
+        .transition().duration(250).attr('x1',x(d.lo)).attr('x2',x(d.hi));
+      k++;document.getElementById('hunHit').textContent=h;document.getElementById('hunMiss').textContent=k-h;
+      if(k>=K){timer.stop();timer=null}
+    },28);
+  }
+  document.getElementById('hunRun').onclick=run;
+  sortBtn.onclick=()=>{if(!data.length||timer)return;sorted=!sorted;sortBtn.textContent=sorted?'Original order':'Sort by mean';pos();
+    g.selectAll('line').transition().duration(800).attr('y1',d=>yr(d.r)+yr.bandwidth()/2).attr('y2',d=>yr(d.r)+yr.bandwidth()/2)};
+  this.stop=()=>{if(timer){timer.stop();timer=null}};
+},leave(){this.stop&&this.stop()}};
+
+/* ---- 6 room ---- */
+hooks['room']={init(){
+  const P=12,tb=document.getElementById('roomTable');
+  for(let i=1;i<=P;i++){const tr=document.createElement('tr');tr.innerHTML=`<td class="num">${i}</td><td><input type="number" min="0" max="100" step="1" data-p="${i}"></td>`;tb.appendChild(tr)}
+  const inputs=[...tb.querySelectorAll('input')];
+  const W=740,H=330,m={l:30,r:20,t:30,b:50};
+  const svg=d3.select('#roomSvg');
+  const x=d3.scaleLinear().domain([84,100]).range([m.l,W-m.r]);
+  const lo=binomQuantile(.025,100,.95),hi=binomQuantile(.975,100,.95);
+  svg.append('rect').attr('x',x(lo-0.5)).attr('width',x(hi+0.5)-x(lo-0.5)).attr('y',m.t).attr('height',H-m.b-m.t).attr('fill',C.pc2).attr('opacity',.1);
+  svg.append('text').attr('class','lbl purple').attr('x',x((lo+hi)/2)).attr('y',m.t-10).attr('text-anchor','middle').text('where one pair lands 95% of the time, if the method were exactly 95%');
+  svg.append('line').attr('x1',x(95)).attr('x2',x(95)).attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>g.call(d3.axisBottom(x).ticks(16).tickFormat(d3.format('d')).tickSize(5)).attr('class','axis'));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Intervals covering the true mean, out of 100');
+  const pooled=svg.append('line').attr('stroke',C.sc1).attr('stroke-width',2.5).attr('y1',m.t).attr('y2',H-m.b).attr('opacity',0);
+  const pl=svg.append('text').attr('class','lbl pink').attr('y',m.t+18).attr('opacity',0);
+  const dots=svg.append('g');
+  document.getElementById('roomBand').innerHTML=`${lo} – ${hi} <small>per pair</small>`;
+  function render(){
+    const v=inputs.filter(i=>i.value!=='').map(i=>({p:+i.dataset.p,c:Math.max(0,Math.min(100,+i.value))}));
+    const cnt={};v.forEach(d=>{d.k=(cnt[d.c]=(cnt[d.c]||0)+1)-1});
+    dots.selectAll('circle').data(v,d=>d.p).join(e=>e.append('circle').attr('r',0).call(s=>s.transition().duration(300).attr('r',9)),u=>u,x=>x.remove())
+      .attr('cx',d=>x(Math.max(84,d.c))).attr('cy',d=>H-m.b-14-d.k*21).attr('fill',HIT).attr('stroke','#fff').attr('stroke-width',2)
+      .on('mousemove',(ev,d)=>showTip(ev,`Pair ${d.p}: <b>${d.c}</b> / 100`)).on('mouseleave',hideTip);
+    document.getElementById('roomPairs').textContent=v.length;
+    if(v.length){const pc=d3.sum(v,d=>d.c)/v.length;
+      document.getElementById('roomPooled').innerHTML=`${fmt1(pc)}% <small>of ${v.length*100} intervals</small>`;
+      pooled.transition().duration(400).attr('opacity',1).attr('x1',x(pc)).attr('x2',x(pc));
+      pl.transition().duration(400).attr('opacity',1).attr('x',x(pc)-8).attr('text-anchor','end').text('pooled');}
+    else{document.getElementById('roomPooled').textContent='–';pooled.attr('opacity',0);pl.attr('opacity',0)}
+  }
+  inputs.forEach(i=>i.addEventListener('input',render));
+  document.getElementById('roomFill').onclick=()=>{const tc=tCrit(.95,30);inputs.forEach(i=>{const r=mulberry32(+i.dataset.p*7919+(Date.now()%1000));const st=studyStats(POPT,30,100,r);let c=0;for(let j=0;j<100;j++)if(Math.abs(st.m[j]-MU)<=tc*st.s[j]/Math.sqrt(30))c++;i.value=c});render()};
+  document.getElementById('roomClear').onclick=()=>{inputs.forEach(i=>i.value='');render()};
+  render();
+}};
+
+/* ---- 7 lab ---- */
+hooks['lab']={init(){
+  let level=.95,n=30;const K=50,W=860,H=420,m={l:20,r:20,t:10,b:44};
+  const svg=d3.select('#labSvg');
+  const x=d3.scaleLinear().domain([0,60]).range([m.l,W-m.r]);
+  svg.append('defs').append('clipPath').attr('id','labClip').append('rect').attr('x',m.l).attr('y',0).attr('width',W-m.l-m.r).attr('height',H);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,12)).append('text').attr('class','axlab').attr('x',W-m.r).attr('y',38).attr('text-anchor','end').text('CI for mean tumour size (mm)');
+  const g=svg.append('g').attr('clip-path','url(#labClip)');
+  svg.append('line').attr('x1',x(MU)).attr('x2',x(MU)).attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  const yr=d3.scaleBand().domain(d3.range(K)).range([m.t,H-m.b]).padding(0.3);
+  function draw(){
+    const tc=tCrit(level,n);const st=studyStats(POPT,n,K);
+    const data=d3.range(K).map(i=>{const hw=tc*st.s[i]/Math.sqrt(n);return{i,m:st.m[i],lo:st.m[i]-hw,hi:st.m[i]+hw}});
+    data.forEach(d=>d.ok=d.lo<=MU&&MU<=d.hi);
+    g.selectAll('line').data(data,d=>d.i).join(e=>e.append('line').attr('stroke-linecap','round').attr('x1',d=>x(d.m)).attr('x2',d=>x(d.m)))
+      .attr('y1',d=>yr(d.i)+yr.bandwidth()/2).attr('y2',d=>yr(d.i)+yr.bandwidth()/2)
+      .on('mousemove',(ev,d)=>showTip(ev,`[${fmt1(d.lo)}, ${fmt1(d.hi)}] ${d.ok?'✓':'✗ missed'}`)).on('mouseleave',hideTip)
+      .transition().duration(500).attr('stroke',d=>d.ok?HIT:MISS).attr('stroke-width',d=>d.ok?2.5:3.5).attr('x1',d=>x(d.lo)).attr('x2',d=>x(d.hi));
+    const big=studyStats(POPT,n,5000);let cov=0,w=0;for(let j=0;j<5000;j++){const hw=tc*big.s[j]/Math.sqrt(n);w+=2*hw;if(Math.abs(big.m[j]-MU)<=hw)cov++}
+    document.getElementById('labT').textContent=fmt2(tc);
+    document.getElementById('labW').innerHTML=`${fmt1(w/5000)} <small>mm</small>`;
+    document.getElementById('labC').innerHTML=`${fmt1(cov/50)}% <small>(target ${d3.format('.1~f')(level*100)}%)</small>`;
+  }
+  segButtons('labLevel',[[.8,'80%'],[.9,'90%'],[.95,'95%'],[.99,'99%'],[.999,'99.9%']],level,v=>{level=v;draw()});
+  segButtons('labN',[[5,'5'],[10,'10'],[30,'30'],[100,'100']],n,v=>{n=v;draw()});
+  draw();
+}};
+
+/* ---- 8 promise ---- */
+hooks['promise']={init(){
+  const ns=[5,10,20,30,50,100],K=10000,W=780,H=440,m={l:60,r:130,t:20,b:50};
+  const series=[['age','Age',C.pc1],['tsize','Tumour size',C.pc2],['pnodes','Positive nodes',C.sc1]];
+  const svg=d3.select('#promSvg');
+  const x=d3.scaleLog().domain([4.5,110]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([.80,1]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>d3.format('.0%')(d)));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>g.call(d3.axisBottom(x).tickValues(ns).tickFormat(d3.format('d')).tickSize(5)).attr('class','axis'));
+  svg.append('text').attr('class','axlab').attr('x',(W-m.r+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Patients per study (log scale)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Intervals that caught the truth');
+  svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(.95)).attr('y2',y(.95)).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl').attr('x',m.l+8).attr('y',y(.95)-8).text('promised: 95%');
+  const lay=svg.append('g');let busy=false;
+  function run(){
+    if(busy)return;busy=true;lay.selectAll('*').remove();
+    const res={};series.forEach(([v])=>res[v]=[]);
+    const jobs=[];ns.forEach(n=>series.forEach(s=>jobs.push([s,n])));
+    let j=0;
+    (function step(){
+      if(j>=jobs.length){busy=false;return}
+      const [[v,lab,col],n]=jobs[j++];const pop=DATA[v],mu=POP[v].mu,tc=tCrit(.95,n);
+      const st=studyStats(pop,n,K);let c=0;for(let i=0;i<K;i++)if(Math.abs(st.m[i]-mu)<=tc*st.s[i]/Math.sqrt(n))c++;
+      res[v].push({n,c:c/K});
+      lay.selectAll(`path.l-${v}`).data([res[v]]).join('path').attr('class',`l-${v}`).attr('fill','none').attr('stroke',col).attr('stroke-width',2).attr('d',d3.line().x(d=>x(d.n)).y(d=>y(d.c)));
+      lay.append('circle').attr('cx',x(n)).attr('cy',y(c/K)).attr('r',0).attr('fill',col).attr('stroke','#fff').attr('stroke-width',2)
+        .on('mousemove',ev=>showTip(ev,`${lab}, n = ${n}: <b>${d3.format('.1%')(c/K)}</b>`)).on('mouseleave',hideTip)
+        .transition().duration(250).attr('r',6);
+      if(n===ns[ns.length-1]){lay.append('text').attr('class','lbl end').attr('fill',col).attr('x',x(n)+12).datum({y:y(c/K)}).text(lab);
+        // dodge end labels so they never overlap
+        const L=lay.selectAll('text.end').nodes().map(t=>({t,y:t.__data__.y})).sort((a,b)=>a.y-b.y);
+        for(let i=1;i<L.length;i++)if(L[i].y-L[i-1].y<18)L[i].y=L[i-1].y+18;
+        L.forEach(o=>d3.select(o.t).attr('y',o.y+5));}
+      setTimeout(step,60);
+    })();
+  }
+  document.getElementById('promRun').onclick=run;
+}};
+
+/* ---- 9 statements ---- */
+hooks['statements']={init(){
+  const Q=[
+    [false,'There is a 95% probability that the true mean lies between 26.1 and 33.4 mm.','The classic misreading. Once computed, this interval either contains the true mean or not. The 95% describes the method.'],
+    [true,'If we repeated the study many times, about 95% of the intervals would contain the true mean.','Correct. This is what the 100-intervals picture showed.'],
+    [false,'95% of patients have tumours between 26.1 and 33.4 mm.','Confuses the CI for the mean with the spread of patients. That is what the SD describes (Topic 1).'],
+    [true,'Values inside the interval are reasonably compatible with the data; values far outside are not.','Correct, and the most useful way to read a CI in practice.']];
+  const box=document.getElementById('qcards');
+  Q.forEach(([ok,q,a],i)=>{const d=document.createElement('div');d.className='qcard '+(ok?'ok':'no');
+    d.innerHTML=`<div class="tag">${i+1} · <span class="res">${ok?'✓ correct':'✗ wrong'}</span></div><div class="q">${q}</div><div class="a">${a}</div>`;
+    const res=d.querySelector('.res');res.style.visibility='hidden';
+    d.onclick=()=>{d.classList.toggle('shown');res.style.visibility=d.classList.contains('shown')?'visible':'hidden'};box.appendChild(d)});
+}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>

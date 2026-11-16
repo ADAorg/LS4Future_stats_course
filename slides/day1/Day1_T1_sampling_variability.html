@@ -348,7 +348,7 @@ ul.clean.x li::before{background:var(--sc1);border-radius:2px;transform:rotate(4
   <div class="row" style="gap:40px;margin-top:8px">
     <div class="col" style="flex:1.2">
       <p class="small" style="margin:0 0 6px">Prompt from the notebook:</p>
-      <div class="prompt">I measured tumour size in 20 patients. The sample mean is 31 mm and the sample standard deviation is 14 mm. What is the difference between the standard deviation and the standard error here, and which one tells me how precise my estimate of the mean is?</div>
+      <div class="prompt">I measured tumour size in 20 patients. The sample mean is 31 mm and the sample standard deviation is 14 mm. What is the difference between the standard deviation and the standard error here, and which one should I report?</div>
       <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
       <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
     </div>
@@ -414,6 +414,23 @@ function studyMeans(pop,n,k,r=R,cum=null){
   return out;
 }
 const fmt1 = d3.format('.1f'), fmt2=d3.format('.2f');
+// one call = k studies of n patients: each study's mean and sample SD (ddof = 1)
+function studyStats(pop,n,k,r=R){const N=pop.length,m=new Float64Array(k),s=new Float64Array(k);
+  for(let j=0;j<k;j++){let a=0,b=0;for(let i=0;i<n;i++){const v=pop[Math.floor(r()*N)];a+=v;b+=v*v}const mu=a/n;m[j]=mu;s[j]=Math.sqrt(Math.max(0,(b-n*mu*mu)/(n-1)))}
+  return{m,s};
+}
+/* ---------- distributions (checked against scipy.stats to 5 decimals) ---------- */
+function lgamma(x){const c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61503916999185,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgamma(1-x);x-=1;let a=c[0];const t=x+7.5;for(let i=1;i<9;i++)a+=c[i]/(x+i);return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a)}
+function betacf(a,b,x){const E=3e-14,F=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<F)d=F;d=1/d;let h=d;
+  for(let m=1;m<=300;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<F)d=F;c=1+aa/c;if(Math.abs(c)<F)c=F;d=1/d;h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<F)d=F;c=1+aa/c;if(Math.abs(c)<F)c=F;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<E)break}return h}
+function ibeta(x,a,b){if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b}
+function tCDF(t,df){const p=0.5*ibeta(df/(df+t*t),df/2,0.5);return t>0?1-p:p}
+function tQuantile(p,df){let lo=-1e3,hi=1e3;for(let i=0;i<200;i++){const m=(lo+hi)/2;if(tCDF(m,df)<p)lo=m;else hi=m}return(lo+hi)/2}
+const normPDF=(x,mu=0,sd=1)=>Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI));
+function binomPMF(k,n,p){return Math.exp(lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p))}
+function binomQuantile(q,n,p){let c=0;for(let k=0;k<=n;k++){c+=binomPMF(k,n,p);if(c>=q)return k}return n}
 
 /* ---------- deck chrome (progress bar, nav, tooltip, notes) ---------- */
 (function(){
