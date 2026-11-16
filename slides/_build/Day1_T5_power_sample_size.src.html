@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 1 · Power and sample size</title>
+<style>/*CSS*/</style>
+<style>.big-p{font-size:46px;font-variant-numeric:tabular-nums;color:var(--pc2)}</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">Power and <em>sample size</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:760px;margin:0">The drug works. Will your study notice? Planning a trial by running it thousands of times first.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 1 · Topic 5 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">Last topic was the pink cell of the error table: false positives when nothing is going on. Now the other side: something real is going on, and we ask how often a study of a given size detects it. This is the calculation every grant reviewer and ethics committee asks for.</aside>
+</section>
+
+<!-- ============ 2 EFFECT ============ -->
+<section class="slide" id="effect">
+  <h1>A real effect, <em>buried</em> in variation.</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.2">
+      <svg id="efSvg" width="800" height="430"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <p class="small" style="margin-top:0">A new drug truly shrinks tumours by <b>5 mm</b> on average. Patients still vary as much as in GBSG2.</p>
+      <div class="stat"><span class="k">EFFECT</span><span class="v num">5 <small>mm</small></span></div>
+      <div class="stat"><span class="k">SPREAD OF PATIENTS (SD)</span><span class="v num" id="efSd"></span></div>
+      <div class="stat"><span class="k">STANDARDIZED EFFECT (COHEN'S d = EFFECT / SD)</span><span class="v num" id="efD"></span></div>
+      <p class="small" style="margin-top:10px">Most real biological effects look like this: genuine, but much smaller than the differences between individuals.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The planning problem</span></div>
+  <aside class="notes">The two curves are the tumour sizes we'd expect without and with the drug: the treated curve is the GBSG2 distribution shifted 5 mm to the left. They overlap almost completely. If you picked one treated and one untreated patient, the untreated one would have the larger tumour only a bit more often than half the time. Cohen's d puts the effect in units of patient-to-patient spread; around 0.35 here, which is typical for clinical effects.</aside>
+</section>
+
+<!-- ============ 3 ONE TRIAL ============ -->
+<section class="slide" id="one-trial">
+  <h1>One planned trial: found or <em>missed</em>?</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:3">
+      <svg id="otSvg" width="880" height="470"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:6px">
+      <div class="card" style="margin-bottom:12px"><span class="small"><b>Predict first.</b> With 30 patients per group, how often will the trial reach p &lt; 0.05?</span></div>
+      <button class="btn primary" id="otRun" style="width:100%">Run the trial (30 per group)</button>
+      <div class="stat" style="margin-top:12px"><span class="k">THIS TRIAL</span><span class="v num" id="otThis" style="font-size:22px">–</span></div>
+      <div class="stat"><span class="k">TRIALS RUN · DETECTED</span><span class="v num" id="otTally">–</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section A</span></div>
+  <aside class="notes">Collect predictions, then click a handful of times. Each click recruits 30 control and 30 treated patients (tumour sizes drawn from GBSG2, treated ones 5 mm smaller) and runs a Welch t-test. Every row is a real effect; the pink ones are trials that missed it: Type II errors. Don't compute the rate yet: that's what the pairs measure.</aside>
+</section>
+
+<!-- ============ 4 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on 5: <em>power by simulation</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day1_HO5_power_sample_size.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">IN SECTION B, SET n_per_group TO YOUR PAIR'S VALUE</p>
+        <div style="display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap">
+          <span class="chip" style="border-color:#fff;color:#fff">10</span><span class="chip" style="border-color:#fff;color:#fff">20</span><span class="chip" style="border-color:#fff;color:#fff">30</span><span class="chip" style="border-color:#fff;color:#fff">50</span><span class="chip" style="border-color:#fff;color:#fff">75</span><span class="chip" style="border-color:#fff;color:#fff">100</span><span class="chip" style="border-color:#fff;color:#fff">150</span><span class="chip" style="border-color:#fff;color:#fff">200</span>
+        </div>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">📋 Enter <b>n per group</b> and <b>power</b> in the shared sheet.</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">How many patients per group for an 80% chance of detecting the 5 mm effect?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">THEN</p>
+        <p style="margin:0;font-size:21px;line-height:1.5;color:rgba(255,255,255,.85)">Sections C–D: the whole power curve, and the textbook formula.<br>Section E ⭐: the winner's curse.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
+  <aside class="notes">Assign the eight values across pairs. Make everyone write a sample-size guess: most guess 30–50 per group, which is the point. While they work, type the shared-sheet values into the next slide.</aside>
+</section>
+
+<!-- ============ 5 ROOM ============ -->
+<section class="slide" id="room">
+  <h1>The room's <em>power curve</em>.</h1>
+  <div class="row" style="gap:36px">
+    <div class="col" style="flex:0 0 330px">
+      <table class="room" id="roomTable"><tr><th>n per group</th><th>Power (%)</th><th></th></tr></table>
+      <div class="controls" style="margin-top:12px">
+        <button class="btn" id="roomFill">Fill from simulation</button>
+        <button class="btn" id="roomClear">Clear</button>
+      </div>
+      <div class="controls"><button class="btn primary" id="roomCurve">Overlay 2,000-trial curve</button></div>
+    </div>
+    <div class="col">
+      <svg id="roomSvg" width="740" height="450"></svg>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · notebook section B · discussion question 1</span></div>
+  <aside class="notes">Type in each pair's power (two columns per n if two pairs share a value). Ask where the curve crosses the 80% line and compare with the guesses from the hands-on slide. Then overlay the simulated curve. Discussion: you'd plan for the crossing point, then recruit 10–20% more to allow for drop-outs.</aside>
+</section>
+
+<!-- ============ 6 TWO WORLDS ============ -->
+<section class="slide" id="worlds">
+  <h1>Why power grows: <em>two worlds</em>.</h1>
+  <div class="controls">
+    <span class="seg"><span class="lab">Patients per group</span></span>
+    <input type="range" id="twSlider" min="0" max="9" step="1" value="2" style="width:280px;accent-color:#9933ff">
+    <span class="num" id="twN" style="font-size:22px;min-width:70px"></span>
+    <span style="width:14px"></span>
+    <div class="seg" id="twEff"><span class="lab">True effect</span></div>
+  </div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.4">
+      <svg id="twSvg" width="840" height="420"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <div class="stat"><span class="k" style="color:var(--sc1)">α: FALSE ALARM IF NO EFFECT</span><span class="v num">5%</span></div>
+      <div class="stat"><span class="k" style="color:var(--pc2)">POWER: DETECTED IF REAL</span><span class="big-p" id="twPow"></span></div>
+      <div class="stat"><span class="k">STANDARD ERROR OF THE DIFFERENCE</span><span class="v num" id="twSe"></span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The theory behind the curve</span></div>
+  <aside class="notes">Grey curve: what trial estimates look like if the drug does nothing. Purple curve: what they look like if it truly shrinks tumours by 5 mm. The dashed lines are where an estimate becomes "significant", fixed by α in the grey world. Power is the purple area beyond the line. Drag n: both curves get narrower (SE shrinks with √n, Topic 1), they separate, and the purple area beyond the line grows. A larger effect separates them faster.</aside>
+</section>
+
+<!-- ============ 7 LAB ============ -->
+<section class="slide" id="lab">
+  <h1>Effect size drives <em>everything</em>.</h1>
+  <div class="controls">
+    <div class="seg" id="lbEff"><span class="lab">True effect</span></div><span style="width:14px"></span>
+    <div class="seg" id="lbA"><span class="lab">α</span></div>
+  </div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.3">
+      <svg id="lbSvg" width="800" height="430"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <div class="stat"><span class="k" style="color:var(--pc2)">SIMULATION: n FOR 80% POWER</span><span class="v num" id="lbSim"></span></div>
+      <div class="stat"><span class="k">FORMULA (t-TEST, COHEN'S d): n FOR 80%</span><span class="v num" id="lbFor"></span></div>
+      <div class="stat"><span class="k">COHEN'S d</span><span class="v num" id="lbD"></span></div>
+      <p class="small" style="margin-top:8px">Halve the effect, and you need about <b>four times</b> the patients.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook sections C and D · discussion question 2</span></div>
+  <aside class="notes">Each point is 2,000 simulated trials on the real, skewed tumour sizes; the dashed line is the textbook formula, which assumes normal data. They're close, not identical. Step the effect to 3 mm: the curve flattens and the required n explodes; at 10 mm a small trial is enough. α = 0.01 (the Gemini prompt) shifts every curve down: fewer false positives, less power. Discussion: where does the expected effect come from? Pilot data (noisy), literature (often inflated, see next slide), or better, the smallest effect that would matter clinically.</aside>
+</section>
+
+<!-- ============ 8 WINNER'S CURSE ============ -->
+<section class="slide" id="curse">
+  <h1>The winner's <em>curse</em>.</h1>
+  <div class="controls"><div class="seg" id="wcN"><span class="lab">Patients per group</span></div><span style="width:14px"></span><button class="btn" id="wcAgain">Run 5,000 new trials</button></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.3">
+      <svg id="wcSvg" width="800" height="430"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <div class="stat"><span class="k">POWER</span><span class="v num" id="wcPow"></span></div>
+      <div class="stat"><span class="k" style="color:var(--sc1)">AVERAGE ESTIMATE AMONG "SIGNIFICANT" TRIALS</span><span class="v num" id="wcSig"></span></div>
+      <div class="stat"><span class="k">EXAGGERATION</span><span class="big-p" id="wcEx"></span></div>
+      <p class="small" style="margin-top:8px">Small studies that reach significance have, by luck, <em>overestimated</em> the effect.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section E · discussion question 3</span></div>
+  <aside class="notes">All 5,000 trials estimate a true 5 mm effect. With 15 per group, only the trials that happened to overestimate it cross the significance line (pink): if only significant results get published, the literature reports an effect much bigger than the truth. With 150 per group nearly every trial is significant, and the average significant estimate is close to the truth. This is why a surprisingly large effect from a small study should make you more cautious, and why effect sizes taken from the literature for power calculations are often too optimistic.</aside>
+</section>
+
+<!-- ============ 9 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which statements are <em>correct</em>?</h1>
+  <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
+  <aside class="notes">Statement 1 links back to the p-values topic: absence of evidence is not evidence of absence, especially in an underpowered study. Statement 2 is the 1/d² rule from the lab slide.</aside>
+</section>
+
+<!-- ============ 10 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>Ask the tutor for a <em>sample size</em>.</h1>
+  <div class="row" style="gap:40px;margin-top:8px">
+    <div class="col" style="flex:1.2">
+      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook:</p>
+      <div class="prompt">I'm planning a two-group trial. I expect the treatment to reduce mean tumour size by 5 mm, and the standard deviation of tumour size is about 14 mm. How many patients per group do I need for 80% power at α = 0.05?</div>
+      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
+      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+      <p class="small" style="margin:22px 0 6px">🧮 Calculator check: is the α = 0.01 curve lower than the α = 0.05 one? Why?</p>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">Compare its number with your sections C and D, then check:</p>
+      <ul class="clean" style="margin-bottom:14px">
+        <li style="font-size:19px">did it show the calculation (d = 5 / 14 ≈ 0.36)?</li>
+        <li style="font-size:19px">did it say which test it assumed?</li>
+        <li style="font-size:19px">did it mention drop-outs, or that tumour sizes are skewed?</li>
+      </ul>
+      <p class="small" style="margin:0 0 4px">Watch for:</p>
+      <ul class="clean x">
+        <li style="font-size:19px">a confident number with no working (often off by a factor of 2: total vs per group)</li>
+        <li style="font-size:19px">"n = 30 is usually enough"</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
+  <aside class="notes">This is a case where AI is usually close, and checking is cheap: you now have a simulation and a formula. The common slip is mixing up per-group and total sample size. Ask pairs how far their AI answer was from the formula, and whether it said "per group".</aside>
+</section>
+
+<!-- ============ 11 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:40px">
+    <h1 style="font-size:56px">Three things to <em>keep</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:26px 0 40px;max-width:1080px">
+      <li>Power = how often a <em>real</em> effect is detected. Plan for 80% before you start.</li>
+      <li>Required n grows with 1 / effect²: the expected effect is the <em>key assumption</em>.</li>
+      <li>Underpowered studies miss real effects, and <em>exaggerate</em> the ones they find.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">Choosing a test</span>: paired or not, counts or measurements, censored or complete.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
+  <aside class="notes">You can now plan a study by simulating it, which works for designs no formula covers. Bridge to Hands-on 6: everything so far used a t-test on two independent groups. Next, what changes when the data are paired, categorical, skewed or censored.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const hooks = {};
+const TS = DATA.tsize, NP = TS.length, SDTS = Math.sqrt(varS(TS)), EFF = 5;
+const HIT = C.pc2, MISS = C.sc1;
+// one simulated trial, as in the notebook: both arms drawn from GBSG2 tumour sizes, treated arm `eff` mm smaller (min 1 mm)
+function trial(n,eff,r=R){
+  let sa=0,qa=0,sb=0,qb=0;
+  for(let i=0;i<n;i++){const c=TS[Math.floor(r()*NP)];sa+=c;qa+=c*c;const t=Math.max(1,TS[Math.floor(r()*NP)]-eff);sb+=t;qb+=t*t}
+  const ma=sa/n,mb=sb/n,va=(qa-n*ma*ma)/(n-1)/n,vb=(qb-n*mb*mb)/(n-1)/n,se=Math.sqrt(va+vb),df=(va+vb)**2/(va*va/(n-1)+vb*vb/(n-1));
+  return{est:ma-mb,p:tTwoSided(Math.abs((ma-mb)/se),df)};
+}
+function simPower(n,eff,alpha,K=2000){let c=0;for(let k=0;k<K;k++)if(trial(n,eff).p<alpha)c++;return c/K}
+// textbook approximation for a two-sample t-test (normal approximation + small-sample correction, matches statsmodels to ±1)
+function formulaN(d,alpha=.05,power=.8){const za=normQuantile(1-alpha/2),zb=normQuantile(power);return Math.ceil(2*(za+zb)**2/(d*d)+za*za/4)}
+function formulaPower(n,d,alpha=.05){const za=normQuantile(1-alpha/2);return normCDF(d*Math.sqrt(n/2)-za)}
+
+/* ---- 2 effect ---- */
+hooks['effect']={init(){
+  const W=800,H=430,m={l:30,r:20,t:30,b:50};
+  const svg=d3.select('#efSvg');
+  const x=d3.scaleLinear().domain([-10,100]).range([m.l,W-m.r]);
+  const kde=(vals,shift)=>{const bw=4,xs=d3.range(-10,100.5,0.5);return xs.map(t=>[t,d3.mean(vals,v=>normPDF(t,Math.max(1,v-shift),bw))])};
+  const c0=kde(TS,0),c1=kde(TS,EFF);
+  const y=d3.scaleLinear().domain([0,d3.max([...c0,...c1],d=>d[1])*1.1]).range([H-m.b,m.t]);
+  const area=d3.area().x(d=>x(d[0])).y0(y(0)).y1(d=>y(d[1])).curve(d3.curveBasis);
+  svg.append('path').attr('d',area(c0)).attr('fill',C.pop).attr('opacity',.45);
+  svg.append('path').attr('d',area(c1)).attr('fill',C.pc2).attr('opacity',.3);
+  const line=d3.line().x(d=>x(d[0])).y(d=>y(d[1])).curve(d3.curveBasis);
+  svg.append('path').attr('d',line(c0)).attr('fill','none').attr('stroke',C.ink2).attr('stroke-width',2);
+  svg.append('path').attr('d',line(c1)).attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',2);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,11));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Tumour size (mm)');
+  const mu0=d3.mean(TS),mu1=d3.mean(TS,v=>Math.max(1,v-EFF));
+  [[mu1,C.pc2,'with drug'],[mu0,C.ink2,'without']].forEach(([mu,col,lab],i)=>{
+    svg.append('line').attr('x1',x(mu)).attr('x2',x(mu)).attr('y1',m.t+30).attr('y2',H-m.b).attr('stroke',col).attr('stroke-width',2).attr('stroke-dasharray','5 4');
+    svg.append('text').attr('class','lbl').style('fill',col).attr('x',x(mu)+(i?6:-6)).attr('text-anchor',i?'start':'end').attr('y',m.t+24).text(`${lab}: mean ${fmt1(mu)}`)});
+  // effect bracket
+  const yb=m.t+46;svg.append('path').attr('d',`M${x(mu1)},${yb+8}V${yb}H${x(mu0)}V${yb+8}`).attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2.5);
+  // SD bracket
+  const ys=H-m.b-30;svg.append('path').attr('d',`M${x(mu0)},${ys-8}V${ys}H${x(mu0+SDTS)}V${ys-8}`).attr('fill','none').attr('stroke',C.ink2).attr('stroke-width',2);
+  svg.append('text').attr('class','lbl').attr('x',x(mu0+SDTS)+8).attr('y',ys+4).text(`1 SD = ${fmt1(SDTS)} mm`);
+  svg.append('text').attr('class','lbl pink').attr('x',x(mu0)+8).attr('y',yb+4).text('5 mm');
+  document.getElementById('efSd').innerHTML=`${fmt1(SDTS)} <small>mm</small>`;
+  document.getElementById('efD').textContent=fmt2(EFF/SDTS);
+}};
+
+/* ---- 3 one trial ---- */
+hooks['one-trial']={init(){
+  const n=30,W=880,m={l:110,r:170};
+  const svg=d3.select('#otSvg');
+  const x=d3.scaleLinear().domain([0,120]).range([m.l,W-m.r]);
+  const rowsY={c:42,t:122};
+  svg.append('text').attr('class','lbl').attr('x',0).attr('y',rowsY.c+5).text('Control (30)');
+  svg.append('text').attr('class','lbl purple').attr('x',0).attr('y',rowsY.t+5).text('Drug (30)');
+  svg.append('g').attr('transform',`translate(0,${rowsY.t+40})`).call(g=>axisB(g,x,12)).append('text').attr('class','axlab').attr('x',W-m.r).attr('y',36).attr('text-anchor','end').text('Tumour size (mm)');
+  const dc=svg.append('g'),dt=svg.append('g');
+  const mc=svg.append('rect').attr('width',4).attr('rx',2).attr('height',64).attr('y',rowsY.c-32).attr('fill',C.ink2).attr('opacity',0);
+  const mt=svg.append('rect').attr('width',4).attr('rx',2).attr('height',64).attr('y',rowsY.t-32).attr('fill',C.pc2).attr('opacity',0);
+  // log of trials: estimate on an effect axis
+  const top=250,rowH=19,maxRows=10;
+  const xe=d3.scaleLinear().domain([-12,20]).range([m.l,W-m.r]);
+  svg.append('text').attr('class','lbl').attr('x',m.l).attr('y',top-14).text('Estimated shrinkage in each trial (mm)');
+  svg.append('line').attr('x1',xe(0)).attr('x2',xe(0)).attr('y1',top-6).attr('y2',top+rowH*maxRows).attr('stroke',C.pc1).attr('stroke-width',1.5);
+  svg.append('line').attr('x1',xe(EFF)).attr('x2',xe(EFF)).attr('y1',top-6).attr('y2',top+rowH*maxRows).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl').attr('x',xe(EFF)+5).attr('y',top+rowH*maxRows+16).text('truth: 5 mm');
+  svg.append('text').attr('class','lbl').attr('x',xe(0)-5).attr('y',top+rowH*maxRows+16).attr('text-anchor','end').text('no effect');
+  svg.append('g').attr('transform',`translate(0,${top+rowH*maxRows+22})`).call(g=>axisB(g,xe,8));
+  const lg=svg.append('g');let rows=[],k=0,det=0;
+  function run(){
+    const jr=mulberry32((Date.now()%1e6)|0);
+    const c=d3.range(n).map(()=>TS[Math.floor(R()*NP)]),t=d3.range(n).map(()=>Math.max(1,TS[Math.floor(R()*NP)]-EFF));
+    const w=welch(c,t),ok=w.p<0.05;k++;if(ok)det++;
+    dc.selectAll('circle').data(c).join('circle').attr('r',4).attr('fill',C.pop).attr('opacity',.8).transition().duration(400).attr('cx',d=>x(d)).attr('cy',()=>rowsY.c+(jr()-.5)*48);
+    dt.selectAll('circle').data(t).join('circle').attr('r',4).attr('fill',C.pc2).attr('opacity',.7).transition().duration(400).attr('cx',d=>x(d)).attr('cy',()=>rowsY.t+(jr()-.5)*48);
+    mc.transition().duration(400).attr('opacity',1).attr('x',x(mean(c))-2);mt.transition().duration(400).attr('opacity',1).attr('x',x(mean(t))-2);
+    rows.forEach(r=>r.i++);rows.forEach(r=>r.g.transition().duration(300).attr('transform',`translate(0,${top+r.i*rowH})`).attr('opacity',r.i>=maxRows?0:1));
+    rows.filter(r=>r.i>=maxRows).forEach(r=>r.g.transition().delay(300).remove());rows=rows.filter(r=>r.i<maxRows);
+    const g=lg.append('g').attr('transform',`translate(0,${top})`).attr('opacity',0);const col=ok?HIT:MISS;
+    const tc=tQuantile(.975,w.df);
+    g.append('line').attr('x1',xe(w.diff-tc*w.se)).attr('x2',xe(w.diff+tc*w.se)).attr('y1',rowH/2).attr('y2',rowH/2).attr('stroke',col).attr('stroke-width',3).attr('stroke-linecap','round');
+    g.append('circle').attr('cx',xe(w.diff)).attr('cy',rowH/2).attr('r',5).attr('fill',col).attr('stroke','#fff').attr('stroke-width',1.5);
+    g.append('text').attr('class','lbl').attr('x',W-m.r+16).attr('y',rowH/2+5).style('font-size','14px').style('fill',col).text(`#${k} p = ${fmtP(w.p)} ${ok?'✓ detected':'✗ missed'}`);
+    g.transition().delay(350).duration(300).attr('opacity',1);rows.unshift({g,i:0});
+    document.getElementById('otThis').innerHTML=`<span style="color:${col}">${fmt1(w.diff)} mm, p = ${fmtP(w.p)}: ${ok?'detected':'missed'}</span>`;
+    document.getElementById('otTally').innerHTML=`${k} <small>run</small> · ${det} <small>detected</small>`;
+  }
+  document.getElementById('otRun').onclick=run;
+}};
+
+/* ---- 5 room ---- */
+hooks['room']={init(){
+  const ns=[10,20,30,50,75,100,150,200];const tb=document.getElementById('roomTable');
+  ns.forEach(n=>{const tr=document.createElement('tr');tr.innerHTML=`<td class="num">${n}</td><td><input type="number" min="0" max="100" step="1" data-n="${n}"></td><td><input type="number" min="0" max="100" step="1" data-n="${n}"></td>`;tb.appendChild(tr)});
+  tb.querySelector('tr').innerHTML='<th>n per group</th><th>Pair A power %</th><th>Pair B</th>';
+  const inputs=[...tb.querySelectorAll('input')];
+  const W=740,H=450,m={l:56,r:20,t:20,b:50};
+  const svg=d3.select('#roomSvg');
+  const x=d3.scaleLinear().domain([0,410]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,100]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>d+'%'));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,8));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Patients per group');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Power (5 mm effect)');
+  svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(80)).attr('y2',y(80)).attr('stroke',C.sc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl pink').attr('x',W-m.r).attr('y',y(80)-6).attr('text-anchor','end').text('80% power');
+  const curve=svg.append('path').attr('fill','none').attr('stroke',C.pc1).attr('stroke-width',2).attr('opacity',0);
+  const cdots=svg.append('g');const pts=svg.append('g');
+  function render(){
+    const v=inputs.filter(i=>i.value!=='').map((i,k)=>({n:+i.dataset.n,p:Math.max(0,Math.min(100,+i.value)),k}));
+    pts.selectAll('circle').data(v,d=>d.n+'_'+d.k).join(e=>e.append('circle').attr('r',0).call(s=>s.transition().duration(300).attr('r',8)),u=>u,ex=>ex.remove())
+      .attr('cx',d=>x(d.n)).attr('cy',d=>y(d.p)).attr('fill',HIT).attr('stroke','#fff').attr('stroke-width',2)
+      .on('mousemove',(ev,d)=>showTip(ev,`${d.n} per group: <b>${d.p}%</b> power`)).on('mouseleave',hideTip);
+  }
+  inputs.forEach(i=>i.addEventListener('input',render));
+  document.getElementById('roomFill').onclick=()=>{inputs.forEach(i=>{i.value=Math.round(100*simPower(+i.dataset.n,EFF,.05,2000))});render()};
+  document.getElementById('roomClear').onclick=()=>{inputs.forEach(i=>i.value='');curve.attr('opacity',0);cdots.selectAll('*').remove();render()};
+  document.getElementById('roomCurve').onclick=()=>{
+    const sz=[10,20,30,50,75,100,150,200,300,400];const pw=sz.map(n=>({n,p:100*simPower(n,EFF,.05,2000)}));
+    curve.attr('d',d3.line().x(d=>x(d.n)).y(d=>y(d.p)).curve(d3.curveMonotoneX)(pw));const L=curve.node().getTotalLength();
+    curve.attr('opacity',1).attr('stroke-dasharray',`${L} ${L}`).attr('stroke-dashoffset',L).transition().duration(1200).attr('stroke-dashoffset',0);
+    cdots.selectAll('circle').data(pw).join('circle').attr('r',4).attr('fill',C.pc1).attr('cx',d=>x(d.n)).attr('cy',d=>y(d.p))
+      .on('mousemove',(ev,d)=>showTip(ev,`${d.n} per group: <b>${fmt1(d.p)}%</b> (2,000 trials)`)).on('mouseleave',hideTip);
+  };
+  render();
+}};
+
+/* ---- 6 two worlds ---- */
+hooks['worlds']={init(){
+  const steps=[5,10,20,30,50,75,100,150,200,400];let eff=5;
+  const W=840,H=420,m={l:30,r:20,t:30,b:50};
+  const svg=d3.select('#twSvg');const x=d3.scaleLinear().domain([-16,22]).range([m.l,W-m.r]);const y=d3.scaleLinear().range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,10));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Estimated shrinkage in one trial (mm)');
+  const aPow=svg.append('path').attr('fill',C.pc2).attr('opacity',.35),aA=svg.append('path').attr('fill',C.sc1).attr('opacity',.5),aA2=svg.append('path').attr('fill',C.sc1).attr('opacity',.5);
+  const l0=svg.append('path').attr('fill','none').attr('stroke',C.ink2).attr('stroke-width',2),l1=svg.append('path').attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',2.5);
+  const cut=[svg.append('line'),svg.append('line')].map(l=>l.attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4').attr('y1',m.t-10).attr('y2',H-m.b));
+  const t0=svg.append('text').attr('class','lbl').attr('text-anchor','middle'),t1=svg.append('text').attr('class','lbl purple').attr('text-anchor','middle');
+  const tc=svg.append('text').attr('class','lbl').attr('y',m.t-14).text('"significant" beyond the dashed lines');
+  const sl=document.getElementById('twSlider');
+  function draw(){
+    const n=steps[+sl.value],se=SDTS*Math.sqrt(2/n),z=1.96,c=z*se;
+    const xs=d3.range(-16,22.01,0.05);const f0=t=>normPDF(t,0,se),f1=t=>normPDF(t,eff,se);
+    y.domain([0,Math.max(f0(0),f1(eff))*1.15]);
+    const ar=(f,lo,hi)=>d3.area().x(d=>x(d)).y0(y(0)).y1(d=>y(f(d)))(xs.filter(d=>d>=lo&&d<=hi));
+    l0.transition().duration(300).attr('d',d3.line().x(d=>x(d)).y(d=>y(f0(d)))(xs));
+    l1.transition().duration(300).attr('d',d3.line().x(d=>x(d)).y(d=>y(f1(d)))(xs));
+    aPow.attr('d',ar(f1,c,22));aA.attr('d',ar(f0,c,22));aA2.attr('d',ar(f0,-16,-c));
+    cut[0].attr('x1',x(-c)).attr('x2',x(-c));cut[1].attr('x1',x(c)).attr('x2',x(c));tc.attr('x',x(c)+6);
+    t0.attr('text-anchor','end').attr('x',x(0)-14).attr('y',y(f0(0))+4).text('drug does nothing');t1.attr('text-anchor','start').attr('x',x(eff)+14).attr('y',y(f1(eff))+4).text(`drug works (${eff} mm)`);
+    const pow=1-normCDF((c-eff)/se)+normCDF((-c-eff)/se);
+    document.getElementById('twN').textContent=`${n}`;
+    document.getElementById('twPow').textContent=`${Math.round(100*pow)}%`;
+    document.getElementById('twSe').innerHTML=`${fmt2(se)} <small>mm</small>`;
+  }
+  sl.oninput=draw;segButtons('twEff',[[3,'3 mm'],[5,'5 mm'],[10,'10 mm']],eff,v=>{eff=v;draw()});draw();
+}};
+
+/* ---- 7 lab ---- */
+hooks['lab']={init(){
+  let eff=5,alpha=.05;const sizes=[10,20,30,50,75,100,150,200,300,400];
+  const W=800,H=430,m={l:56,r:20,t:20,b:50};
+  const svg=d3.select('#lbSvg');
+  const x=d3.scaleLinear().domain([0,410]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,1]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>d3.format('.0%')(d)));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,8));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Patients per group');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Power');
+  svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(.8)).attr('y2',y(.8)).attr('stroke',C.sc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl pink').attr('x',W-m.r).attr('y',y(.8)+18).attr('text-anchor','end').text('80%');
+  const fl=svg.append('path').attr('fill','none').attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','6 4');
+  const sl=svg.append('path').attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',2.5);const sd=svg.append('g');
+  const lgd=svg.append('g').attr('transform',`translate(${m.l+14},${m.t+10})`);
+  lgd.append('line').attr('x2',24).attr('stroke',C.pc2).attr('stroke-width',2.5);lgd.append('text').attr('class','lbl').attr('x',30).attr('y',5).text('simulation (real, skewed tumour sizes)');
+  lgd.append('line').attr('y1',20).attr('y2',20).attr('x2',24).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','6 4');lgd.append('text').attr('class','lbl').attr('x',30).attr('y',25).text('formula (assumes normal data)');
+  function draw(){
+    const d=eff/SDTS;
+    fl.transition().duration(400).attr('d',d3.line().x(n=>x(n)).y(n=>y(formulaPower(n,d,alpha)))(d3.range(2,411,2)));
+    const pw=sizes.map(n=>({n,p:simPower(n,eff,alpha,2000)}));
+    sl.transition().duration(400).attr('d',d3.line().x(q=>x(q.n)).y(q=>y(q.p)).curve(d3.curveMonotoneX)(pw));
+    sd.selectAll('circle').data(pw).join('circle').attr('r',6).attr('fill',C.pc2).attr('stroke','#fff').attr('stroke-width',2)
+      .on('mousemove',(ev,q)=>showTip(ev,`${q.n} per group: <b>${fmt1(100*q.p)}%</b>`)).on('mouseleave',hideTip)
+      .transition().duration(400).attr('cx',q=>x(q.n)).attr('cy',q=>y(q.p));
+    const first=pw.find(q=>q.p>=.8);
+    document.getElementById('lbSim').innerHTML=first?`≈ ${first.n} <small>per group (first simulated size)</small>`:`> 400 <small>per group</small>`;
+    document.getElementById('lbFor').innerHTML=`${formulaN(d,alpha)} <small>per group</small>`;
+    document.getElementById('lbD').textContent=fmt2(d);
+  }
+  segButtons('lbEff',[[3,'3 mm'],[5,'5 mm'],[10,'10 mm']],eff,v=>{eff=v;draw()});
+  segButtons('lbA',[[.05,'0.05'],[.01,'0.01']],alpha,v=>{alpha=v;draw()});draw();
+}};
+
+/* ---- 8 winner's curse ---- */
+hooks['curse']={init(){
+  let n=15;const K=5000,W=800,H=430,m={l:56,r:20,t:30,b:50};
+  const svg=d3.select('#wcSvg');const x=d3.scaleLinear().domain([-15,25]).range([m.l,W-m.r]);const y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,8));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Estimated shrinkage in one trial (mm)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Number of trials (of 5,000)');
+  const bars=svg.append('g');
+  svg.append('line').attr('x1',x(EFF)).attr('x2',x(EFF)).attr('y1',m.t-10).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl').attr('x',x(EFF)-6).attr('y',m.t-14).attr('text-anchor','end').text('truth 5 mm');
+  const ml=svg.append('line').attr('stroke',C.sc1).attr('stroke-width',2.5).attr('y1',m.t-10).attr('y2',H-m.b),mt=svg.append('text').attr('class','lbl pink').attr('y',m.t-14);
+  const lg=svg.append('g').attr('transform',`translate(${W-m.r-230},${m.t+10})`);
+  lg.append('rect').attr('width',12).attr('height',12).attr('rx',2).attr('fill',C.sc1);lg.append('text').attr('class','lbl').attr('x',18).attr('y',11).text('"significant" (p < 0.05)');
+  lg.append('rect').attr('y',20).attr('width',12).attr('height',12).attr('rx',2).attr('fill',C.popL);lg.append('text').attr('class','lbl').attr('x',18).attr('y',31).text('not significant');
+  function draw(){
+    const res=d3.range(K).map(()=>trial(n,EFF));const sig=res.filter(r=>r.p<.05);
+    const bw=0.5,thr=d3.range(-15,25,bw);
+    const bS=d3.bin().domain([-15,25]).thresholds(thr)(sig.map(r=>r.est)),bN=d3.bin().domain([-15,25]).thresholds(thr)(res.filter(r=>r.p>=.05).map(r=>r.est));
+    const tot=bS.map((b,i)=>({x0:b.x0,x1:b.x1,s:b.length,n:bN[i].length}));
+    y.domain([0,d3.max(tot,d=>d.s+d.n)*1.1]).nice();axisL(gy.transition().duration(400),y,5,W-m.l-m.r);
+    bars.selectAll('g').data(tot).join(e=>{const q=e.append('g');q.append('rect').attr('class','n');q.append('rect').attr('class','s');return q})
+      .on('mousemove',(ev,d)=>showTip(ev,`${fmt1(d.x0)}–${fmt1(d.x1)} mm: <b>${d.s}</b> significant, ${d.n} not`)).on('mouseleave',hideTip)
+      .each(function(d){const q=d3.select(this);q.select('.s').transition().duration(400).attr('x',x(d.x0)+.4).attr('width',Math.max(0,x(d.x1)-x(d.x0)-.8)).attr('y',y(d.s)).attr('height',y(0)-y(d.s)).attr('fill',C.sc1);
+        q.select('.n').transition().duration(400).attr('x',x(d.x0)+.4).attr('width',Math.max(0,x(d.x1)-x(d.x0)-.8)).attr('y',y(d.s+d.n)).attr('height',y(d.s)-y(d.s+d.n)).attr('fill',C.popL)});
+    const ms=d3.mean(sig,r=>r.est);
+    ml.transition().duration(400).attr('x1',x(ms)).attr('x2',x(ms));mt.transition().duration(400).attr('x',x(ms)+6).text(`significant trials average ${fmt1(ms)} mm`);
+    document.getElementById('wcPow').innerHTML=`${Math.round(100*sig.length/K)}%`;
+    document.getElementById('wcSig').innerHTML=`${fmt1(ms)} <small>mm (truth 5)</small>`;
+    document.getElementById('wcEx').textContent=`${fmt1(ms/EFF)}×`;
+  }
+  segButtons('wcN',[[15,'15'],[50,'50'],[150,'150']],n,v=>{n=v;draw()});document.getElementById('wcAgain').onclick=draw;draw();
+}};
+
+/* ---- 9 statements ---- */
+hooks['statements']={init(){qcards('qcards',[
+  [false,'A non-significant result from a trial with 20 patients per group shows the drug does not work.','With low power, real effects are usually missed. Absence of evidence is not evidence of absence: look at the CI.'],
+  [true,'If the expected effect is halved, you need roughly four times as many patients.','Correct. Required n grows with 1 / effect².'],
+  [true,'If a small study finds a surprisingly large significant effect, the true effect is probably smaller.','Correct. That is the winner\'s curse: in small studies, only lucky overestimates reach significance.'],
+  [false,'80% power means that 80% of treated patients will respond to the drug.','Power is about the study, not the patients: the chance the trial detects the effect if it is real.']])}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>
