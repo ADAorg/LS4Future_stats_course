@@ -84,3 +84,15 @@ ul.clean li{padding:6px 0 6px 26px;position:relative}
 ul.clean li::before{content:"";position:absolute;left:4px;top:17px;width:9px;height:9px;border-radius:50%;background:var(--pc2)}
 ul.clean.x li::before{background:var(--sc1);border-radius:2px;transform:rotate(45deg)}
 .num{font-variant-numeric:tabular-nums}
+/* clickable reveal cards (concept checks) */
+.qcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+.qcard{background:var(--wash);border-radius:14px;padding:16px 20px;cursor:pointer;border:2px solid transparent;transition:border-color .2s,background .2s;min-height:150px}
+.qcard:hover{border-color:var(--line)}
+.qcard .q{font-size:21px;line-height:1.4}
+.qcard .a{font-size:17px;line-height:1.4;color:var(--ink2);margin-top:10px;opacity:0;transition:opacity .3s}
+.qcard.shown .a{opacity:1}
+.qcard.shown.ok{border-color:var(--pc2);background:#fff}
+.qcard.shown.no{border-color:var(--sc1);background:#fff}
+.qcard .tag{font-size:14px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;color:var(--muted)}
+.qcard.shown.ok .tag{color:var(--pc2)}
+.qcard.shown.no .tag{color:var(--sc1)}

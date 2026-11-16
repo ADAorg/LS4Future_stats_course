@@ -10,17 +10,6 @@
 .formula .lhs{display:inline-block;width:150px;color:var(--ink2)}
 .formula .res{color:var(--pc2)}
 .verdict{font-size:22px;margin-top:10px}
-.qcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
-.qcard{background:var(--wash);border-radius:14px;padding:16px 20px;cursor:pointer;border:2px solid transparent;transition:border-color .2s,background .2s;min-height:150px}
-.qcard:hover{border-color:var(--line)}
-.qcard .q{font-size:21px;line-height:1.4}
-.qcard .a{font-size:17px;line-height:1.4;color:var(--ink2);margin-top:10px;opacity:0;transition:opacity .3s}
-.qcard.shown .a{opacity:1}
-.qcard.shown.ok{border-color:var(--pc2);background:#fff}
-.qcard.shown.no{border-color:var(--sc1);background:#fff}
-.qcard .tag{font-size:14px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;color:var(--muted)}
-.qcard.shown.ok .tag{color:var(--pc2)}
-.qcard.shown.no .tag{color:var(--sc1)}
 </style>
 </head>
 <body>
@@ -486,11 +475,7 @@ hooks['statements']={init(){
     [true,'If we repeated the study many times, about 95% of the intervals would contain the true mean.','Correct. This is what the 100-intervals picture showed.'],
     [false,'95% of patients have tumours between 26.1 and 33.4 mm.','Confuses the CI for the mean with the spread of patients. That is what the SD describes (Topic 1).'],
     [true,'Values inside the interval are reasonably compatible with the data; values far outside are not.','Correct, and the most useful way to read a CI in practice.']];
-  const box=document.getElementById('qcards');
-  Q.forEach(([ok,q,a],i)=>{const d=document.createElement('div');d.className='qcard '+(ok?'ok':'no');
-    d.innerHTML=`<div class="tag">${i+1} · <span class="res">${ok?'✓ correct':'✗ wrong'}</span></div><div class="q">${q}</div><div class="a">${a}</div>`;
-    const res=d.querySelector('.res');res.style.visibility='hidden';
-    d.onclick=()=>{d.classList.toggle('shown');res.style.visibility=d.classList.contains('shown')?'visible':'hidden'};box.appendChild(d)});
+  qcards('qcards',Q);
 }};
 
 startDeck(hooks);

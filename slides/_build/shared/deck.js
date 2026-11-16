@@ -1,6 +1,6 @@
 /* GIMM interactive deck: shared engine and helpers. Inlined into every deck by build.py.
    A deck defines  const hooks = { "<slide id>": {init(), enter(), leave()} }  and calls  startDeck(hooks). */
-const C = {pc1:'#240046', pc2:'#9933ff', sc1:'#ff0066', sc3:'#ff99cc', pop:'#a799b5', popL:'#d3cce0', ink2:'#5b4b6e', line:'#e6e1ec'};
+const C = {pc1:'#240046', pc2:'#9933ff', sc1:'#ff0066', sc3:'#ff99cc', pop:'#a799b5', popL:'#d3cce0', ink2:'#5b4b6e', muted:'#8a7d99', line:'#e6e1ec'};
 /* ---------- maths ---------- */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 let R = mulberry32((Date.now()%1e9)|0);
@@ -34,6 +34,35 @@ function tQuantile(p,df){let lo=-1e3,hi=1e3;for(let i=0;i<200;i++){const m=(lo+h
 const normPDF=(x,mu=0,sd=1)=>Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI));
 function binomPMF(k,n,p){return Math.exp(lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p))}
 function binomQuantile(q,n,p){let c=0;for(let k=0;k<=n;k++){c+=binomPMF(k,n,p);if(c>=q)return k}return n}
+/* ---------- tests (checked against scipy.stats) ---------- */
+const varS = a => {const m=mean(a);let s=0;for(const v of a)s+=(v-m)*(v-m);return s/(a.length-1)};
+function tTwoSided(t,df){return ibeta(df/(df+t*t),df/2,0.5)}   // exact two-sided tail, no 1-x precision loss
+function welch(a,b){const ma=mean(a),mb=mean(b),va=varS(a)/a.length,vb=varS(b)/b.length,se=Math.sqrt(va+vb);
+  const df=(va+vb)**2/(va*va/(a.length-1)+vb*vb/(b.length-1)),t=(ma-mb)/se;return{diff:ma-mb,se,df,t,p:tTwoSided(Math.abs(t),df)}}
+function gammaQ(a,x){ // regularized upper incomplete gamma
+  if(x<=0)return 1;const gln=lgamma(a);
+  if(x<a+1){let ap=a,sum=1/a,del=sum;for(let n=0;n<500;n++){ap++;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*1e-15)break}return 1-sum*Math.exp(-x+a*Math.log(x)-gln)}
+  let b=x+1-a,c=1e300,d=1/b,h=d;for(let i=1;i<500;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-300)d=1e-300;c=b+an/c;if(Math.abs(c)<1e-300)c=1e-300;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-15)break}
+  return Math.exp(-x+a*Math.log(x)-gln)*h}
+const chi2SF=(x,k)=>gammaQ(k/2,x/2);
+function chi2Table(g,c){ // g: 0/1 group codes, c: category codes; Yates correction for 2x2 (as scipy.stats.chi2_contingency)
+  const cats=[...new Set(c)].sort((a,b)=>a-b),gs=[0,1],O=gs.map(gg=>cats.map(cc=>0));
+  for(let i=0;i<g.length;i++)O[g[i]][cats.indexOf(c[i])]++;
+  const N=g.length,rs=O.map(r=>d3.sum(r)),cs=cats.map((_,j)=>O[0][j]+O[1][j]),df=(cats.length-1);let x=0;
+  for(let i=0;i<2;i++)for(let j=0;j<cats.length;j++){const E=rs[i]*cs[j]/N;let d=Math.abs(O[i][j]-E);if(df===1)d=Math.max(0,d-0.5);x+=d*d/E}
+  return{stat:x,df,p:chi2SF(x,df),O,cats,rs}}
+function randn(r=R){let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())}
+// k label shuffles: difference in means between a random group of size nA and the rest
+function permDiffs(vals,nA,k,r=R){const N=vals.length,idx=Int32Array.from({length:N},(_,i)=>i);let tot=0;for(const v of vals)tot+=v;const out=new Float64Array(k);
+  for(let j=0;j<k;j++){let s=0;for(let i=0;i<nA;i++){const q=i+Math.floor(r()*(N-i)),t=idx[i];idx[i]=idx[q];idx[q]=t;s+=vals[idx[i]]}out[j]=s/nA-(tot-s)/(N-nA)}return out}
+function shuffled(a,r=R){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+function fmtP(p){if(p>=0.001)return d3.format('.2~g')(p).replace(/^0\./,'0.');const e=Math.floor(Math.log10(p)),m=p/10**e;
+  const sup=String(e).replace('-','⁻').replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);return `${m.toFixed(1)} × 10${sup}`}
+/* ---------- concept-check cards: Q = [[isCorrect, statement, explanation], ...] ---------- */
+function qcards(id,Q){const box=document.getElementById(id);
+  Q.forEach(([ok,q,a],i)=>{const d=document.createElement('div');d.className='qcard '+(ok?'ok':'no');
+    d.innerHTML=`<div class="tag">${i+1} · <span class="res" style="visibility:hidden">${ok?'✓ correct':'✗ wrong'}</span></div><div class="q">${q}</div><div class="a">${a}</div>`;
+    const res=d.querySelector('.res');d.onclick=()=>{d.classList.toggle('shown');res.style.visibility=d.classList.contains('shown')?'visible':'hidden'};box.appendChild(d)});}
 
 /* ---------- deck chrome (progress bar, nav, tooltip, notes) ---------- */
 (function(){

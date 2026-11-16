@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 1 · p-values</title>
+<style>/*CSS*/</style>
+<style>
+.big-p{font-size:46px;font-variant-numeric:tabular-nums;color:var(--pc2)}
+.cond{font-size:30px;text-align:center;padding:18px 10px;font-variant-numeric:tabular-nums}
+.cond b{font-weight:400;color:var(--pc2)}
+.cond.wrong b{color:var(--sc1)}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px"><em>p</em>-values.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:760px;margin:0">If nothing were going on, how surprising would your result be? And what a p-value can't tell you.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 1 · Topic 3 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">Opening. The p-value is the most reported and most misread number in biomedicine. We'll build it from scratch by simulation, so it never feels like a magic output again. The data are the same GBSG2 patients; the question now is whether two groups of them differ.</aside>
+</section>
+
+<!-- ============ 2 SHUFFLE ============ -->
+<section class="slide" id="shuffle">
+  <h1>Imagine <em>no difference</em>: shuffle the labels.</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:3">
+      <div class="controls">
+        <button class="btn primary" id="shOne">Shuffle once</button>
+        <button class="btn" id="shHundred">+100</button>
+        <button class="btn" id="shAll">Run to 5,000</button>
+        <button class="btn" id="shReset">Reset</button>
+      </div>
+      <svg id="shSvg" width="880" height="470"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:52px">
+      <p class="small" style="margin-top:0">Take all 686 patients and deal them at random into a group of 246 and a group of 440. Any difference between the two groups is <em>pure chance</em>.</p>
+      <div class="stat"><span class="k">SHUFFLES</span><span class="v num" id="shCount">0</span></div>
+      <div class="stat"><span class="k">LAST DIFFERENCE IN MEAN TUMOUR SIZE</span><span class="v num" id="shLast">–</span></div>
+      <div class="stat"><span class="k">MIDDLE 95% OF CHANCE DIFFERENCES</span><span class="v num" id="shRange">–</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Building the null hypothesis by simulation</span></div>
+  <aside class="notes">Same group sizes as the therapy groups in the hands-on (246 vs 440), but here the labels are dealt at random, so by construction there is no real difference. Click "Shuffle once" a few times: the dots swap rows and the two means move apart a little. Each shuffle's difference drops into the histogram. This is the null distribution: the differences chance alone produces. Its spread is a standard error again, this time of a difference.</aside>
+</section>
+
+<!-- ============ 3 TAIL ============ -->
+<section class="slide" id="tail">
+  <h1>The p-value is a <em>tail area</em>.</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:3">
+      <div class="controls">
+        <span class="seg"><span class="lab">Suppose two real groups differ by</span></span>
+        <input type="range" id="tailSlider" min="0" max="4" step="0.1" value="1.5" style="width:260px;accent-color:#9933ff">
+        <span class="num" id="tailD" style="font-size:24px;min-width:90px"></span>
+      </div>
+      <svg id="tailSvg" width="880" height="440"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:52px">
+      <div class="stat"><span class="k">SHUFFLES AT LEAST THIS FAR FROM 0</span><span class="v num" id="tailCount"></span></div>
+      <div class="stat"><span class="k">p-VALUE BY SHUFFLING</span><span class="big-p" id="tailPerm"></span></div>
+      <div class="stat"><span class="k">p-VALUE BY WELCH t-TEST</span><span class="v num" id="tailT"></span></div>
+      <p class="small" style="margin-top:10px" id="tailMsg"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">What the number means</span></div>
+  <aside class="notes">Drag the slider: it's a hypothetical observed difference between two groups. The p-value is simply the share of chance differences (pink tails, both sides) at least as extreme. Point out that the t-test, which uses a formula instead of shuffling, gives almost the same number. At 2.2–2.3 mm we cross p = 0.05: chance alone would produce a gap this big about 1 time in 20. Nothing magic happens at that line.</aside>
+</section>
+
+<!-- ============ 4 NOT ============ -->
+<section class="slide" id="not">
+  <h1>The p-value answers the <em>other</em> question.</h1>
+  <div class="row" style="gap:28px;margin-top:6px">
+    <div class="col">
+      <div class="card"><div class="kicker" style="margin:0;color:var(--pc2)">What p is</div><div class="cond">P( <b>data this extreme</b> | no difference )</div>
+        <p class="small" style="margin:0">"If the groups were the same, how often would chance give a gap this big?"</p></div>
+    </div>
+    <div class="col">
+      <div class="card"><div class="kicker" style="margin:0;color:var(--sc1)">What people read</div><div class="cond wrong">P( <b>no difference</b> | data )</div>
+        <p class="small" style="margin:0">"How likely is it that the groups are the same?" p cannot tell you this.</p></div>
+    </div>
+  </div>
+  <p class="small" style="margin:22px 0 6px">Same trap, from the clinic: P(positive test | healthy) is not P(healthy | positive test).</p>
+  <p class="small" style="margin:18px 0 6px"><b>A p-value also does not tell you:</b></p>
+  <ul class="clean">
+    <li style="font-size:20px">how <em>big</em> the difference is, or whether it <em>matters</em></li>
+    <li style="font-size:20px">that p &gt; 0.05 means "no difference" (absence of evidence ≠ evidence of absence)</li>
+  </ul>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The classic misreading</span></div>
+  <aside class="notes">The p-value is calculated assuming no difference, so it can't also be the probability of that assumption. The diagnostic-test analogy usually lands: a test with a 5% false-positive rate does not mean a positive patient has a 95% chance of being ill; that depends on how common the disease is. We'll come back to this on the false-positives topic.</aside>
+</section>
+
+<!-- ============ 5 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on 3: <em>p-values</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day1_HO3_p_values.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTION A</p>
+        <p style="margin:0 0 22px;font-size:22px;color:rgba(255,255,255,.85)">Did patients who got hormonal therapy look like those who didn't, <em>before</em> treatment?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTION B</p>
+        <p style="margin:0;font-size:22px;color:rgba(255,255,255,.85)">A drug that shrinks tumours by just 1 mm. Change the trial size.</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">For <b>age</b>: will the p-value be large or small?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">TWO AI ROLES, KEPT APART</p>
+        <p style="margin:0;font-size:20px;line-height:1.5;color:rgba(255,255,255,.85)">🧮 Gemini in Colab = <em>calculator</em>, for code.<br>🎓 Claude / ChatGPT = <em>tutor you must check</em>, for interpretation.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 20 minutes · in pairs</span></div>
+  <aside class="notes">No shared sheet this time. Ask everyone to commit to a guess for age before running. Most expect a large p-value ("it's a trial, the groups should be similar"). The tutor prompt in this notebook is a known failure point: p = 0.03 read as "3% chance the null is true" or as "a large effect".</aside>
+</section>
+
+<!-- ============ 6 BASELINE ============ -->
+<section class="slide" id="baseline">
+  <h1>Were the groups <em>comparable</em>?</h1>
+  <div class="controls"><div class="seg" id="blVar"><span class="lab">Baseline variable</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.1">
+      <svg id="blSvg" width="770" height="300"></svg>
+      <svg id="blNull" width="770" height="150" style="margin-top:6px"></svg>
+    </div>
+    <div class="col" style="flex:1">
+      <div class="stat"><span class="k" id="blDiffK">DIFFERENCE</span><span class="v num" id="blDiff"></span></div>
+      <div class="stat"><span class="k" id="blTestK">TEST</span><span class="v num" id="blTest" style="font-size:22px"></span></div>
+      <div class="stat"><span class="k">p-VALUE</span><span class="big-p" id="blP"></span></div>
+      <div class="stat"><span class="k">SHUFFLES AS EXTREME (OUT OF 2,000)</span><span class="v num" id="blPerm"></span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · notebook section A</span></div>
+  <aside class="notes">Go through age first: the therapy group is older, and not one of 2,000 shuffles produces a gap that big (bottom panel: the pink line sits far outside the chance distribution). Then menopausal status, which tells the same story. Tumour size, nodes and grade look balanced. Oestrogen receptor also differs. Ask: does a tiny p-value for age mean therapy makes patients older? No: age came first. It means who got therapy depended on age. That's the next slide.</aside>
+</section>
+
+<!-- ============ 7 CONFOUNDING ============ -->
+<section class="slide" id="confounding">
+  <h1>Not a fair comparison: <em>confounding</em>.</h1>
+  <div class="row" style="gap:30px">
+    <div class="col" style="flex:1.3">
+      <svg id="cfSvg" width="660" height="400"></svg>
+    </div>
+    <div class="col" style="flex:1">
+      <p class="small" style="margin-top:0">If older, postmenopausal patients were more likely to get therapy, and age also affects recurrence, then a difference in outcomes between the groups mixes two things: the therapy, and <em>who received it</em>.</p>
+      <div class="card" style="margin-top:14px">
+        <div class="kicker" style="margin:0 0 4px;color:var(--ink2)">In a properly randomized trial</div>
+        <p class="small" style="margin:0">Baseline differences are chance by design, so a baseline p-value only tests the coin. CONSORT advises a baseline table <em>without</em> p-values, and judging imbalance by size, not significance.</p>
+      </div>
+      <p class="small" style="margin-top:14px">How to adjust for it: regression (Day 2), design and survival analysis (Day 3).</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Discussion questions 1 and 2 · preview of Day 3</span></div>
+  <aside class="notes">The arrows build when the slide opens. The solid arrow from menopausal status to therapy is what the data just showed us. The arrow to recurrence is plausible background knowledge, not something we tested. The dashed arrow is the question we actually care about. Discussion question 1: in a truly randomized trial every baseline difference is chance, so testing it answers a question we already know the answer to. What matters is whether an imbalance is big enough to affect outcomes, which is a judgement about size.</aside>
+</section>
+
+<!-- ============ 8 IMPORTANT ============ -->
+<section class="slide" id="important">
+  <h1>Significant is not the same as <em>important</em>.</h1>
+  <div class="controls"><div class="seg" id="impN"><span class="lab">Patients per group</span></div><span style="width:20px"></span><button class="btn" id="impAgain">Run 20 new trials</button></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.3">
+      <svg id="impSvg" width="820" height="440"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <p class="small" style="margin-top:0">Every trial tests a drug that truly shrinks tumours by <b>1 mm</b>: clinically trivial.</p>
+      <div class="stat"><span class="k" style="color:var(--pc2)">SIGNIFICANT (p &lt; 0.05), OF 20</span><span class="v num" id="impSig"></span></div>
+      <div class="stat"><span class="k">MEDIAN p</span><span class="v num" id="impP"></span></div>
+      <div class="stat"><span class="k">TYPICAL 95% CI</span><span class="v num" id="impCI" style="font-size:24px"></span></div>
+      <p class="small" style="margin-top:10px">Report the <em>effect and its CI</em>, not just "p &lt; 0.05".</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · notebook section B · discussion question 3</span></div>
+  <aside class="notes">At 50 per group almost no trial is significant, and the intervals are wide enough to include both "no effect" and "a big effect": inconclusive, not negative. At 50,000 per group every trial is significant with a tiny p-value, but the interval sits entirely inside the "too small to matter" zone. With enough patients, any non-zero effect becomes significant. The effect estimate and its CI tell you whether it matters. The 3 mm threshold is only an example; in practice it comes from clinicians.</aside>
+</section>
+
+<!-- ============ 9 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which conclusions <em>follow</em>?</h1>
+  <p class="lead" style="font-size:21px">Age gives a very small p-value, and so does menopausal status. Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
+  <aside class="notes">Show of hands before each reveal. Statement 2 reverses time: age was measured before treatment. Statement 4 is the misreading from slide 4. Statement 3 is the important one: it's why the baseline check matters at all.</aside>
+</section>
+
+<!-- ============ 10 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>p = 0.03: what does the tutor <em>say</em>?</h1>
+  <div class="row" style="gap:40px;margin-top:8px">
+    <div class="col" style="flex:1.2">
+      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook, a known failure point:</p>
+      <div class="prompt">In a study comparing tumour size between two treatment groups I got p = 0.03. Explain what this p-value means for my conclusions.</div>
+      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
+      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+      <p class="small" style="margin:22px 0 6px">🧮 Calculator check: when Gemini tested every baseline variable in one table, did it use a t-test for numbers and a chi-square test for categories?</p>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">Watch for:</p>
+      <ul class="clean x" style="margin-bottom:14px">
+        <li style="font-size:19px">"3% probability the null is true" or "97% chance the effect is real"</li>
+        <li style="font-size:19px">"the difference is large" or "clinically important"</li>
+        <li style="font-size:19px">no mention of the effect size and its CI</li>
+      </ul>
+      <p class="small" style="margin:0 0 4px">A good answer says:</p>
+      <ul class="clean">
+        <li style="font-size:19px">if there were no difference, a gap this large would be unusual (about 3 in 100)</li>
+        <li style="font-size:19px">report how big the difference is, with its CI</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
+  <aside class="notes">Collect one good and one flawed answer from the room. A common pattern: the definition is right in the first paragraph, and the "practical implications" paragraph then reads p as the probability the finding is real. For the calculator check: a chi-square on age or a t-test on menopausal status would be a silent error. The code runs; the answer is wrong.</aside>
+</section>
+
+<!-- ============ 11 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:40px">
+    <h1 style="font-size:56px">Three things to <em>keep</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:26px 0 40px;max-width:1060px">
+      <li>p = how often chance alone gives a result <em>this extreme</em>, assuming no difference.</li>
+      <li>It is not the probability that there is <em>no difference</em>, and not a measure of <em>size</em>.</li>
+      <li>Always report the <em>effect and its CI</em>; check groups are comparable before comparing outcomes.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">False positives</span>: test 20 things that do nothing. How many come out "significant"?</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
+  <aside class="notes">Bridge to Hands-on 4: on the tail-area slide, p &lt; 0.05 happened in 5% of shuffles, all of them with no real difference. Run many tests and those 5% add up.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const hooks = {};
+const G = DATA.horTh, NA = d3.sum(G), NB = G.length - NA;   // 246 therapy, 440 no therapy
+const TS = DATA.tsize;
+const NULL_TS = permDiffs(TS, NA, 10000);                   // shared null for slides 2–3 (shuffles of tumour size)
+const seTS = Math.sqrt(varS(TS)/NA + varS(TS)/NB);
+
+/* ---- 2 shuffle ---- */
+hooks['shuffle']={init(){
+  const W=880,m={l:110,r:20};const x=d3.scaleLinear().domain([0,120]).range([m.l,W-m.r]);
+  const svg=d3.select('#shSvg');const rowA=40,rowB=125,band=56;
+  const jr=mulberry32(17),jit=TS.map(()=>jr()-.5);
+  svg.append('text').attr('class','lbl purple').attr('x',0).attr('y',rowA+5).text('Group 1 (246)');
+  svg.append('text').attr('class','lbl').attr('x',0).attr('y',rowB+5).text('Group 2 (440)');
+  svg.append('g').attr('transform',`translate(0,${rowB+band/2+8})`).call(g=>axisB(g,x,12)).append('text').attr('class','axlab').attr('x',W-m.r).attr('y',36).attr('text-anchor','end').text('Tumour size (mm)');
+  let lab=shuffled(G);
+  const dots=svg.append('g').selectAll('circle').data(TS).join('circle').attr('r',2.6).attr('cx',(d,i)=>x(d+jit[i]*.9))
+    .attr('cy',(d,i)=>(lab[i]?rowA:rowB)+jit[(i*13)%TS.length]*band).attr('fill',(d,i)=>lab[i]?C.pc2:C.pop).attr('opacity',.75);
+  const mA=svg.append('rect').attr('width',4).attr('height',band+10).attr('rx',2).attr('fill',C.sc1).attr('y',rowA-band/2-5);
+  const mB=svg.append('rect').attr('width',4).attr('height',band+10).attr('rx',2).attr('fill',C.sc1).attr('y',rowB-band/2-5);
+  // null histogram
+  const bot={t:260,b:420};const xd=d3.scaleLinear().domain([-4,4]).range([m.l,W-m.r]);const yd=d3.scaleLinear().range([bot.b,bot.t]);
+  svg.append('text').attr('class','lbl').attr('x',m.l).attr('y',bot.t-14).text('Difference in mean tumour size, group 1 − group 2, after each shuffle');
+  const gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  svg.append('g').attr('transform',`translate(0,${bot.b})`).call(g=>axisB(g,xd,8)).append('text').attr('class','axlab').attr('x',W-m.r).attr('y',36).attr('text-anchor','end').text('mm');
+  svg.append('line').attr('x1',xd(0)).attr('x2',xd(0)).attr('y1',bot.t).attr('y2',bot.b).attr('stroke',C.pc1).attr('stroke-dasharray','5 4').attr('stroke-width',1.5);
+  const bars=svg.append('g');const drops=svg.append('g');
+  let diffs=[];
+  function means(){let sa=0,sb=0;TS.forEach((v,i)=>{if(lab[i])sa+=v;else sb+=v});return[sa/NA,sb/NB]}
+  function render(dur=250){
+    const bins=d3.bin().domain([-4,4]).thresholds(d3.range(-4,4,0.2))(diffs);
+    yd.domain([0,Math.max(5,d3.max(bins,b=>b.length))]).nice();axisL(gy.transition().duration(dur),yd,4,W-m.l-m.r);
+    bars.selectAll('path').data(bins).join('path').attr('fill',C.pop)
+      .on('mousemove',(ev,b)=>showTip(ev,`${fmt1(b.x0)} to ${fmt1(b.x1)} mm: <b>${b.length}</b> shuffles`)).on('mouseleave',hideTip)
+      .transition().duration(dur).attr('d',b=>barPath(xd(b.x0)+.6,xd(b.x1)-.6,yd(0),yd(b.length),2));
+    document.getElementById('shCount').textContent=d3.format(',')(diffs.length);
+    if(diffs.length>=40){const s=Float64Array.from(diffs).sort();document.getElementById('shRange').innerHTML=`${fmt1(d3.quantileSorted(s,.025))} to +${fmt1(d3.quantileSorted(s,.975))} <small>mm</small>`}else document.getElementById('shRange').textContent='–';
+  }
+  function placeMeans(dur){const[a,b]=means();mA.transition().duration(dur).attr('x',x(a)-2);mB.transition().duration(dur).attr('x',x(b)-2);return a-b}
+  placeMeans(0);
+  function one(){
+    lab=shuffled(G);
+    dots.transition().duration(700).ease(d3.easeCubicInOut).attr('cy',(d,i)=>(lab[i]?rowA:rowB)+jit[(i*13)%TS.length]*band).attr('fill',(d,i)=>lab[i]?C.pc2:C.pop);
+    const d=placeMeans(700);
+    document.getElementById('shLast').innerHTML=`${d>=0?'+':''}${fmt2(d)} <small>mm</small>`;
+    drops.append('circle').attr('cx',xd(d)).attr('cy',bot.t-30).attr('r',6).attr('fill',C.sc1).transition().delay(700).duration(500).ease(d3.easeBounceOut).attr('cy',yd(0)-6).attr('r',4).on('end',function(){d3.select(this).remove();diffs.push(d);render()});
+  }
+  let timer=null;const stop=()=>{if(timer){timer.stop();timer=null}};
+  document.getElementById('shOne').onclick=()=>{stop();one()};
+  document.getElementById('shHundred').onclick=()=>{stop();for(const v of permDiffs(TS,NA,100))diffs.push(v);render(500)};
+  document.getElementById('shAll').onclick=()=>{stop();timer=d3.interval(()=>{const k=Math.min(250,5000-diffs.length);for(const v of permDiffs(TS,NA,k))diffs.push(v);render(120);if(diffs.length>=5000)stop()},130)};
+  document.getElementById('shReset').onclick=()=>{stop();diffs=[];render(300);document.getElementById('shLast').textContent='–'};
+  render(0);this.stop=stop;
+},leave(){this.stop&&this.stop()}};
+
+/* ---- 3 tail ---- */
+hooks['tail']={init(){
+  const W=880,H=440,m={l:56,r:20,t:30,b:50};
+  const svg=d3.select('#tailSvg');
+  const x=d3.scaleLinear().domain([-4.5,4.5]).range([m.l,W-m.r]);const y=d3.scaleLinear().range([H-m.b,m.t]);
+  const bins=d3.bin().domain([-4.5,4.5]).thresholds(d3.range(-4.5,4.5,0.15))(NULL_TS);
+  y.domain([0,d3.max(bins,b=>b.length)]).nice();
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,9));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Difference in mean tumour size between two shuffled groups (mm)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Number of shuffles (of 10,000)');
+  const bars=svg.append('g').selectAll('path').data(bins).join('path').attr('d',b=>barPath(x(b.x0)+.5,x(b.x1)-.5,y(0),y(b.length),2))
+    .on('mousemove',(ev,b)=>showTip(ev,`${fmt2(b.x0)} to ${fmt2(b.x1)} mm: <b>${b.length}</b>`)).on('mouseleave',hideTip);
+  const lines=[svg.append('line'),svg.append('line')].map(l=>l.attr('stroke',C.sc1).attr('stroke-width',2.5).attr('y1',m.t-6).attr('y2',H-m.b));
+  const labs=[svg.append('text').attr('class','lbl pink').attr('text-anchor','end'),svg.append('text').attr('class','lbl pink')];
+  const sl=document.getElementById('tailSlider');
+  function draw(){
+    const d=+sl.value;let c=0;for(const v of NULL_TS)if(Math.abs(v)>=d-1e-9)c++;const p=c/NULL_TS.length;
+    bars.attr('fill',b=>(b.x1<=-d+1e-9||b.x0>=d-1e-9)?C.sc1:C.popL);
+    lines[0].attr('x1',x(-d)).attr('x2',x(-d));lines[1].attr('x1',x(d)).attr('x2',x(d));
+    labs[0].attr('x',x(-d)-6).attr('y',m.t+6).text(`−${fmt1(d)}`);labs[1].attr('x',x(d)+6).attr('y',m.t+6).text(`+${fmt1(d)}`);
+    const tp=tTwoSided(d/seTS,NA+NB-2);
+    document.getElementById('tailD').textContent=`${fmt1(d)} mm`;
+    document.getElementById('tailCount').innerHTML=`${d3.format(',')(c)} <small>of 10,000</small>`;
+    document.getElementById('tailPerm').textContent=p===0?'< 0.0001':fmtP(p);
+    document.getElementById('tailT').textContent=fmtP(tp);
+    document.getElementById('tailMsg').innerHTML=p<0.05?`Chance alone gives a gap this big less than 1 time in 20: <b>"significant"</b> at 0.05.`:`Chance alone gives a gap this big about 1 time in ${Math.max(1,Math.round(1/Math.max(p,1e-4)))}.`;
+  }
+  sl.oninput=draw;draw();
+}};
+
+/* ---- 6 baseline ---- */
+const BL = {
+  age:{label:'Age',unit:'years',type:'num',dom:[20,82]},
+  menostat:{label:'Menopausal status',type:'cat',cats:[[0,'Pre'],[1,'Post']]},
+  tsize:{label:'Tumour size',unit:'mm',type:'num',dom:[0,120]},
+  pnodes:{label:'Positive nodes',unit:'nodes',type:'num',dom:[0,52]},
+  tgrade:{label:'Tumour grade',type:'cat',cats:[[1,'I'],[2,'II'],[3,'III']]},
+  progrec:{label:'Progesterone rec.',unit:'fmol/l',type:'num',dom:[0,2400]},
+  estrec:{label:'Oestrogen rec.',unit:'fmol/l',type:'num',dom:[0,1150]}
+};
+hooks['baseline']={init(){
+  const W=770,H=300,m={l:120,r:20,t:20,b:44};
+  const svg=d3.select('#blSvg'),ns=d3.select('#blNull');
+  const g=svg.append('g'),gn=ns.append('g');
+  const groups=[[1,'Therapy (246)',C.pc2],[0,'No therapy (440)',C.pop]];
+  function draw(v){
+    const cfg=BL[v],vals=DATA[v];g.selectAll('*').remove();gn.selectAll('*').remove();
+    let pval,permStat,obs,nullStat;
+    if(cfg.type==='num'){
+      const a=vals.filter((_,i)=>G[i]),b=vals.filter((_,i)=>!G[i]),w=welch(a,b),tc=tQuantile(.975,w.df);
+      const x=d3.scaleLinear().domain(cfg.dom).range([m.l,W-m.r]);const rows=[90,200];
+      g.append('g').attr('transform',`translate(0,${H-m.b})`).call(gg=>axisB(gg,x,8));
+      g.append('text').attr('class','axlab').attr('x',W-m.r).attr('y',H-8).attr('text-anchor','end').text(`${cfg.label} (${cfg.unit})`);
+      const jr=mulberry32(5);
+      groups.forEach(([code,lab,col],k)=>{const vv=vals.filter((_,i)=>G[i]===code);
+        g.append('text').attr('class','lbl').attr('x',0).attr('y',rows[k]+5).attr('fill',code?C.pc2:C.ink2).text(lab);
+        g.append('g').selectAll('circle').data(vv).join('circle').attr('r',2.4).attr('fill',col).attr('opacity',.6).attr('cx',d=>x(d)).attr('cy',()=>rows[k]+(jr()-.5)*70);
+        const mv=mean(vv);g.append('rect').attr('x',x(mv)-2).attr('width',4).attr('y',rows[k]-44).attr('height',88).attr('rx',2).attr('fill',C.sc1);
+        g.append('text').attr('class','lbl pink').attr('x',x(mv)+8).attr('y',rows[k]-34).text(`mean ${fmt1(mv)}`);});
+      document.getElementById('blDiffK').textContent='DIFFERENCE IN MEANS (THERAPY − NONE)';
+      document.getElementById('blDiff').innerHTML=`${w.diff>=0?'+':''}${fmt1(w.diff)} <small>${cfg.unit}, 95% CI [${fmt1(w.diff-tc*w.se)}, ${fmt1(w.diff+tc*w.se)}]</small>`;
+      document.getElementById('blTestK').textContent='TEST (NUMBERS)';document.getElementById('blTest').textContent='Welch t-test';
+      pval=w.p;obs=w.diff;nullStat=permDiffs(vals,NA,2000);permStat='diff';
+    }else{
+      const ct=chi2Table(G,vals);const x=d3.scaleBand().domain(cfg.cats.map(c=>c[1])).range([m.l,W-m.r]).padding(0.3);
+      const y=d3.scaleLinear().domain([0,100]).range([H-m.b,m.t]);
+      g.append('g').attr('transform',`translate(${m.l},0)`).call(gg=>axisL(gg,y,5,W-m.l-m.r)).call(gg=>gg.selectAll('.tick text').text(d=>d+'%'));
+      g.append('g').attr('transform',`translate(0,${H-m.b})`).call(gg=>gg.call(d3.axisBottom(x).tickSize(0).tickPadding(10)).attr('class','axis'));
+      g.append('text').attr('class','axlab').attr('x',W-m.r).attr('y',H-4).attr('text-anchor','end').text(cfg.label);
+      const xi=d3.scaleBand().domain([1,0]).range([0,x.bandwidth()]).padding(0.08);
+      cfg.cats.forEach(([code,name],j)=>{groups.forEach(([gc,lab,col])=>{
+        const pct=100*ct.O[gc][ct.cats.indexOf(code)]/ct.rs[gc];
+        g.append('path').attr('fill',col).attr('d',barPath(x(name)+xi(gc),x(name)+xi(gc)+xi.bandwidth(),y(0),y(pct),4))
+          .on('mousemove',ev=>showTip(ev,`${lab}: <b>${fmt1(pct)}%</b> ${name}`)).on('mouseleave',hideTip);
+        g.append('text').attr('class','lbl').attr('text-anchor','middle').attr('x',x(name)+xi(gc)+xi.bandwidth()/2).attr('y',y(pct)-6).text(`${Math.round(pct)}%`);})});
+      const lg=g.append('g').attr('transform',`translate(${m.l+10},${m.t+4})`);
+      groups.forEach(([gc,lab,col],k)=>{lg.append('rect').attr('x',k*190).attr('width',12).attr('height',12).attr('rx',2).attr('fill',col);lg.append('text').attr('class','lbl').attr('x',k*190+18).attr('y',11).text(lab)});
+      const c0=cfg.cats[cfg.cats.length-1];
+      const pctA=100*ct.O[1][ct.cats.indexOf(c0[0])]/ct.rs[1],pctB=100*ct.O[0][ct.cats.indexOf(c0[0])]/ct.rs[0];
+      document.getElementById('blDiffK').textContent=`SHARE "${c0[1]}" (THERAPY vs NONE)`;
+      document.getElementById('blDiff').innerHTML=`${fmt1(pctA)}% <small>vs</small> ${fmt1(pctB)}%`;
+      document.getElementById('blTestK').textContent='TEST (CATEGORIES)';document.getElementById('blTest').textContent=`Chi-square, ${ct.df} df`;
+      pval=ct.p;obs=ct.stat;permStat='chi';
+      nullStat=new Float64Array(2000);for(let k=0;k<2000;k++)nullStat[k]=chi2Table(shuffled(G),vals).stat;
+    }
+    document.getElementById('blP').textContent=fmtP(pval);
+    // null panel
+    let c=0;for(const s of nullStat)if(permStat==='diff'?Math.abs(s)>=Math.abs(obs):s>=obs)c++;
+    document.getElementById('blPerm').innerHTML=`${c} <small>of 2,000</small>`;
+    const NW=770,NH=150,nm={l:120,r:20,t:24,b:30};
+    const ext=d3.extent([...nullStat,obs,permStat==='diff'?-Math.abs(obs):0]);const pad=(ext[1]-ext[0])*0.05;
+    const xn=d3.scaleLinear().domain([ext[0]-pad,ext[1]+pad]).range([nm.l,NW-nm.r]);
+    const nb=d3.bin().domain(xn.domain()).thresholds(40)(nullStat);const yn=d3.scaleLinear().domain([0,d3.max(nb,b=>b.length)]).range([NH-nm.b,nm.t]);
+    gn.append('text').attr('class','lbl').attr('x',0).attr('y',(NH-nm.b+nm.t)/2).text('2,000 shuffles');
+    gn.append('text').attr('class','tiny').attr('x',0).attr('y',(NH-nm.b+nm.t)/2+18).attr('fill',C.muted).style('font-size','13px').text(permStat==='diff'?'difference in means':'chi-square statistic');
+    gn.append('g').selectAll('path').data(nb).join('path').attr('fill',C.popL).attr('d',b=>barPath(xn(b.x0)+.5,xn(b.x1)-.5,yn(0),yn(b.length),2));
+    gn.append('g').attr('transform',`translate(0,${NH-nm.b})`).call(gg=>axisB(gg,xn,8));
+    gn.append('line').attr('x1',xn(obs)).attr('x2',xn(obs)).attr('y1',nm.t-12).attr('y2',NH-nm.b).attr('stroke',C.sc1).attr('stroke-width',2.5);
+    gn.append('text').attr('class','lbl pink').attr('x',xn(obs)+(xn(obs)>NW-150?-6:6)).attr('text-anchor',xn(obs)>NW-150?'end':'start').attr('y',nm.t-2).text('observed');
+  }
+  segButtons('blVar',Object.entries(BL).map(([k,v])=>[k,v.label]),'age',draw);draw('age');
+}};
+
+/* ---- 7 confounding ---- */
+hooks['confounding']={init(){
+  const svg=d3.select('#cfSvg');
+  const post=[1,0].map(gc=>{let n=0,t=0;DATA.menostat.forEach((v,i)=>{if(G[i]===gc){t++;n+=v}});return 100*n/t});
+  const defs=svg.append('defs');
+  [['arP',C.pc2],['arK',C.pc1],['arG',C.muted]].forEach(([id,col])=>defs.append('marker').attr('id',id).attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',8).attr('markerHeight',8).attr('orient','auto-start-reverse').append('path').attr('d','M0,0L10,5L0,10z').attr('fill',col));
+  const node=(x,y,w,t1,t2,col)=>{const g=svg.append('g').attr('transform',`translate(${x},${y})`);g.append('rect').attr('x',-w/2).attr('y',-34).attr('width',w).attr('height',68).attr('rx',14).attr('fill','#fff').attr('stroke',col).attr('stroke-width',2);
+    g.append('text').attr('class','lbl').attr('text-anchor','middle').attr('y',-4).style('font-size','19px').text(t1);g.append('text').attr('class','lbl').attr('text-anchor','middle').attr('y',18).attr('fill',C.ink2).style('font-size','14px').text(t2);};
+  node(330,60,300,'Age / menopausal status','came first',C.pc1);
+  node(120,320,210,'Hormonal therapy','who received it',C.pc2);
+  node(540,320,200,'Recurrence','the outcome',C.pc1);
+  const arrows=[
+    {d:'M265,96 L150,284',m:'arP',col:C.pc2,dash:null,lab:`${Math.round(post[0])}% vs ${Math.round(post[1])}%`,lab2:'postmenopausal',lx:190,ly:170,lc:C.pc2,anchor:'end'},
+    {d:'M395,96 L510,284',m:'arK',col:C.pc1,dash:null,lab:'plausible (prior knowledge)',lx:470,ly:178,lc:C.ink2},
+    {d:'M228,320 L436,320',m:'arG',col:C.muted,dash:'7 6',lab:'the question we care about',lx:332,ly:308,lc:C.muted}];
+  this.arrows=arrows.map(a=>{const p=svg.append('path').attr('d',a.d).attr('fill','none').attr('stroke',a.col).attr('stroke-width',2.5).attr('marker-end',`url(#${a.m})`);
+    const t=svg.append('text').attr('class','lbl').attr('x',a.lx).attr('y',a.ly).style('fill',a.lc).attr('text-anchor',a.anchor||(a.lx===332?'middle':'start')).attr('opacity',0);
+    t.append('tspan').attr('x',a.lx).text(a.lab);if(a.lab2)t.append('tspan').attr('x',a.lx).attr('dy',19).text(a.lab2);
+    svg.append('text').attr('class','lbl').attr('x',332).attr('y',348).attr('text-anchor','middle').attr('fill',C.muted).style('font-size','26px').text(a.lx===332?'?':'');
+    return{p,t,dash:a.dash}});
+  this.enter();
+},enter(){(this.arrows||[]).forEach((a,i)=>{const L=a.p.node().getTotalLength();a.p.interrupt().attr('stroke-dasharray',`${L} ${L}`).attr('stroke-dashoffset',L)
+  .transition().delay(300+i*700).duration(700).attr('stroke-dashoffset',0).on('end',function(){if(a.dash)d3.select(this).attr('stroke-dasharray',a.dash)});
+  a.t.interrupt().attr('opacity',0).transition().delay(800+i*700).duration(400).attr('opacity',1)})}};
+
+/* ---- 8 important ---- */
+hooks['important']={init(){
+  let n=50;const K=20,eff=1,sd=SIGMA_TS(),W=820,H=440,m={l:40,r:20,t:30,b:50},zone=3;
+  const svg=d3.select('#impSvg');
+  const x=d3.scaleLinear().domain([-12,14]).range([m.l,W-m.r]);
+  svg.append('defs').append('clipPath').attr('id','impClip').append('rect').attr('x',m.l).attr('y',0).attr('width',W-m.l-m.r).attr('height',H);
+  svg.append('rect').attr('x',x(-zone)).attr('width',x(zone)-x(-zone)).attr('y',m.t).attr('height',H-m.b-m.t).attr('fill',C.sc3).attr('opacity',.25);
+  svg.append('text').attr('class','lbl pink').attr('x',x(0)).attr('y',m.t-10).attr('text-anchor','middle').text('too small to matter (example: under 3 mm)');
+  svg.append('line').attr('x1',x(0)).attr('x2',x(0)).attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-width',1.5);
+  svg.append('line').attr('x1',x(eff)).attr('x2',x(eff)).attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl').attr('x',x(eff)+6).attr('y',H-m.b-8).text('true effect 1 mm');
+  svg.append('text').attr('class','lbl').attr('x',x(0)-6).attr('y',H-m.b-8).attr('text-anchor','end').text('no effect');
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,13));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Estimated tumour shrinkage with 95% CI (mm)');
+  const g=svg.append('g').attr('clip-path','url(#impClip)');
+  const yr=d3.scaleBand().domain(d3.range(K)).range([m.t+8,H-m.b-26]).padding(0.35);
+  function draw(){
+    const se=sd*Math.sqrt(2/n),df=2*n-2,tc=tQuantile(.975,df);
+    const data=d3.range(K).map(i=>{const est=eff+se*randn();const sehat=se*Math.sqrt(1+randn()/Math.sqrt(n)*0.7);const p=tTwoSided(Math.abs(est/sehat),df);return{i,est,lo:est-tc*sehat,hi:est+tc*sehat,p}});
+    g.selectAll('g.tr').data(data,d=>d.i).join(e=>{const q=e.append('g').attr('class','tr');q.append('line').attr('stroke-linecap','round');q.append('circle').attr('r',5).attr('stroke','#fff').attr('stroke-width',1.5);return q})
+      .on('mousemove',(ev,d)=>showTip(ev,`estimate ${fmt2(d.est)} mm, CI [${fmt2(d.lo)}, ${fmt2(d.hi)}], p = ${fmtP(d.p)}`)).on('mouseleave',hideTip)
+      .each(function(d){const q=d3.select(this),yy=yr(d.i)+yr.bandwidth()/2,col=d.p<0.05?C.pc2:C.pop;
+        q.select('line').transition().duration(500).attr('x1',x(d.lo)).attr('x2',x(d.hi)).attr('y1',yy).attr('y2',yy).attr('stroke',col).attr('stroke-width',d.p<0.05?3:2.5);
+        q.select('circle').transition().duration(500).attr('cx',x(d.est)).attr('cy',yy).attr('fill',col)});
+    const sig=data.filter(d=>d.p<0.05).length;
+    document.getElementById('impSig').innerHTML=`${sig} <small>of 20</small>`;
+    document.getElementById('impP').textContent=fmtP(d3.median(data,d=>d.p));
+    document.getElementById('impCI').textContent=`1 ± ${fmt2(tc*se)} mm`;
+  }
+  segButtons('impN',[[50,'50'],[500,'500'],[5000,'5,000'],[50000,'50,000']],n,v=>{n=v;draw()});
+  document.getElementById('impAgain').onclick=draw;draw();
+}};
+function SIGMA_TS(){return Math.sqrt(varS(TS))}
+
+/* ---- 9 statements ---- */
+hooks['statements']={init(){qcards('qcards',[
+  [true,'The groups differ in age by more than chance alone would easily produce.','Correct. That is exactly what a small p-value says.'],
+  [false,'Hormonal therapy causes patients to be older.','Reverses time: age was there before treatment. More likely, who received therapy depended on age or menopausal status.'],
+  [true,'Comparing outcomes between these groups could be misleading.','Correct. Baseline differences can produce outcome differences on their own: confounding (Day 3).'],
+  [false,'There is a less than 0.1% probability that the groups have the same mean age.','The most common misreading. p is calculated assuming equal means; it cannot also be the probability of that assumption.']])}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>
