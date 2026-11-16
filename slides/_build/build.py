@@ -24,6 +24,8 @@ for src in sorted(HERE.glob("*.src.html")):
             .replace("/*D3*/", d3).replace("__DATA__", data)
             .replace("__LOGO_NEG__", logo("logo_neg.png"))
             .replace("__LOGO_POS__", logo("logo_pos.png")))
+    # extra datasets: __JSON:name__ inlines name.json from this folder (e.g. __JSON:lung__)
+    html = re.sub(r"__JSON:(\w+)__", lambda m: json.dumps(json.loads((HERE / f"{m.group(1)}.json").read_text()), separators=(",", ":")), html)
     out = HERE.parent / day / f"{name}.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")

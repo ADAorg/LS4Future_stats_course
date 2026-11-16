@@ -10,6 +10,7 @@ self-contained deck in `../dayN/` (one HTML file, works offline, safe to email o
 | `shared/deck.js` | Shared engine: navigation, speaker notes, tooltips, simulation helpers, `startDeck(hooks)` | `/*DECKJS*/` |
 | `shared/gbsg2.js` | GBSG2 variables and population summaries (Day 1 decks) | `/*GBSG2*/` |
 | `gbsg2.json` | `tsize`, `age`, `pnodes` from GBSG2 (lifelines) | `__DATA__` |
+| `lung.json` | NCCTG lung cancer data (lifelines): pat_karno, ecog, age, sex, wt_loss, time, status | `__JSON:lung__` |
 | `d3.min.js` | d3 v7.9 (ISC licence) | `/*D3*/` |
 | `logo_neg.png`, `logo_pos.png` | Downsized copies of the official GIMM logos | `__LOGO_NEG__`, `__LOGO_POS__` |
 

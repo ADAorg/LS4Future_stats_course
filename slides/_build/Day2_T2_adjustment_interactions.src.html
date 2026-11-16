@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 2 · Adjustment and interactions</title>
+<style>/*CSS*/</style>
+<style>
+.steps{display:flex;gap:8px;align-items:center;margin:4px 0 10px}
+.steps .dot{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--pc1);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--pc1);cursor:pointer;transition:all .2s}
+.steps .dot.on{background:var(--pc2);border-color:var(--pc2);color:#fff}
+.steps .dot.done{background:var(--line);border-color:var(--line)}
+.stepbox{min-height:210px}
+.stepbox h3{font-weight:400;font-size:24px;margin:0 0 8px;color:var(--pc2)}
+.stepbox p{font-size:19px;line-height:1.5;margin:0 0 10px;color:var(--ink)}
+.eq2{font-size:24px;line-height:1.6;font-variant-numeric:tabular-nums}
+.eq2 .a{color:var(--ink2)} .eq2 .b{color:var(--pc2)} .eq2 .c{color:var(--sc1)}
+.ttab{border-collapse:collapse;font-size:18px;font-variant-numeric:tabular-nums;width:100%}
+.ttab th{font-weight:400;font-size:13px;letter-spacing:.06em;color:var(--muted);text-align:left;padding:5px 10px;border-bottom:1px solid var(--line)}
+.ttab td{padding:7px 10px;border-bottom:1px solid var(--line)}
+.sentence{font-size:20px;line-height:1.5;background:var(--wash);border-radius:12px;padding:12px 16px}
+.toggle-q{font-size:17px;color:var(--ink2);margin:10px 0 4px}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">Adjustment and <em>interactions</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:800px;margin:0">What "adjusted for age" really means, and how to ask whether an effect is different in different people.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 2 · Topic 2 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">This is the hardest topic of the workshop, so we go slowly and build it from one picture. Two ideas: adjustment (comparing like with like) and interaction (an effect that depends on something else). Plan: a real puzzle from GBSG2, then a simulated world where we know the truth, step by step.</aside>
+</section>
+
+<!-- ============ 2 PUZZLE ============ -->
+<section class="slide" id="puzzle">
+  <h1>Grade III tumours are bigger. But <em>why</em>?</h1>
+  <div class="steps" id="pzSteps"></div>
+  <div class="row" style="gap:20px">
+    <div class="col" style="flex:1"><svg id="pz1" width="360" height="330"></svg></div>
+    <div class="col" style="flex:1"><svg id="pz2" width="360" height="330"></svg></div>
+    <div class="col" style="flex:1"><svg id="pz3" width="360" height="330"></svg></div>
+  </div>
+  <div class="card" id="pzQ" style="margin-top:6px;opacity:0;transition:opacity .5s"><span style="font-size:22px">So how much of the extra tumour size in grade III is <em>grade</em>, and how much is just <em>having more nodes</em>?</span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The puzzle · GBSG2</span></div>
+  <aside class="notes">Click through the steps (or use the numbered dots). Step 1 is yesterday's model: grade III tumours are about 5 mm larger than grade I. Step 2: grade III patients also have more positive nodes. Step 3: patients with more nodes have larger tumours, whatever their grade. So part of the 5 mm may just be "more nodes". The question on the card is what adjustment answers. Real data never tell us the true answer, so next we build a world where we know it.</aside>
+</section>
+
+<!-- ============ 3 STEP BY STEP ============ -->
+<section class="slide" id="stepwise">
+  <h1>A world where we know the <em>truth</em>.</h1>
+  <div class="steps" id="swSteps"></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.1"><svg id="swSvg" width="780" height="440"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stepbox" id="swText"></div>
+      <div class="stat"><span class="k">TRUE EFFECT OF GENOTYPE BB (BUILT INTO THE WORLD)</span><span class="v num">+8.0</span></div>
+      <div class="stat"><span class="k" id="swK">ESTIMATE</span><span class="v num" id="swV">–</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · what adjustment does</span></div>
+  <aside class="notes">This is the simulated dataset from the notebook, rebuilt in the page: 300 people, a biomarker that rises with age, and genotype BB adds exactly 8 units. The twist: BB carriers in this sample happen to be about 8 years older. Step 1: compare the two averages, you get about 13, too big. Step 2: BB carriers are older. Step 3: older people have higher values, so part of the 13 is age. Step 4: fit two parallel lines (one model: biomarker ~ genotype + age) and measure the gap between them at the same age. That gap is the adjusted effect, close to 8. Take your time on step 4: "adjusted for age" means "compared at the same age".</aside>
+</section>
+
+<!-- ============ 4 STRATA ============ -->
+<section class="slide" id="strata">
+  <h1>Adjusting = comparing <em>like with like</em>.</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.1"><svg id="stSvg" width="780" height="460"></svg></div>
+    <div class="col" style="flex:1;padding-top:6px">
+      <p class="small" style="margin-top:0">Another way to see it: split people into <b>age bands</b> and compare BB with AA <em>within</em> each band.</p>
+      <p class="small">Inside every band, the difference is close to the truth. Pooling everyone together is what inflates it.</p>
+      <p class="small">The regression does this in one step, without cutting age into bands: it compares groups <em>at every age at once</em>.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · the same idea, without equations</span></div>
+  <aside class="notes">Each purple dot is the BB − AA difference within one age band, with its 95% CI. They scatter around 8 (the truth), not around the crude 13. This is how epidemiologists adjusted before regression was easy: stratify, compare within strata, then combine. The regression's adjusted estimate is essentially a weighted average of those within-band comparisons. Bands are coarse; the model uses age exactly.</aside>
+</section>
+
+<!-- ============ 5 RECIPE ============ -->
+<section class="slide" id="recipe">
+  <h1>When does adjusting <em>change</em> the answer?</h1>
+  <div class="row" style="gap:28px">
+    <div class="col" style="flex:1.05">
+      <p class="toggle-q">Are BB carriers older than AA carriers in this sample?</p>
+      <div class="controls"><div class="seg" id="rcA"></div></div>
+      <p class="toggle-q">Does age affect the biomarker?</p>
+      <div class="controls"><div class="seg" id="rcB"></div></div>
+      <svg id="rcDiag" width="520" height="250" style="margin-top:6px"></svg>
+    </div>
+    <div class="col" style="flex:1">
+      <svg id="rcSvg" width="520" height="330"></svg>
+      <p class="small" id="rcMsg" style="margin-top:6px"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · the recipe for a confounder</span></div>
+  <aside class="notes">Flip the two switches. Each combination rebuilds the world (2,000 people) and fits both models. Only when age is linked to the group AND to the outcome do crude and adjusted disagree. If BB carriers aren't older, adjusting changes nothing (but costs nothing either). If age doesn't matter for the biomarker, being older changes nothing. Both arrows: confounding. This is the concept-check sentence in the notebook.</aside>
+</section>
+
+<!-- ============ 6 MEDIATOR ============ -->
+<section class="slide" id="mediator">
+  <h1>So adjust for everything? <em>No</em>.</h1>
+  <div class="row" style="gap:30px">
+    <div class="col">
+      <svg id="mdA" width="540" height="260"></svg>
+      <div class="card" style="margin-top:6px"><div class="kicker" style="margin:0 0 4px;color:var(--pc2)">Confounder: adjust</div><p class="small" style="margin:0">Age is linked to who is in the group and to the outcome, but it isn't caused by the group. Adjusting removes a false part of the difference.</p></div>
+    </div>
+    <div class="col">
+      <svg id="mdB" width="540" height="260"></svg>
+      <div class="card" style="margin-top:6px"><div class="kicker" style="margin:0 0 4px;color:var(--sc1)">Mediator: don't adjust (for the total effect)</div><p class="small" style="margin:0">The drug lowers blood pressure, which prevents strokes. Adjusting for blood pressure compares patients with the <em>same</em> pressure, hiding the very route by which the drug works.</p></div>
+    </div>
+  </div>
+  <p class="small" style="margin-top:14px">The data can't tell these apart: both are "related to group and outcome". Only knowledge of the biology, and of what happened <em>first</em>, can.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · discussion question 1</span></div>
+  <aside class="notes">This is the limit of statistics alone. A confounder sits before both the group and the outcome. A mediator sits between them, on the causal path. Adjusting for a mediator answers a different question ("does the drug work through some route other than blood pressure?"), which can be interesting but isn't the total effect. Ask the room for one confounder and one mediator from their own work.</aside>
+</section>
+
+<!-- ============ 7 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on 2: <em>adjust, then interact</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day2_HO2_multiple_regression_interactions.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">DATASET</p>
+        <p style="margin:0 0 22px;font-size:22px;color:rgba(255,255,255,.85)">Same as this morning (<b>gbsg2</b> or <b>lung</b>), then <b>simulated</b>.</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTION B</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">Switch <code>model</code> between "additive" and "interaction" and compare the plots.</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">When you adjust for the numeric predictor, will the group coefficients <em>grow</em>, <em>shrink</em> or <em>stay the same</em>?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">THEN EXPLAIN IT</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">The notebook prints the predictor's average in each group. Use it.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
+  <aside class="notes">The answer differs by dataset, which is the point of the debrief: GBSG2 shrinks, lung barely moves, simulated shrinks towards the truth. The AI prompt is a known failure point (causal language), generated from each pair's own adjusted model.</aside>
+</section>
+
+<!-- ============ 8 ROOM ADJUST ============ -->
+<section class="slide" id="adjusted">
+  <h1>What happened in <em>your</em> dataset?</h1>
+  <div class="controls"><div class="seg" id="adDs"><span class="lab">Dataset</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.5"><svg id="adSvg" width="660" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <table class="ttab" id="adWhy"></table>
+      <div class="sentence" id="adSent" style="margin-top:12px"></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section A · concept check</span></div>
+  <aside class="notes">Start with the dataset most pairs used. GBSG2: adjusting for nodes roughly halves the grade III difference, because node count rises with grade and nodes go with bigger tumours. Lung: adjusting for age changes almost nothing, because age is barely related to the Karnofsky score: one of the two conditions is missing. Simulated: the estimate moves from about 13 towards the true 8. The sentence at the bottom is the concept check, filled in from the data.</aside>
+</section>
+
+<!-- ============ 9 INTERACTION INTRO ============ -->
+<section class="slide" id="interaction-idea">
+  <h1>Interaction: does the slope <em>depend</em> on the group?</h1>
+  <div class="row" style="gap:28px">
+    <div class="col">
+      <svg id="iiA" width="540" height="300"></svg>
+      <div class="eq2" style="margin-top:4px"><span class="a">biomarker</span> = <span class="b">b₀</span> + <span class="b">b₁</span>·age + <span class="b">b₂</span>·male</div>
+      <p class="small" style="margin:4px 0 0"><b>Additive:</b> one slope for everyone; men are shifted up or down by b₂. <em>Parallel lines.</em></p>
+    </div>
+    <div class="col">
+      <svg id="iiB" width="540" height="300"></svg>
+      <div class="eq2" style="margin-top:4px"><span class="a">biomarker</span> = <span class="b">b₀</span> + <span class="b">b₁</span>·age + <span class="b">b₂</span>·male + <span class="c">b₃</span>·age·male</div>
+      <p class="small" style="margin:4px 0 0"><b>Interaction:</b> women's slope is b₁, men's slope is b₁ + <span style="color:var(--sc1)">b₃</span>. <em>Fanning lines.</em></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section B · the idea</span></div>
+  <aside class="notes">A cartoon of the two models before we look at data. The extra term age·male is zero for women, so their slope is b₁; for men it adds b₃ per year, so their slope is b₁ + b₃. The interaction coefficient is the difference in slopes. Clinical translation: "does the drug work better in men?" is an interaction question: drug × sex.</aside>
+</section>
+
+<!-- ============ 10 INTERACTION DATA ============ -->
+<section class="slide" id="interaction">
+  <h1>Parallel or <em>fanning</em>? Your data.</h1>
+  <div class="controls">
+    <div class="seg" id="inDs"><span class="lab">Dataset</span></div><span style="width:14px"></span>
+    <div class="seg" id="inM"><span class="lab">Model</span></div>
+  </div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2"><svg id="inSvg" width="760" height="420"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stat"><span class="k" id="inK1"></span><span class="v num" id="inS1"></span></div>
+      <div class="stat"><span class="k" id="inK2"></span><span class="v num" id="inS2"></span></div>
+      <div class="stat"><span class="k" style="color:var(--sc1)">INTERACTION = DIFFERENCE IN SLOPES</span><span class="v num" id="inI" style="font-size:24px"></span></div>
+      <p class="small" id="inMsg" style="margin-top:8px"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section B · concept check</span></div>
+  <aside class="notes">Simulated first: the interaction model recovers slopes near the true 0.4 and 0.7, and the interaction (their difference) near 0.3. Then the real datasets: the lines fan a little, but the interaction CI includes zero. Concept check 2: a large interaction p-value does not show the slopes are equal; look at how wide the interval is. Interactions need much larger samples than main effects, which is why trials that "find" a subgroup effect in a small sample are usually wrong. Discussion: include an interaction before seeing the data only when there's a prior reason (biology, earlier studies).</aside>
+</section>
+
+<!-- ============ 11 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which statements are <em>correct</em>?</h1>
+  <p class="lead" style="font-size:21px">GBSG2: tumour size ~ grade + positive nodes. Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
+  <aside class="notes">Statement 1 is the one-sentence version of "holding the others constant" (discussion question 3). Statement 3 is the mediator slide. Statement 4 is the interaction concept check.</aside>
+</section>
+
+<!-- ============ 12 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>"Associated with", not "<em>causes</em>".</h1>
+  <div class="row" style="gap:36px;margin-top:6px">
+    <div class="col" style="flex:1.2">
+      <p class="small" style="margin:0 0 6px">🎓 The notebook builds this prompt from your adjusted model. With GBSG2:</p>
+      <div class="prompt" id="aiPrompt" style="font-size:16px;white-space:pre-wrap"></div>
+      <div class="chips" style="margin-top:12px"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">Watch for:</p>
+      <ul class="clean x" style="margin-bottom:12px">
+        <li style="font-size:19px"><em>causes</em>, <em>increases</em>, <em>leads to</em>, <em>effect of</em></li>
+        <li style="font-size:19px">"each extra node <em>would</em> make the tumour 0.8 mm larger"</li>
+      </ul>
+      <p class="small" style="margin:0 0 4px">A good answer:</p>
+      <div class="card"><span style="font-size:18px" id="aiGood"></span></div>
+      <p class="small" style="margin:12px 0 0">🧮 Gemini: "Add the group variable from section A to this model as well." Did the formula change as expected? Did the slopes move?</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure point</span></div>
+  <aside class="notes">The prompt even says "observational data", and causal verbs still appear in most answers. Ask pairs to read out their AI's two sentences and count the causal words. "Holding nodes constant" is the phrase that shows the writer understands adjustment.</aside>
+</section>
+
+<!-- ============ 13 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:30px">
+    <h1 style="font-size:56px">Four things to <em>keep</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:22px 0 34px;max-width:1080px">
+      <li style="font-size:27px">"Adjusted for age" = groups compared <em>at the same age</em>.</li>
+      <li style="font-size:27px">Adjusting changes an estimate only if the variable is linked to <em>both</em> group and outcome.</li>
+      <li style="font-size:27px">Adjust for confounders, not mediators: that's <em>biology</em>, not statistics.</li>
+      <li style="font-size:27px">An interaction is a <em>difference in slopes</em>, and needs a lot of data to pin down.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">Model diagnostics</span>: the model makes assumptions. How do you check them?</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
+  <aside class="notes">Bridge to Hands-on 3: everything today relied on straight lines, equal spread and roughly normal residuals. Next we look at how to see when those fail, and what to do.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const LUNG = __JSON:lung__;
+const hooks = {};
+const COL = {ref:C.pop, other:C.pc2, line2:C.sc1};
+
+/* ---------- simulated world (same recipe as the notebook's 'simulated' dataset) ---------- */
+function simWorld(seed=2026,n=300,opt={}){
+  const r=mulberry32(seed),shift=opt.shift??8,sl=opt.slope; // sl: fixed age slope for everyone, or undefined = 0.4 women / 0.7 men
+  const rows=[];
+  for(let i=0;i<n;i++){const u=r();const g=u<.4?'AA':(u<.8?'AB':'BB');const sex=r()<.5?'F':'M';
+    const age=30+50*r()+(g==='BB'?shift:0);const ge={AA:0,AB:3,BB:8}[g];const slope=sl??(sex==='M'?.7:.4);
+    const y=50+slope*(age-50)+ge+6*randn(r);rows.push({g,sex,age,y})}
+  return rows;
+}
+const SIM = simWorld();
+// a generic "dataset" description used by the debrief slides
+const LUNG_ROWS = LUNG.age.map((a,i)=>({age:a,y:LUNG.pat_karno[i],ecog:LUNG.ecog[i]>=2?'2+':String(LUNG.ecog[i]),sex:LUNG.sex[i]===2?'female':'male'})).filter(d=>d.y!=null);
+const DS = {
+  gbsg2:{label:'GBSG2',rows:DATA.tsize.map((v,i)=>({y:v,g:['I','II','III'][DATA.tgrade[i]-1],x:DATA.pnodes[i],g2:DATA.menostat[i]?'Post':'Pre'})),
+    yl:'Tumour size (mm)',gl:'grade',levels:['I','II','III'],xl:'positive nodes',xunit:'nodes',g2l:'menopausal status',g2lev:['Post','Pre']},
+  lung:{label:'Lung',rows:LUNG_ROWS.map(d=>({y:d.y,g:d.ecog,x:d.age,g2:d.sex})),yl:'Patient-rated Karnofsky score',gl:'ECOG',levels:['0','1','2+'],xl:'age',xunit:'years',g2l:'sex',g2lev:['female','male']},
+  sim:{label:'Simulated',rows:SIM.map(d=>({y:d.y,g:d.g,x:d.age,g2:d.sex})),yl:'Biomarker level',gl:'genotype',levels:['AA','AB','BB'],xl:'age',xunit:'years',g2l:'sex',g2lev:['F','M'],
+    truth:{AB:3,BB:8},truthSlopes:{F:.4,M:.7}}
+};
+function crudeAdj(ds){const lev=ds.levels,ref=lev[0],rows=ds.rows;
+  const D=dummies(rows.map(r=>r.g),lev,ref);const y=rows.map(r=>r.y);
+  const crude=ols(D.map(d=>[1,...d]),y),adj=ols(D.map((d,i)=>[1,...d,rows[i].x]),y);return{crude,adj}}
+
+/* ---------- step widget ---------- */
+function stepper(id,n,onStep){const el=document.getElementById(id);let cur=0;const dots=[];
+  const prev=document.createElement('button');prev.className='btn';prev.textContent='‹ Back';
+  const next=document.createElement('button');next.className='btn primary';next.textContent='Next step ›';
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='dot';d.textContent=i+1;d.onclick=()=>go(i);el.appendChild(d);dots.push(d)}
+  el.appendChild(prev);el.appendChild(next);
+  function go(i){cur=Math.max(0,Math.min(n-1,i));dots.forEach((d,k)=>{d.className='dot'+(k===cur?' on':(k<cur?' done':''))});prev.disabled=cur===0;next.disabled=cur===n-1;onStep(cur)}
+  prev.onclick=()=>go(cur-1);next.onclick=()=>go(cur+1);return{go,get cur(){return cur}}}
+
+/* ---- 2 puzzle ---- */
+hooks['puzzle']={init(){
+  const ds=DS.gbsg2,rows=ds.rows,lev=ds.levels;const W=360,H=330,m={l:50,r:14,t:40,b:46};
+  const mk=(id,title)=>{const s=d3.select('#'+id);s.append('text').attr('class','lbl').attr('x',0).attr('y',16).style('font-size','17px').text(title);return s};
+  const p1=mk('pz1','1 · Tumour size by grade'),p2=mk('pz2','2 · Positive nodes by grade'),p3=mk('pz3','3 · Nodes and tumour size');
+  const bars=(s,vals,ymax,unit,col)=>{const x=d3.scaleBand().domain(lev).range([m.l,W-m.r]).padding(.35),y=d3.scaleLinear().domain([0,ymax]).range([H-m.b,m.t]);
+    s.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,4,W-m.l-m.r));
+    s.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>g.call(d3.axisBottom(x).tickFormat(d=>'grade '+d).tickSize(0).tickPadding(8)).attr('class','axis'));
+    lev.forEach((l,i)=>{s.append('path').attr('fill',i===2?col:C.popL).attr('d',barPath(x(l),x(l)+x.bandwidth(),y(0),y(vals[i]),4));
+      s.append('text').attr('class','lbl').attr('text-anchor','middle').attr('x',x(l)+x.bandwidth()/2).attr('y',y(vals[i])-6).text(fmt1(vals[i])+unit)})};
+  const mt=lev.map(l=>mean(rows.filter(r=>r.g===l).map(r=>r.y))),mn=lev.map(l=>mean(rows.filter(r=>r.g===l).map(r=>r.x)));
+  bars(p1,mt,36,' mm',C.pc2);bars(p2,mn,7,'',C.pc2);
+  // scatter nodes vs size
+  const x=d3.scaleLinear().domain([0,52]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,125]).range([H-m.b,m.t]);
+  p3.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,4,W-m.l-m.r));
+  p3.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,5));
+  p3.append('text').attr('class','axlab').attr('x',W-m.r).attr('y',H-8).attr('text-anchor','end').style('font-size','13px').text('positive nodes');
+  p3.append('g').selectAll('circle').data(rows).join('circle').attr('r',2).attr('fill',C.pc2).attr('opacity',.35).attr('cx',d=>x(d.x)).attr('cy',d=>y(d.y));
+  const f=ols(rows.map(r=>[1,r.x]),rows.map(r=>r.y));p3.append('line').attr('x1',x(0)).attr('x2',x(52)).attr('y1',y(f.coef[0].est)).attr('y2',y(f.coef[0].est+52*f.coef[1].est)).attr('stroke',C.sc1).attr('stroke-width',2.5);
+  p3.append('text').attr('class','lbl pink').attr('x',x(20)).attr('y',y(f.coef[0].est+20*f.coef[1].est)-26).style('font-size','14px').text(`+${fmt2(f.coef[1].est)} mm per node`);
+  const panels=[d3.select('#pz1'),d3.select('#pz2'),d3.select('#pz3')];const q=document.getElementById('pzQ');
+  this.st=stepper('pzSteps',4,s=>{panels.forEach((p,i)=>p.transition().duration(400).style('opacity',i<=s?1:.08));q.style.opacity=s>=3?1:0});
+  this.st.go(0);
+},enter(){this.st&&this.st.go(0)}};
+
+/* ---- 3 stepwise ---- */
+hooks['stepwise']={init(){
+  const rows=SIM.filter(d=>d.g!=='AB'),W=780,H=440,m={l:56,r:90,t:20,b:50};
+  const svg=d3.select('#swSvg');
+  const x=d3.scaleLinear().domain([25,92]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([d3.min(rows,d=>d.y)-4,d3.max(rows,d=>d.y)+4]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,6,W-m.l-m.r));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,8));
+  svg.append('text').attr('class','axlab').attr('x',(W-m.r+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Age (years)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Biomarker level');
+  const lg=svg.append('g').attr('transform',`translate(${m.l+10},${m.t+6})`);
+  [['AA',COL.ref],['BB',COL.other]].forEach(([t,c],i)=>{lg.append('circle').attr('cx',i*80).attr('r',6).attr('fill',c);lg.append('text').attr('class','lbl').attr('x',i*80+10).attr('y',5).text(t)});
+  const A=rows.filter(d=>d.g==='AA'),B=rows.filter(d=>d.g==='BB');
+  const mA=mean(A.map(d=>d.y)),mB=mean(B.map(d=>d.y)),aA=mean(A.map(d=>d.age)),aB=mean(B.map(d=>d.age));
+  const fit=ols(rows.map(d=>[1,d.g==='BB'?1:0,d.age]),rows.map(d=>d.y));const [b0,bB,bAge]=fit.coef.map(c=>c.est);
+  const dots=svg.append('g').selectAll('circle').data(rows).join('circle').attr('r',3.5).attr('cx',d=>x(d.age)).attr('cy',d=>y(d.y)).attr('fill',d=>d.g==='BB'?COL.other:COL.ref).attr('opacity',.55);
+  const L=svg.append('g');
+  // step layers
+  const meanL=L.append('g'),ageL=L.append('g'),slopeL=L.append('g'),adjL=L.append('g');
+  [[mA,COL.ref,'AA average'],[mB,COL.other,'BB average']].forEach(([v,c,t])=>{meanL.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(v)).attr('y2',y(v)).attr('stroke',c==COL.ref?C.ink2:C.pc2).attr('stroke-width',2.5).attr('stroke-dasharray','8 5')});
+  meanL.append('path').attr('d',`M${W-m.r+10},${y(mA)}H${W-m.r+20}V${y(mB)}H${W-m.r+10}`).attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2.5);
+  meanL.append('text').attr('class','lbl pink').attr('x',W-m.r+26).attr('y',(y(mA)+y(mB))/2+5).text(`+${fmt1(mB-mA)}`);
+  [[aA,C.ink2,'AA'],[aB,C.pc2,'BB']].forEach(([v,c,t],i)=>{ageL.append('path').attr('d',`M${x(v)},${H-m.b-2}l-8,-14h16z`).attr('fill',c);
+    ageL.append('line').attr('x1',x(v)).attr('x2',x(v)).attr('y1',m.t).attr('y2',H-m.b-16).attr('stroke',c).attr('stroke-dasharray','3 4').attr('opacity',.6);
+    ageL.append('text').attr('class','lbl').style('fill',c).attr('x',x(v)+(i?6:-6)).attr('text-anchor',i?'start':'end').attr('y',H-m.b-22).text(`${t} mean age ${fmt1(v)}`)});
+  const xs=[28,90];
+  slopeL.append('line').attr('x1',x(xs[0])).attr('x2',x(xs[1])).attr('y1',y(b0+bAge*xs[0])).attr('y2',y(b0+bAge*xs[1])).attr('stroke',C.ink2).attr('stroke-width',3);
+  slopeL.append('line').attr('x1',x(xs[0])).attr('x2',x(xs[1])).attr('y1',y(b0+bB+bAge*xs[0])).attr('y2',y(b0+bB+bAge*xs[1])).attr('stroke',C.pc2).attr('stroke-width',3);
+  slopeL.append('text').attr('class','lbl').attr('x',x(90)+6).attr('y',y(b0+bAge*90)+5).text('AA');slopeL.append('text').attr('class','lbl purple').attr('x',x(90)+6).attr('y',y(b0+bB+bAge*90)+5).text('BB');
+  const a0=55;adjL.append('line').attr('x1',x(a0)).attr('x2',x(a0)).attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-dasharray','3 4').attr('opacity',.5);
+  adjL.append('path').attr('d',`M${x(a0)},${y(b0+bAge*a0)}V${y(b0+bB+bAge*a0)+6}`).attr('stroke',C.sc1).attr('stroke-width',3.5).attr('marker-end','url(#swAr)');
+  svg.append('defs').append('marker').attr('id','swAr').attr('viewBox','0 0 10 10').attr('refX',5).attr('refY',5).attr('markerWidth',6).attr('markerHeight',6).attr('orient','auto').append('path').attr('d','M0,0L10,5L0,10z').attr('fill',C.sc1);
+  adjL.append('text').attr('class','lbl pink').attr('x',x(a0)+10).attr('y',(y(b0+bAge*a0)+y(b0+bB+bAge*a0))/2+5).style('font-size','17px').text(`+${fmt1(bB)} at the same age`);
+  adjL.append('text').attr('class','lbl').attr('x',x(a0)+4).attr('y',m.t+12).style('font-size','14px').text('age 55');
+  const layers=[meanL,ageL,slopeL,adjL];
+  const T=[
+    ['1 · Compare the averages',`<p>Ignore age and compare the two groups' average biomarker (dashed lines).</p><p>BB is <b>${fmt1(mB-mA)}</b> higher. But we built this world with a true effect of 8. Where do the extra ${fmt1(mB-mA-8)} come from?</p>`,'CRUDE DIFFERENCE (BB − AA)',`+${fmt1(mB-mA)}`],
+    ['2 · Look at the ages',`<p>The triangles mark each group's average age. BB carriers in this sample are <b>${fmt1(aB-aA)} years older</b>.</p><p>That isn't the genotype's doing; it's who happened to be recruited.</p>`,'AGE GAP (BB − AA)',`+${fmt1(aB-aA)} years`],
+    ['3 · Age moves the biomarker',`<p>In both groups, older people have higher values: about <b>${fmt2(bAge)} per year</b>.</p><p>One model, two parallel lines: <em>biomarker ~ genotype + age</em>. Same slope, different height.</p>`,'AGE SLOPE (BOTH GROUPS)',`+${fmt2(bAge)} per year`],
+    ['4 · Compare at the same age',`<p>The gap between the two lines is the same at every age. That gap is the <b>adjusted</b> difference.</p><p>"Adjusted for age" means exactly this: <em>BB vs AA at the same age</em>.</p>`,'ADJUSTED DIFFERENCE (BB − AA)',`+${fmt1(bB)}`]];
+  this.st=stepper('swSteps',4,s=>{
+    layers.forEach((l,i)=>l.transition().duration(450).style('opacity',i===s||(i===2&&s===3)?1:(i<s?.15:0)));
+    dots.transition().duration(450).attr('opacity',s===3?.3:.55);
+    document.getElementById('swText').innerHTML=`<h3>${T[s][0]}</h3>${T[s][1]}`;document.getElementById('swK').textContent=T[s][2];document.getElementById('swV').textContent=T[s][3];});
+  this.st.go(0);
+},enter(){this.st&&this.st.go(0)}};
+
+/* ---- 4 strata ---- */
+hooks['strata']={init(){
+  const rows=SIM.filter(d=>d.g!=='AB'),bands=[[30,45],[45,60],[60,75],[75,90]];
+  const W=780,H=460,m={l:60,r:150,t:30,b:60};const svg=d3.select('#stSvg');
+  const x=d3.scaleBand().domain(bands.map(b=>`${b[0]}–${b[1]}`).concat(['everyone'])).range([m.l,W-m.r]).padding(.4),y=d3.scaleLinear().domain([-4,22]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,7,W-m.l-m.r));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>g.call(d3.axisBottom(x).tickSize(0).tickPadding(10)).attr('class','axis'));
+  svg.append('text').attr('class','axlab').attr('x',(W-m.r+m.l)/2).attr('y',H-10).attr('text-anchor','middle').text('Age band (years)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('BB − AA difference in biomarker');
+  const fit=ols(rows.map(d=>[1,d.g==='BB'?1:0,d.age]),rows.map(d=>d.y));const adj=fit.coef[1].est;
+  const A=rows.filter(d=>d.g==='AA'),B=rows.filter(d=>d.g==='BB'),crude=mean(B.map(d=>d.y))-mean(A.map(d=>d.y));
+  const RL=[[8,C.pc1,'truth: 8',''],[crude,C.sc1,`crude: ${fmt1(crude)}`,'6 4'],[adj,C.pc2,`adjusted: ${fmt1(adj)}`,'2 3']];
+  const ly=RL.map(r=>({y:y(r[0]),r})).sort((a,b)=>a.y-b.y);for(let i=1;i<ly.length;i++)if(ly[i].y-ly[i-1].y<18)ly[i].y=ly[i-1].y+18;
+  ly.forEach(({y:yy,r:[v,c,t,dash]})=>{svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(v)).attr('y2',y(v)).attr('stroke',c).attr('stroke-width',2).attr('stroke-dasharray',dash);svg.append('text').attr('class','lbl').style('fill',c).attr('x',W-m.r+8).attr('y',yy+5).text(t)});
+  const st=bands.map(([a,b])=>{const ia=A.filter(d=>d.age>=a&&d.age<b).map(d=>d.y),ib=B.filter(d=>d.age>=a&&d.age<b).map(d=>d.y);const w=welch(ib,ia),tc=tQuantile(.975,w.df);return{k:`${a}–${b}`,d:w.diff,lo:w.diff-tc*w.se,hi:w.diff+tc*w.se,na:ia.length,nb:ib.length}});
+  const wc=welch(B.map(d=>d.y),A.map(d=>d.y)),tcc=tQuantile(.975,wc.df);st.push({k:'everyone',d:wc.diff,lo:wc.diff-tcc*wc.se,hi:wc.diff+tcc*wc.se,na:A.length,nb:B.length,all:1});
+  const g=svg.append('g').selectAll('g').data(st).join('g').on('mousemove',(ev,s)=>showTip(ev,`${s.k}: ${fmt1(s.d)} [${fmt1(s.lo)}, ${fmt1(s.hi)}] · AA n = ${s.na}, BB n = ${s.nb}`)).on('mouseleave',hideTip);
+  g.append('line').attr('x1',s=>x(s.k)+x.bandwidth()/2).attr('x2',s=>x(s.k)+x.bandwidth()/2).attr('y1',s=>y(s.lo)).attr('y2',s=>y(s.hi)).attr('stroke',s=>s.all?C.sc1:C.pc2).attr('stroke-width',2.5);
+  g.append('circle').attr('cx',s=>x(s.k)+x.bandwidth()/2).attr('cy',s=>y(s.d)).attr('r',8).attr('fill',s=>s.all?C.sc1:C.pc2).attr('stroke','#fff').attr('stroke-width',2);
+  g.append('text').attr('class','lbl').attr('x',s=>x(s.k)+x.bandwidth()/2-12).attr('text-anchor','end').attr('y',s=>y(s.d)+5).style('font-size','14px').text(s=>fmt1(s.d));
+  g.attr('opacity',0).transition().delay((s,i)=>300+i*350).duration(400).attr('opacity',1);
+}};
+
+/* ---- 5 recipe ---- */
+hooks['recipe']={init(){
+  let older=true,ageMatters=true;const W=520,H=330,m={l:50,r:20,t:30,b:40};
+  const svg=d3.select('#rcSvg');const x=d3.scaleBand().domain(['truth','crude','adjusted']).range([m.l,W-m.r]).padding(.35),y=d3.scaleLinear().domain([0,16]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,4,W-m.l-m.r));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>g.call(d3.axisBottom(x).tickFormat(d=>({truth:'truth',crude:'crude (ignore age)',adjusted:'adjusted for age'})[d]).tickSize(0).tickPadding(8)).attr('class','axis'));
+  svg.append('text').attr('class','lbl').attr('x',m.l).attr('y',14).text('BB − AA difference');
+  const bars=svg.append('g'),labs=svg.append('g');
+  // diagram
+  const dg=d3.select('#rcDiag');const N={age:[260,40,'Age'],g:[90,200,'Genotype BB'],y:[430,200,'Biomarker']};
+  dg.append('defs').append('marker').attr('id','rcAr').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M0,0L10,5L0,10z').attr('fill',C.pc1);
+  const e1=dg.append('line').attr('x1',225).attr('y1',62).attr('x2',115).attr('y2',176).attr('stroke',C.pc1).attr('stroke-width',2.5).attr('stroke-dasharray','6 4');
+  const e2=dg.append('line').attr('x1',295).attr('y1',62).attr('x2',405).attr('y2',176).attr('stroke',C.pc1).attr('stroke-width',2.5).attr('marker-end','url(#rcAr)');
+  dg.append('line').attr('x1',165).attr('y1',200).attr('x2',350).attr('y2',200).attr('stroke',C.pc2).attr('stroke-width',2.5).attr('marker-end','url(#rcAr)');
+  dg.append('text').attr('class','lbl purple').attr('x',258).attr('y',192).attr('text-anchor','middle').text('+8 (true effect)');
+  const t1=dg.append('text').attr('class','lbl').attr('x',120).attr('y',112).attr('text-anchor','end').style('font-size','14px').text('BB carriers older');
+  const t2=dg.append('text').attr('class','lbl').attr('x',400).attr('y',112).style('font-size','14px').text('age raises it');
+  Object.values(N).forEach(([cx,cy,t])=>{const g=dg.append('g').attr('transform',`translate(${cx},${cy})`);g.append('rect').attr('x',-75).attr('y',-22).attr('width',150).attr('height',44).attr('rx',12).attr('fill','#fff').attr('stroke',C.pc1).attr('stroke-width',1.5);g.append('text').attr('class','lbl').attr('text-anchor','middle').attr('y',6).text(t)});
+  function draw(){
+    const w=simWorld(77,3000,{shift:older?8:0,slope:ageMatters?.55:0}).filter(d=>d.g!=='AB');
+    const A=w.filter(d=>d.g==='AA'),B=w.filter(d=>d.g==='BB');const crude=mean(B.map(d=>d.y))-mean(A.map(d=>d.y));
+    const adj=ols(w.map(d=>[1,d.g==='BB'?1:0,d.age]),w.map(d=>d.y)).coef[1].est;
+    const v=[['truth',8,C.pc1],['crude',crude,C.sc1],['adjusted',adj,C.pc2]];
+    bars.selectAll('path').data(v).join('path').attr('fill',d=>d[2]).transition().duration(500).attr('d',d=>barPath(x(d[0]),x(d[0])+x.bandwidth(),y(0),y(d[1]),4));
+    labs.selectAll('text').data(v).join('text').attr('class','lbl').attr('text-anchor','middle').transition().duration(500).attr('x',d=>x(d[0])+x.bandwidth()/2).attr('y',d=>y(d[1])-8).text(d=>fmt1(d[1]));
+    e1.transition().duration(400).attr('opacity',older?1:.12);t1.transition().duration(400).attr('opacity',older?1:.25);
+    e2.transition().duration(400).attr('opacity',ageMatters?1:.12);t2.transition().duration(400).attr('opacity',ageMatters?1:.25);
+    document.getElementById('rcMsg').innerHTML=older&&ageMatters?'<b>Both links:</b> age is a confounder. Crude is biased; adjusting recovers the truth.':(older?'Age differs between groups, but doesn\'t affect the biomarker: <b>nothing to correct</b>.':(ageMatters?'Age matters, but both groups have the same ages: <b>nothing to correct</b>.':'No links at all: crude and adjusted agree.'));
+  }
+  segButtons('rcA',[[true,'yes, older'],[false,'no, same ages']],older,v=>{older=v;draw()});
+  segButtons('rcB',[[true,'yes'],[false,'no']],ageMatters,v=>{ageMatters=v;draw()});draw();
+}};
+
+/* ---- 6 mediator ---- */
+function dag(id,nodes,edges){const s=d3.select('#'+id);const mid='ar'+id;
+  s.append('defs').append('marker').attr('id',mid).attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M0,0L10,5L0,10z').attr('fill',C.pc1);
+  edges.forEach(([a,b,col,dash,lab])=>{const A=nodes[a],B=nodes[b],dx=B[0]-A[0],dy=B[1]-A[1],L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,pad=(p)=>Math.min(p[3]/2/Math.abs(ux||1e-9),28/Math.abs(uy||1e-9));
+    const sa=pad(A),sb=pad(B);s.append('line').attr('x1',A[0]+ux*sa).attr('y1',A[1]+uy*sa).attr('x2',B[0]-ux*(sb+2)).attr('y2',B[1]-uy*(sb+2)).attr('stroke',col||C.pc1).attr('stroke-width',2.5).attr('stroke-dasharray',dash||null).attr('marker-end',`url(#${mid})`);
+    if(lab)s.append('text').attr('class','lbl').attr('x',(A[0]+B[0])/2+uy*18).attr('y',(A[1]+B[1])/2-ux*18+5).attr('text-anchor','middle').style('font-size','14px').style('fill',col||C.ink2).text(lab)});
+  Object.values(nodes).forEach(([cx,cy,t,w,col])=>{const g=s.append('g').attr('transform',`translate(${cx},${cy})`);g.append('rect').attr('x',-w/2).attr('y',-24).attr('width',w).attr('height',48).attr('rx',12).attr('fill',col?'#ead9ff':'#fff').attr('stroke',col||C.pc1).attr('stroke-width',1.8);g.append('text').attr('class','lbl').attr('text-anchor','middle').attr('y',6).style('font-size','17px').text(t)})}
+hooks['mediator']={init(){
+  dag('mdA',{c:[270,50,'Age',120,C.pc2],g:[90,200,'Genotype group',170],y:[450,200,'Biomarker',150]},[['c','g',C.pc1,'6 4'],['c','y'],['g','y',C.pc2,null,'effect?']]);
+  dag('mdB',{m:[270,50,'Blood pressure',170,C.sc1],g:[90,200,'Drug',120],y:[450,200,'Stroke',120]},[['g','m',C.pc1,null,'lowers'],['m','y',C.pc1,null,'raises risk'],['g','y',C.pc2,'6 4','other routes']]);
+}};
+
+/* ---- 8 adjusted ---- */
+hooks['adjusted']={init(){
+  const W=660,H=400,m={l:60,r:20,t:30,b:60};const svg=d3.select('#adSvg');const g=svg.append('g');
+  function draw(k){const ds=DS[k],{crude,adj}=crudeAdj(ds),lev=ds.levels;g.selectAll('*').remove();
+    const terms=lev.slice(1),vals=terms.flatMap((l,i)=>[{l,kind:'crude',v:crude.coef[i+1].est,lo:crude.coef[i+1].lo,hi:crude.coef[i+1].hi},{l,kind:'adjusted',v:adj.coef[i+1].est,lo:adj.coef[i+1].lo,hi:adj.coef[i+1].hi}]);
+    const ext=d3.extent(vals.flatMap(v=>[v.lo,v.hi,0,...(ds.truth?Object.values(ds.truth):[])]));
+    const x0=d3.scaleBand().domain(terms).range([m.l,W-m.r]).padding(.3),x1=d3.scaleBand().domain(['crude','adjusted']).range([0,x0.bandwidth()]).padding(.15),y=d3.scaleLinear().domain([Math.min(0,ext[0])*1.1,Math.max(0,ext[1])*1.1]).nice().range([H-m.b,m.t]);
+    g.append('g').attr('transform',`translate(${m.l},0)`).call(gg=>axisL(gg,y,6,W-m.l-m.r));
+    g.append('g').attr('transform',`translate(0,${H-m.b})`).call(gg=>gg.call(d3.axisBottom(x0).tickFormat(l=>`${ds.gl} ${l} vs ${lev[0]}`).tickSize(0).tickPadding(10)).attr('class','axis'));
+    g.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(0)).attr('y2',y(0)).attr('stroke',C.pc1);
+    g.append('text').attr('class','lbl').attr('x',m.l).attr('y',14).text(`Difference in ${ds.yl.toLowerCase()} vs ${ds.gl} ${lev[0]}`);
+    const b=g.append('g').selectAll('g').data(vals).join('g').on('mousemove',(ev,d)=>showTip(ev,`${d.kind}: ${fmt2(d.v)} [${fmt2(d.lo)}, ${fmt2(d.hi)}]`)).on('mouseleave',hideTip);
+    b.append('path').attr('fill',d=>d.kind==='crude'?C.popL:C.pc2).attr('d',d=>{const xx=x0(d.l)+x1(d.kind);return d.v>=0?barPath(xx,xx+x1.bandwidth(),y(0),y(d.v),4):`M${xx},${y(0)}V${y(d.v)}H${xx+x1.bandwidth()}V${y(0)}Z`});
+    b.append('line').attr('x1',d=>x0(d.l)+x1(d.kind)+x1.bandwidth()/2).attr('x2',d=>x0(d.l)+x1(d.kind)+x1.bandwidth()/2).attr('y1',d=>y(d.lo)).attr('y2',d=>y(d.hi)).attr('stroke',C.pc1).attr('stroke-width',1.5);
+    b.append('text').attr('class','lbl').attr('text-anchor','middle').style('font-size','14px').attr('x',d=>x0(d.l)+x1(d.kind)+x1.bandwidth()/2).attr('y',d=>d.v>=0?y(Math.max(d.hi,d.v))-6:y(Math.min(d.lo,d.v))+16).text(d=>`${d.kind}: ${fmt1(d.v)}`);
+    if(ds.truth)terms.forEach(l=>{g.append('line').attr('x1',x0(l)-6).attr('x2',x0(l)+x0.bandwidth()+6).attr('y1',y(ds.truth[l])).attr('y2',y(ds.truth[l])).attr('stroke',C.sc1).attr('stroke-width',2).attr('stroke-dasharray','5 3');
+      g.append('text').attr('class','lbl pink').attr('x',x0(l)+x0.bandwidth()+8).attr('y',y(ds.truth[l])+5).style('font-size','14px').text(`truth ${ds.truth[l]}`)});
+    // why
+    const mx=lev.map(l=>mean(ds.rows.filter(r=>r.g===l).map(r=>r.x)));const sl=adj.coef[adj.coef.length-1];
+    document.getElementById('adWhy').innerHTML=`<tr><th>${ds.gl}</th><th>mean ${ds.xl}</th></tr>`+lev.map((l,i)=>`<tr><td>${l}</td><td>${fmt1(mx[i])} ${ds.xunit}</td></tr>`).join('')+
+      `<tr><td>${ds.xl} → outcome</td><td>${sl.est>=0?'+':''}${fmt2(sl.est)} per ${ds.xunit==='years'?'year':'node'}, p = ${fmtP(sl.p)}</td></tr>`;
+    const differs=Math.abs(mx[mx.length-1]-mx[0])>0.1*Math.abs(mx[0]),related=sl.p<0.05;
+    document.getElementById('adSent').innerHTML=`The ${ds.gl} coefficients ${differs&&related?'<b>changed</b>':'<b>barely changed</b>'} after adjustment because ${ds.xl} ${differs?'<b>differs</b>':'hardly differs'} between groups <em>and</em> ${related?'<b>is related</b>':'is <b>not clearly related</b>'} to the outcome.`;
+  }
+  segButtons('adDs',[['gbsg2','GBSG2 (adjust for nodes)'],['lung','Lung (adjust for age)'],['sim','Simulated (adjust for age)']],'gbsg2',draw);draw('gbsg2');
+}};
+
+/* ---- 9 interaction idea ---- */
+hooks['interaction-idea']={init(){
+  const draw=(id,inter)=>{const W=540,H=300,m={l:40,r:60,t:20,b:36};const s=d3.select('#'+id);
+    const x=d3.scaleLinear().domain([30,85]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([30,85]).range([H-m.b,m.t]);
+    s.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,6));s.append('g').attr('transform',`translate(${m.l},0)`).call(g=>g.call(d3.axisLeft(y).ticks(4).tickSize(4)).attr('class','axis'));
+    s.append('text').attr('class','axlab').attr('x',W-m.r).attr('y',H-4).attr('text-anchor','end').style('font-size','13px').text('age');
+    const f=(a,male)=>50+(inter?(male?.7:.4):.55)*(a-50)+(male?3:0);
+    [[0,C.pop,'women'],[1,C.pc2,'men']].forEach(([mm,c,t])=>{const p=s.append('line').attr('x1',x(30)).attr('x2',x(85)).attr('y1',y(f(30,mm))).attr('y2',y(f(85,mm))).attr('stroke',mm?c:C.ink2).attr('stroke-width',3.5);
+      s.append('text').attr('class','lbl').style('fill',mm?c:C.ink2).attr('x',x(85)+6).attr('y',y(f(85,mm))+5).text(t);
+      const L=p.node().getTotalLength();p.attr('stroke-dasharray',`${L} ${L}`).attr('stroke-dashoffset',L).transition().delay(300+mm*500).duration(900).attr('stroke-dashoffset',0)});
+    s.append('text').attr('class','lbl').attr('x',m.l+6).attr('y',m.t+6).style('font-size','17px').style('fill',inter?C.sc1:C.pc1).text(inter?'interaction model':'additive model')};
+  this.d=()=>{d3.select('#iiA').selectAll('*').remove();d3.select('#iiB').selectAll('*').remove();draw('iiA',false);draw('iiB',true)};this.d();
+},enter(){this.d&&this.d()}};
+
+/* ---- 10 interaction data ---- */
+hooks['interaction']={init(){
+  let k='sim',inter=true;const W=760,H=420,m={l:56,r:90,t:20,b:50};const svg=d3.select('#inSvg');
+  const x=d3.scaleLinear().range([m.l,W-m.r]),y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gx=svg.append('g').attr('transform',`translate(0,${H-m.b})`),gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  const xl=svg.append('text').attr('class','axlab').attr('x',(W-m.r+m.l)/2).attr('y',H-8).attr('text-anchor','middle');
+  const yl=svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle');
+  const dots=svg.append('g'),lines=svg.append('g');
+  function draw(){const ds=DS[k],[g0,g1]=ds.g2lev,rows=ds.rows.filter(r=>r.x!=null&&r.y!=null);
+    const X=rows.map(r=>{const z=r.g2===g1?1:0;return inter?[1,r.x,z,r.x*z]:[1,r.x,z]}),f=ols(X,rows.map(r=>r.y));const c=f.coef.map(q=>q.est);
+    x.domain(d3.extent(rows,r=>r.x)).nice();y.domain(d3.extent(rows,r=>r.y)).nice();
+    gx.transition().duration(500).call(g=>axisB(g,x,8));axisL(gy.transition().duration(500),y,6,W-m.l-m.r);xl.text(ds.xl);yl.text(ds.yl);
+    const jr=mulberry32(4);
+    dots.selectAll('circle').data(rows).join('circle').attr('r',2.8).attr('opacity',.45).attr('fill',r=>r.g2===g1?C.pc2:C.pop).transition().duration(500).attr('cx',r=>x(r.x+(k==='gbsg2'?(jr()-.5)*.5:0))).attr('cy',r=>y(r.y));
+    const [a,b]=x.domain(),pred=(xx,z)=>c[0]+c[1]*xx+c[2]*z+(inter?c[3]*xx*z:0);
+    const L=[[0,C.ink2,g0],[1,C.pc2,g1]];
+    lines.selectAll('line').data(L).join('line').attr('stroke-width',3.5).attr('stroke',d=>d[1]).transition().duration(600).attr('x1',x(a)).attr('x2',x(b)).attr('y1',d=>y(pred(a,d[0]))).attr('y2',d=>y(pred(b,d[0])));
+    lines.selectAll('text').data(L).join('text').attr('class','lbl').style('fill',d=>d[1]).transition().duration(600).attr('x',x(b)+6).attr('y',d=>y(pred(b,d[0]))+5).text(d=>d[2]);
+    const s0=c[1],s1=c[1]+(inter?c[3]:0);const per=ds.xunit==='years'?'per year':'per node';
+    document.getElementById('inK1').textContent=`SLOPE FOR ${g0.toUpperCase()}`;document.getElementById('inK2').textContent=`SLOPE FOR ${g1.toUpperCase()}`;
+    document.getElementById('inS1').innerHTML=`${s0>=0?'+':''}${fmt2(s0)} <small>${per}${ds.truthSlopes?`, truth ${ds.truthSlopes[g0]}`:''}</small>`;
+    document.getElementById('inS2').innerHTML=`${s1>=0?'+':''}${fmt2(s1)} <small>${per}${ds.truthSlopes?`, truth ${ds.truthSlopes[g1]}`:''}</small>`;
+    if(inter){const q=f.coef[3];document.getElementById('inI').innerHTML=`${q.est>=0?'+':''}${fmt2(q.est)} <small>[${fmt2(q.lo)}, ${fmt2(q.hi)}], p = ${fmtP(q.p)}</small>`;
+      document.getElementById('inMsg').innerHTML=q.p<0.05?`The slopes differ: the ${ds.xl} effect depends on ${ds.g2l}.`+(ds.truthSlopes?' Truth: 0.7 − 0.4 = +0.3.':''):`No clear evidence of different slopes. But the CI is wide: the data <b>can't tell</b>, which is not the same as "equal".`}
+    else{document.getElementById('inI').innerHTML='<small>not in the additive model: the slopes are forced to be equal</small>';document.getElementById('inMsg').textContent='Switch to the interaction model to let the slopes differ.'}
+  }
+  segButtons('inDs',[['sim','Simulated'],['gbsg2','GBSG2'],['lung','Lung']],k,v=>{k=v;draw()});
+  segButtons('inM',[[false,'additive'],[true,'interaction']],inter,v=>{inter=v;draw()});draw();
+}};
+
+/* ---- 11 statements ---- */
+hooks['statements']={init(){const {adj}=crudeAdj(DS.gbsg2);const b3=adj.coef[2].est;qcards('qcards',[
+  [true,`The grade III coefficient (${fmt1(b3)} mm) compares grade III with grade I patients who have the same number of positive nodes.`,'Correct. That is what "adjusted for nodes" or "holding nodes constant" means.'],
+  [true,'Adjusting for nodes changed the grade coefficients because nodes differ between grades and are related to tumour size.','Correct: both links are needed. If either were missing, the estimate would barely move.'],
+  [false,'To be safe, you should adjust for every variable you have measured.','Adjusting for a mediator (on the path from cause to outcome) removes part of the effect you want to estimate. Choose adjustments from biology, not from the spreadsheet.'],
+  [false,'The interaction between nodes and menopausal status has p = 0.2, so the node slope is the same before and after menopause.','A large p means the data can\'t distinguish the slopes. Look at the CI: interactions are estimated imprecisely.']])}};
+
+/* ---- 12 AI ---- */
+hooks['ai-tutor']={init(){const {adj}=crudeAdj(DS.gbsg2);const n=['Intercept','tgrade: II vs I','tgrade: III vs I','pnodes'];
+  const t=adj.coef.map((c,i)=>`${n[i].padEnd(18)}${d3.format('8.3f')(c.est)}  [${fmt2(c.lo)}, ${fmt2(c.hi)}]  p = ${fmtP(c.p)}`).join('\n');
+  document.getElementById('aiPrompt').textContent=`I fitted a linear regression of Tumour size (mm) on Tumour grade and Positive lymph nodes in observational data. Results:\n${t}\nWrite two sentences interpreting these results for the results section of a paper.`;
+  document.getElementById('aiGood').innerHTML=`"Grade III tumours were on average ${fmt1(adj.coef[2].est)} mm larger than grade I tumours in patients with the same number of positive nodes (95% CI ${fmt1(adj.coef[2].lo)} to ${fmt1(adj.coef[2].hi)}). Each additional positive node was <em>associated with</em> ${fmt2(adj.coef[3].est)} mm larger tumours, holding grade constant."`;
+}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>
