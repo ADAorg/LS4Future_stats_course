@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 2 · Tests as linear models</title>
+<style>/*CSS*/</style>
+<style>
+.eq{font-size:40px;text-align:center;padding:18px 0 8px;letter-spacing:.01em}
+.eq .b{color:var(--pc2);font-style:italic}
+.eq .e{color:var(--muted)}
+.maptab{border-collapse:collapse;width:100%;margin-top:6px}
+.maptab td{padding:11px 14px;border-bottom:1px solid var(--line);font-size:20px;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s}
+.maptab tr.on td{opacity:1;transform:none}
+.maptab td code{font-family:var(--serif);font-size:20px;color:var(--pc2);font-style:italic}
+.maptab th{font-weight:400;font-size:14px;letter-spacing:.08em;color:var(--muted);text-align:left;padding:4px 14px;border-bottom:1px solid var(--line)}
+.ttab{border-collapse:collapse;font-size:20px;font-variant-numeric:tabular-nums;width:100%}
+.ttab th{font-weight:400;font-size:14px;letter-spacing:.06em;color:var(--muted);text-align:left;padding:6px 12px;border-bottom:1px solid var(--line)}
+.ttab td{padding:10px 12px;border-bottom:1px solid var(--line)}
+.ttab tr.same td{color:var(--pc2)}
+.dtab td,.dtab th{text-align:center;padding:5px 12px;font-size:18px;font-variant-numeric:tabular-nums}
+.dtab th{font-weight:400;font-size:14px;color:var(--muted);border-bottom:1px solid var(--line)}
+.dtab td.one{color:var(--pc2);font-weight:600}
+.dtab tr:hover td{background:var(--wash)}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">Tests are <em>linear models</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:780px;margin:0">Yesterday's separate tools are one idea: outcome = baseline + effects + noise.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 2 · Topic 1 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">Day 2 opening. Yesterday every question got its own test. Today we see that most of those tests are the same model with different inputs. The payoff comes in the next topic: once a test is a model, you can add more variables to it (age, stage, batch), which no t-test can do.</aside>
+</section>
+
+<!-- ============ 2 ONE MODEL ============ -->
+<section class="slide" id="one-model">
+  <h1>One model, many <em>names</em>.</h1>
+  <div class="eq">outcome = <span class="b">b₀</span> + <span class="b">b₁</span>·x₁ + <span class="b">b₂</span>·x₂ + … <span class="e">+ noise</span></div>
+  <table class="maptab" id="mapTab">
+    <tr><th>Day 1 test</th><th>As a linear model</th><th>What the x's are</th></tr>
+    <tr><td>Two-group t-test</td><td><code>outcome ~ group</code></td><td>one 0/1 column: "is in group B"</td></tr>
+    <tr><td>One-way ANOVA</td><td><code>outcome ~ group</code></td><td>k − 1 such columns, one per non-reference group</td></tr>
+    <tr><td>Pearson correlation</td><td><code>outcome ~ x</code></td><td>a numeric predictor</td></tr>
+    <tr><td>Paired t-test</td><td><code>difference ~ 1</code></td><td>no x at all: is the average difference zero?</td></tr>
+    <tr><td style="color:var(--pc2)">Today, next topic</td><td><code>outcome ~ group + age</code></td><td>several at once: <em>adjustment</em></td></tr>
+  </table>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The big picture</span></div>
+  <aside class="notes">The rows appear one by one when the slide opens. The b's are what the model estimates; each comes with a standard error, a CI and a p-value, exactly like yesterday's single numbers. The last row is the reason we bother: the t-test can't adjust for anything, the model can.</aside>
+</section>
+
+<!-- ============ 3 LINE ============ -->
+<section class="slide" id="line">
+  <h1>A t-test is a line through <em>two groups</em>.</h1>
+  <div class="controls"><div class="seg" id="lnPair"><span class="lab">Compare grades</span></div><span style="width:14px"></span><button class="btn primary" id="lnShow">Draw the line</button></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.2"><svg id="lnSvg" width="800" height="430"></svg></div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <p class="small" style="margin-top:0">Code the groups as <b>x = 0</b> (reference) and <b>x = 1</b>. Fit the best straight line.</p>
+      <div class="stat"><span class="k" style="color:var(--pc2)">INTERCEPT b₀ = MEAN AT x = 0</span><span class="v num" id="lnB0">–</span></div>
+      <div class="stat"><span class="k" style="color:var(--sc1)">SLOPE b₁ = CHANGE FROM 0 TO 1</span><span class="v num" id="lnB1">–</span></div>
+      <p class="small" style="margin-top:10px">The slope <em>is</em> the difference in means. Testing "slope = 0" is testing "no difference".</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section A</span></div>
+  <aside class="notes">GBSG2 tumour size by grade. First show the two clouds, then "Draw the line". With only two x values (0 and 1), the least-squares line has to pass through both group means, so the intercept is the reference mean and the slope is the difference. Don't show p-values yet: section A asks them to predict whether the t-test and the model p-values will be similar or identical.</aside>
+</section>
+
+<!-- ============ 4 DUMMIES ============ -->
+<section class="slide" id="dummies">
+  <h1>Groups become <em>0s and 1s</em>.</h1>
+  <div class="eq" style="font-size:32px">tumour size = <span class="b">b₀</span> + <span class="b">b₁</span>·[grade II] + <span class="b">b₂</span>·[grade III] <span class="e">+ noise</span></div>
+  <div class="row" style="gap:40px;margin-top:6px">
+    <div class="col" style="flex:1.1">
+      <table class="dtab" id="dTab"></table>
+      <p class="tiny" style="margin-top:6px">Eight example GBSG2 patients. Hover a row to see its prediction.</p>
+    </div>
+    <div class="col">
+      <div class="card" style="margin-bottom:12px"><div class="kicker" style="margin:0 0 4px;color:var(--ink2)">Reference group (grade I)</div><p style="margin:0;font-size:20px">both columns 0 → prediction = <b style="color:var(--pc2)">b₀</b></p></div>
+      <div class="card" style="margin-bottom:12px"><div class="kicker" style="margin:0 0 4px;color:var(--ink2)">Grade II</div><p style="margin:0;font-size:20px">prediction = <b style="color:var(--pc2)">b₀ + b₁</b>, so b₁ = II − I</p></div>
+      <div class="card"><div class="kicker" style="margin:0 0 4px;color:var(--ink2)">Grade III</div><p style="margin:0;font-size:20px">prediction = <b style="color:var(--pc2)">b₀ + b₂</b>, so b₂ = III − I</p></div>
+      <p class="small" style="margin-top:12px" id="dPred">&nbsp;</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section B</span></div>
+  <aside class="notes">Three groups need two 0/1 columns ("dummies"), one per non-reference group. The reference group is the one with no column. Every coefficient is therefore a difference from the reference, never a group mean by itself. That's the AI failure point of this notebook. The ANOVA F-test asks whether b₁ and b₂ are both zero.</aside>
+</section>
+
+<!-- ============ 5 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on 1: <em>tests as models</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day2_HO1_tests_as_linear_models.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">DATASET</p>
+        <p style="margin:0 0 22px;font-size:22px;color:rgba(255,255,255,.85)">Half the pairs <b>gbsg2</b>, half <b>lung</b>. Then everyone tries <b>simulated</b>, where the true effects are known (🎯).</p>
+        <p style="margin:0;font-size:20px;color:rgba(255,255,255,.75)">The notebooks work by <em>roles</em> (outcome, group, predictor), so the same cells run on any dataset, including your own CSV.</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">Will the t-test's p-value and the model's slope p-value be <em>similar</em>, or <em>identical</em>?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">IN SECTION B</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">Change the reference group. Which numbers change, which stay the same?</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
+  <aside class="notes">Assign datasets. The AI prompt in this notebook is generated from each pair's own model output; it's a known failure point (coefficient read as a group mean). Pairs that finish early: section C, correlation as a model.</aside>
+</section>
+
+<!-- ============ 6 IDENTICAL ============ -->
+<section class="slide" id="identical">
+  <h1>Identical, not just <em>similar</em>.</h1>
+  <div class="controls"><div class="seg" id="idPair"><span class="lab">Compare grades</span></div></div>
+  <div class="row" style="gap:36px;margin-top:4px">
+    <div class="col" style="flex:1.4">
+      <table class="ttab" id="idTab"></table>
+      <p class="small" style="margin-top:14px" id="idSd"></p>
+    </div>
+    <div class="col">
+      <p class="callout" style="margin-top:0">The ordinary linear model assumes the <em>same spread</em> in every group, exactly like the Student t-test. Welch drops that assumption, so it differs a little.</p>
+      <p class="small" style="margin-top:16px">Checking that assumption, and what to do when it fails, is Hands-on 3.</p>
+      <p class="small" style="margin-top:16px">🧮 Gemini prompt: <em>"Also run Welch's t-test and print its p-value next to the others."</em> When would it differ a lot?</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section A · concept check 2</span></div>
+  <aside class="notes">Ask who guessed "identical". t and p match to every decimal, because they are the same calculation. Welch differs because it lets each group have its own variance. They diverge most when group sizes are very unequal and the smaller group is the more variable one.</aside>
+</section>
+
+<!-- ============ 7 REFERENCE ============ -->
+<section class="slide" id="reference">
+  <h1>New reference: new <em>description</em>, same model.</h1>
+  <div class="controls"><div class="seg" id="rfRef"><span class="lab">Reference group</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.5"><svg id="rfSvg" width="660" height="410"></svg></div>
+    <div class="col" style="flex:1">
+      <table class="ttab" id="rfTab"></table>
+      <div class="row" style="gap:16px;margin-top:6px">
+        <div class="stat" style="flex:1"><span class="k">ANOVA F</span><span class="v num" id="rfF"></span></div>
+        <div class="stat" style="flex:1"><span class="k">F-TEST p</span><span class="v num" id="rfP"></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section B · discussion question 2</span></div>
+  <aside class="notes">The dots are the three group means with 95% CIs; they never move. The arrows are the coefficients: each starts at the reference mean and ends at another group's mean. Switch the reference and the arrows redraw, the table changes, and the F-test doesn't move, because the model's fitted values (the three means) are the same. Discussion: in a paper, pick the reference that makes the comparisons readers care about: the control, the most common group, or the lowest grade.</aside>
+</section>
+
+<!-- ============ 8 CORRELATION ============ -->
+<section class="slide" id="correlation">
+  <h1>A correlation is a line <em>too</em>.</h1>
+  <div class="controls"><div class="seg" id="crScale"><span class="lab">Axes in</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.1"><svg id="crSvg" width="780" height="420"></svg></div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <div class="stat"><span class="k">PEARSON r</span><span class="v num" id="crR"></span></div>
+      <div class="stat"><span class="k">SLOPE OF THE LINE</span><span class="v num" id="crB"></span></div>
+      <div class="stat"><span class="k">p-VALUE (BOTH)</span><span class="v num" id="crP"></span></div>
+      <p class="small" style="margin-top:10px" id="crMsg"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section C</span></div>
+  <aside class="notes">Tumour size against positive nodes. In raw units the slope says "each extra positive node goes with 0.86 mm larger tumours". Switch to standardized units (each variable minus its mean, divided by its SD): the cloud and line don't change shape, but now the slope equals r. Correlation is a regression slope with the units removed. The p-values are identical. Note the r² ≈ 0.11: a "highly significant" relationship that explains about a tenth of the variation.</aside>
+</section>
+
+<!-- ============ 9 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which statements are <em>correct</em>?</h1>
+  <p class="lead" style="font-size:21px">Model: tumour size ~ grade, with grade I as the reference. Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
+  <aside class="notes">Statement 2 is the AI failure point of this notebook. Statement 4 connects to diagnostics (Hands-on 3).</aside>
+</section>
+
+<!-- ============ 10 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>Coefficient or <em>group mean</em>?</h1>
+  <div class="row" style="gap:40px;margin-top:8px">
+    <div class="col" style="flex:1.2">
+      <p class="small" style="margin:0 0 6px">🎓 The notebook builds this prompt from your own model. With GBSG2 it reads:</p>
+      <div class="prompt" id="aiPrompt"></div>
+      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
+      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">A good answer computes:</p>
+      <div class="card" style="margin-bottom:14px"><span style="font-size:22px" id="aiGood"></span></div>
+      <p class="small" style="margin:0 0 4px">Watch for:</p>
+      <ul class="clean x">
+        <li style="font-size:19px" id="aiBad"></li>
+        <li style="font-size:19px">no mention of the reference group at all</li>
+        <li style="font-size:19px">"grade III causes larger tumours" (that's the next topic's failure point)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
+  <aside class="notes">Numbers on this slide are computed live from GBSG2. Ask pairs with the lung dataset what their prompt said: the same slip happens with ECOG groups. A useful habit: whenever you read a coefficient table, say out loud "compared with the reference".</aside>
+</section>
+
+<!-- ============ 11 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:40px">
+    <h1 style="font-size:56px">Three things to <em>keep</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:26px 0 40px;max-width:1080px">
+      <li>t-test, ANOVA and correlation are one model: outcome ~ predictors.</li>
+      <li>A group coefficient is a <em>difference from the reference</em>, not a mean.</li>
+      <li>The model carries the Student t-test's assumptions: <em>equal spread</em>, roughly normal noise.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">Adjustment and interactions</span>: add a second predictor and watch the first one change.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
+  <aside class="notes">Bridge to Hands-on 2: grade III tumours are larger than grade I, but grade III patients also have more positive nodes. What's the grade effect once nodes are in the model? That's adjustment, and it's one more term in the formula.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const hooks = {};
+const LV=['I','II','III'], GR=DATA.tgrade.map(v=>LV[v-1]), Y=DATA.tsize;
+function fitGroups(ref){const lev=[ref,...LV.filter(l=>l!==ref)];return{lev,fit:ols(dummies(GR,lev,ref).map(r=>[1,...r]),Y)}}
+function studentT(a,b){const na=a.length,nb=b.length,sp=((na-1)*varS(a)+(nb-1)*varS(b))/(na+nb-2),se=Math.sqrt(sp*(1/na+1/nb)),t=(mean(b)-mean(a))/se;return{t,p:tTwoSided(Math.abs(t),na+nb-2)}}
+const byG=l=>Y.filter((_,i)=>GR[i]===l);
+
+/* ---- 2 one model ---- */
+hooks['one-model']={init(){},enter(){const rows=[...document.querySelectorAll('#mapTab tr')].slice(1);rows.forEach(r=>r.classList.remove('on'));rows.forEach((r,i)=>setTimeout(()=>r.classList.add('on'),300+i*550))}};
+hooks['one-model'].init=hooks['one-model'].enter;
+
+/* ---- 3 line ---- */
+hooks['line']={init(){
+  let pair=['I','III'],shown=false;const W=800,H=430,m={l:60,r:40,t:20,b:60};
+  const svg=d3.select('#lnSvg');const x=d3.scaleLinear().domain([-0.45,1.45]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,125]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,6,W-m.l-m.r));
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Tumour size (mm)');
+  const xa=svg.append('g').attr('transform',`translate(0,${H-m.b})`);
+  const xl=svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle');
+  const dots=svg.append('g');const means=svg.append('g');
+  const line=svg.append('line').attr('stroke',C.sc1).attr('stroke-width',3).attr('stroke-linecap','round');
+  const b0=svg.append('g'),b1=svg.append('g');
+  function draw(){
+    const [a,b]=pair,va=byG(a),vb=byG(b),ma=mean(va),mb=mean(vb);
+    xa.call(g=>g.call(d3.axisBottom(x).tickValues([0,1]).tickFormat(d=>d?`x = 1  (grade ${b})`:`x = 0  (grade ${a})`).tickSize(5)).attr('class','axis'));
+    xl.text('dummy variable: "is grade '+b+'"');
+    const jr=mulberry32(3);const pts=[...va.map(v=>({x:0,v})),...vb.map(v=>({x:1,v}))];
+    dots.selectAll('circle').data(pts).join('circle').attr('r',2.6).attr('opacity',.55).attr('fill',d=>d.x?C.pc2:C.pop).transition().duration(400).attr('cx',d=>x(d.x+(jr()-.5)*.36)).attr('cy',d=>y(d.v));
+    means.selectAll('rect').data([[0,ma],[1,mb]]).join('rect').attr('width',90).attr('height',4).attr('rx',2).attr('fill',C.pc1).transition().duration(400).attr('x',d=>x(d[0])-45).attr('y',d=>y(d[1])-2);
+    const ext=t=>ma+(mb-ma)*t;
+    line.interrupt();
+    if(shown){line.attr('x1',x(0)).attr('y1',y(ma)).attr('x2',x(0)).attr('y2',y(ma)).transition().duration(900).attr('x1',x(-0.3)).attr('y1',y(ext(-0.3))).attr('x2',x(1.3)).attr('y2',y(ext(1.3)));}
+    else line.attr('x1',x(0)).attr('x2',x(0)).attr('y1',y(ma)).attr('y2',y(ma));
+    b0.selectAll('*').remove();b1.selectAll('*').remove();
+    if(shown){
+      b0.append('circle').attr('cx',x(0)).attr('cy',y(ma)).attr('r',7).attr('fill',C.pc2).attr('stroke','#fff').attr('stroke-width',2);
+      b0.append('text').attr('class','lbl purple').attr('x',x(0)-56).attr('y',y(ma)-10).attr('text-anchor','end').text(`b₀ = ${fmt1(ma)}`);
+      b1.append('path').attr('d',`M${x(1)+60},${y(ma)}H${x(1)+70}V${y(mb)}H${x(1)+60}`).attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2);
+      b1.append('line').attr('x1',x(0)).attr('x2',x(1)+60).attr('y1',y(ma)).attr('y2',y(ma)).attr('stroke',C.sc1).attr('stroke-dasharray','3 3').attr('opacity',.6);
+      b1.append('text').attr('class','lbl pink').attr('x',x(1)+76).attr('y',(y(ma)+y(mb))/2+5).text(`b₁ = ${mb-ma>=0?'+':''}${fmt1(mb-ma)}`);
+      b1.attr('opacity',0).transition().delay(800).duration(300).attr('opacity',1);
+    }
+    document.getElementById('lnB0').innerHTML=shown?`${fmt1(ma)} <small>mm (mean of grade ${a})</small>`:'–';
+    document.getElementById('lnB1').innerHTML=shown?`${mb-ma>=0?'+':''}${fmt1(mb-ma)} <small>mm (${b} − ${a})</small>`:'–';
+  }
+  segButtons('lnPair',[['I-II','I vs II'],['I-III','I vs III'],['II-III','II vs III']],'I-III',v=>{pair=v.split('-');draw()});
+  document.getElementById('lnShow').onclick=()=>{shown=true;draw()};draw();
+}};
+
+/* ---- 4 dummies ---- */
+hooks['dummies']={init(){
+  const {fit}=fitGroups('I');const b=fit.coef.map(c=>c.est);
+  const r=mulberry32(12);const pick=[];['I','II','III','II','I','III','II','III'].forEach(g=>{const idx=GR.map((v,i)=>v===g?i:-1).filter(i=>i>=0);pick.push(idx[Math.floor(r()*idx.length)])});
+  const tb=document.getElementById('dTab');
+  tb.innerHTML='<tr><th>patient</th><th>grade</th><th>[grade II]</th><th>[grade III]</th><th>tumour (mm)</th></tr>'+pick.map((i,k)=>{const g=GR[i];return`<tr data-g="${g}"><td>${k+1}</td><td>${g}</td><td class="${g==='II'?'one':''}">${g==='II'?1:0}</td><td class="${g==='III'?'one':''}">${g==='III'?1:0}</td><td>${Y[i]}</td></tr>`}).join('');
+  const msg=document.getElementById('dPred');
+  tb.querySelectorAll('tr[data-g]').forEach(tr=>{tr.onmouseenter=()=>{const g=tr.dataset.g;const pred=g==='I'?`b₀ = ${fmt1(b[0])}`:g==='II'?`b₀ + b₁ = ${fmt1(b[0])} + ${fmt1(b[1])} = ${fmt1(b[0]+b[1])}`:`b₀ + b₂ = ${fmt1(b[0])} + ${fmt1(b[2])} = ${fmt1(b[0]+b[2])}`;
+    msg.innerHTML=`Grade ${g} prediction: <b style="color:var(--pc2)">${pred} mm</b> (the grade ${g} mean)`}});
+}};
+
+/* ---- 6 identical ---- */
+hooks['identical']={init(){
+  function draw(v){const [a,b]=v.split('-'),va=byG(a),vb=byG(b);
+    const st=studentT(va,vb),wl=welch(vb,va);
+    const fit=ols(GR.map((g,i)=>[g===a||g===b?1:null,g===b?1:0]).filter(r=>r[0]!==null),GR.map((g,i)=>[g,Y[i]]).filter(r=>r[0]===a||r[0]===b).map(r=>r[1]));
+    const c=fit.coef[1];
+    document.getElementById('idTab').innerHTML=`<tr><th>Method</th><th>Difference (${b} − ${a})</th><th>t</th><th>p</th></tr>
+      <tr class="same"><td>Student t-test</td><td>${fmt2(mean(vb)-mean(va))} mm</td><td>${d3.format('.4f')(st.t)}</td><td>${d3.format('.6f')(st.p)}</td></tr>
+      <tr class="same"><td>Linear model, slope</td><td>${fmt2(c.est)} mm</td><td>${d3.format('.4f')(c.t)}</td><td>${d3.format('.6f')(c.p)}</td></tr>
+      <tr><td>Welch t-test</td><td>${fmt2(wl.diff)} mm</td><td>${d3.format('.4f')(wl.t)}</td><td>${d3.format('.6f')(wl.p)}</td></tr>`;
+    document.getElementById('idSd').innerHTML=`Group SDs: grade ${a} ${fmt1(Math.sqrt(varS(va)))} mm (n = ${va.length}), grade ${b} ${fmt1(Math.sqrt(varS(vb)))} mm (n = ${vb.length}).`}
+  segButtons('idPair',[['I-II','I vs II'],['I-III','I vs III'],['II-III','II vs III']],'I-III',draw);draw('I-III');
+}};
+
+/* ---- 7 reference ---- */
+hooks['reference']={init(){
+  const W=660,H=410,m={l:60,r:20,t:30,b:50};const svg=d3.select('#rfSvg');
+  const x=d3.scalePoint().domain(LV).range([m.l+90,W-m.r-90]),y=d3.scaleLinear().domain([22,36]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,7,W-m.l-m.r));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>g.call(d3.axisBottom(x).tickFormat(d=>'grade '+d).tickSize(0).tickPadding(10)).attr('class','axis'));
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Mean tumour size (mm), 95% CI');
+  svg.append('defs').append('marker').attr('id','rfAr').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M0,0L10,5L0,10z').attr('fill',C.sc1);
+  const st=LV.map(l=>{const v=byG(l),mu=mean(v),se=Math.sqrt(varS(v)/v.length),tc=tQuantile(.975,v.length-1);return{l,mu,lo:mu-tc*se,hi:mu+tc*se}});
+  const arrows=svg.append('g');
+  const g=svg.append('g').selectAll('g').data(st).join('g');
+  g.append('line').attr('x1',d=>x(d.l)).attr('x2',d=>x(d.l)).attr('y1',d=>y(d.lo)).attr('y2',d=>y(d.hi)).attr('stroke',C.pc1).attr('stroke-width',2);
+  const dots=g.append('circle').attr('cx',d=>x(d.l)).attr('cy',d=>y(d.mu)).attr('r',8).attr('stroke','#fff').attr('stroke-width',2);
+  g.append('text').attr('class','lbl').attr('x',d=>x(d.l)+14).attr('y',d=>y(d.mu)+5).style('font-size','14px').text(d=>fmt1(d.mu));
+  function draw(ref){const {lev,fit}=fitGroups(ref);const mref=st.find(s=>s.l===ref).mu;
+    dots.transition().duration(400).attr('fill',d=>d.l===ref?C.pc2:C.pop).attr('r',d=>d.l===ref?10:8);
+    arrows.selectAll('*').remove();
+    st.filter(s=>s.l!==ref).forEach((s,k)=>{const xo=x(s.l)-30;
+      arrows.append('line').attr('x1',x(ref)).attr('x2',xo).attr('y1',y(mref)).attr('y2',y(mref)).attr('stroke',C.pc2).attr('stroke-dasharray','3 3').attr('opacity',.6);
+      const a=arrows.append('line').attr('x1',xo).attr('x2',xo).attr('y1',y(mref)).attr('y2',y(mref)).attr('stroke',C.sc1).attr('stroke-width',2.5).attr('marker-end','url(#rfAr)');
+      a.transition().delay(200+k*250).duration(500).attr('y2',y(s.mu)+(s.mu>mref?6:-6));
+      arrows.append('text').attr('class','lbl pink').attr('x',xo-8).attr('y',(y(mref)+y(s.mu))/2+5).attr('text-anchor','end').style('font-size','15px').text(`${s.mu-mref>=0?'+':''}${fmt1(s.mu-mref)}`)});
+    document.getElementById('rfTab').innerHTML='<tr><th>Term</th><th>Estimate</th><th>p</th></tr>'+fit.coef.map((c,i)=>`<tr><td>${i?`grade ${lev[i]} vs ${ref}`:`Intercept (grade ${ref} mean)`}</td><td>${i&&c.est>=0?'+':''}${fmt2(c.est)}</td><td>${fmtP(c.p)}</td></tr>`).join('');
+    document.getElementById('rfF').textContent=fmt2(fit.F);document.getElementById('rfP').textContent=fmtP(fit.Fp);}
+  segButtons('rfRef',LV.map(l=>[l,'grade '+l]),'I',draw);draw('I');
+}};
+
+/* ---- 8 correlation ---- */
+hooks['correlation']={init(){
+  const X=DATA.pnodes,W=780,H=420,m={l:60,r:20,t:20,b:50};let z=false;
+  const svg=d3.select('#crSvg');const x=d3.scaleLinear().range([m.l,W-m.r]),y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gx=svg.append('g').attr('transform',`translate(0,${H-m.b})`),gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  const xl=svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle');
+  const yl=svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle');
+  const jr=mulberry32(8);const jit=X.map(()=>(jr()-.5)*.5);
+  const dots=svg.append('g').selectAll('circle').data(d3.range(X.length)).join('circle').attr('r',3).attr('fill',C.pc2).attr('opacity',.4);
+  const line=svg.append('line').attr('stroke',C.sc1).attr('stroke-width',3);
+  const mx=mean(X),my=mean(Y),sx=Math.sqrt(varS(X)),sy=Math.sqrt(varS(Y));
+  const raw=ols(X.map(v=>[1,v]),Y),zs=ols(X.map(v=>[1,(v-mx)/sx]),Y.map(v=>(v-my)/sy));
+  const r=raw.coef[1].est*sx/sy;
+  function draw(){
+    const fx=i=>z?(X[i]+jit[i]-mx)/sx:X[i]+jit[i],fy=i=>z?(Y[i]-my)/sy:Y[i];
+    if(z){x.domain([-1.2,8.8]);y.domain([-2,6.5])}else{x.domain([0,52]);y.domain([0,125])}
+    gx.transition().duration(700).call(g=>axisB(g,x,8));axisL(gy.transition().duration(700),y,6,W-m.l-m.r);
+    xl.text(z?'Positive nodes (standardized: SDs from the mean)':'Positive lymph nodes');yl.text(z?'Tumour size (standardized)':'Tumour size (mm)');
+    dots.transition().duration(700).attr('cx',i=>x(fx(i))).attr('cy',i=>y(fy(i)));
+    const f=z?zs:raw,[lo,hi]=x.domain();line.transition().duration(700).attr('x1',x(lo)).attr('x2',x(hi)).attr('y1',y(f.coef[0].est+f.coef[1].est*lo)).attr('y2',y(f.coef[0].est+f.coef[1].est*hi));
+    document.getElementById('crR').textContent=d3.format('.3f')(r);
+    document.getElementById('crB').innerHTML=z?`${d3.format('.3f')(zs.coef[1].est)} <small>SD per SD</small>`:`${d3.format('.3f')(raw.coef[1].est)} <small>mm per node</small>`;
+    document.getElementById('crP').textContent=fmtP(raw.coef[1].p);
+    document.getElementById('crMsg').innerHTML=z?'In standardized units the slope <b>equals r</b>.':`r² = ${fmt2(r*r)}: very significant, yet nodes explain only about ${Math.round(100*r*r)}% of the variation in tumour size.`;
+  }
+  segButtons('crScale',[[false,'original units'],[true,'standardized units']],z,v=>{z=v;draw()});draw();
+}};
+
+/* ---- 9 statements ---- */
+hooks['statements']={init(){qcards('qcards',[
+  [true,'The intercept is the average tumour size of grade I patients.','Correct, in a model whose only predictor is grade: all dummies are 0 for the reference group.'],
+  [false,'The coefficient for grade III is the average tumour size of grade III patients.','It is the difference from grade I. The grade III mean is intercept + coefficient.'],
+  [false,'Choosing grade II as the reference would change the ANOVA F-test.','The fitted group means are the same whichever group is the reference, so the F-test is unchanged. Only the coefficients describe them differently.'],
+  [true,'Like the Student t-test, this model assumes the same spread of tumour sizes in every grade.','Correct. One residual variance for everyone; checking it is Hands-on 3.']])}};
+
+/* ---- 10 AI ---- */
+hooks['ai-tutor']={init(){
+  const {fit}=fitGroups('I');const b0=fit.coef[0].est,b2=fit.coef[2].est;
+  document.getElementById('aiPrompt').textContent=`My linear model of Tumour size (mm) on Tumour grade gives an intercept of ${fmt2(b0)} and a coefficient of ${d3.format('.3f')(b2)} for "tgrade: III vs I". What is the average Tumour size (mm) in that group, and what does the coefficient mean?`;
+  document.getElementById('aiGood').innerHTML=`grade III mean = ${fmt2(b0)} + ${fmt2(b2)} = <b style="color:var(--pc2)">${fmt2(b0+b2)} mm</b>; the coefficient is the difference from grade I.`;
+  document.getElementById('aiBad').innerHTML=`"the average tumour size in grade III is ${fmt2(b2)} mm"`;
+}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>

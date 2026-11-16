@@ -499,6 +499,22 @@ function logRank(t1,e1,t2,e2){const T=[...new Set([...t1.filter((_,i)=>e1[i]),..
   for(const t of T){let n1=0,n2=0,d1=0,d2=0;t1.forEach((v,i)=>{if(v>=t){n1++;if(v===t&&e1[i])d1++}});t2.forEach((v,i)=>{if(v>=t){n2++;if(v===t&&e2[i])d2++}});
     const n=n1+n2,d=d1+d2;O+=d1;E+=d*n1/n;if(n>1)V+=d*(n1/n)*(n2/n)*(n-d)/(n-1)}
   const stat=(O-E)**2/V;return{stat,p:chi2SF(stat,1),O,E}}
+/* ---------- linear model (OLS), checked against statsmodels ---------- */
+function matInv(A){const n=A.length,M=A.map((r,i)=>[...r,...A.map((_,j)=>i===j?1:0)]);
+  for(let c=0;c<n;c++){let p=c;for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>Math.abs(M[p][c]))p=r;[M[c],M[p]]=[M[p],M[c]];
+    const v=M[c][c];for(let j=0;j<2*n;j++)M[c][j]/=v;for(let r=0;r<n;r++)if(r!==c){const f=M[r][c];if(f)for(let j=0;j<2*n;j++)M[r][j]-=f*M[c][j]}}
+  return M.map(r=>r.slice(n))}
+const fSF=(F,d1,d2)=>F<=0?1:ibeta(d2/(d2+d1*F),d2/2,d1/2);
+// X: array of rows (include a leading 1 for the intercept); returns coefficients with SE, t, p, 95% CI, and the overall F-test
+function ols(X,y){const n=y.length,k=X[0].length,XtX=Array.from({length:k},()=>new Array(k).fill(0)),Xty=new Array(k).fill(0);
+  for(let i=0;i<n;i++){const r=X[i];for(let a=0;a<k;a++){Xty[a]+=r[a]*y[i];for(let b=0;b<k;b++)XtX[a][b]+=r[a]*r[b]}}
+  const V=matInv(XtX),b=V.map(row=>row.reduce((s,v,j)=>s+v*Xty[j],0));let rss=0;const my=mean(y);let tss=0;const fitted=new Array(n);
+  for(let i=0;i<n;i++){const f=X[i].reduce((s,v,j)=>s+v*b[j],0);fitted[i]=f;rss+=(y[i]-f)**2;tss+=(y[i]-my)**2}
+  const df=n-k,s2=rss/df,se=V.map((r,i)=>Math.sqrt(r[i]*s2)),tc=tQuantile(.975,df);
+  const coef=b.map((v,i)=>({est:v,se:se[i],t:v/se[i],p:tTwoSided(Math.abs(v/se[i]),df),lo:v-tc*se[i],hi:v+tc*se[i]}));
+  const F=((tss-rss)/(k-1))/s2;return{coef,df,rss,sigma:Math.sqrt(s2),r2:1-rss/tss,F,Fp:k>1?fSF(F,k-1,df):NaN,fitted,resid:y.map((v,i)=>v-fitted[i])}}
+// design matrix helpers
+function dummies(vals,levels,ref){return vals.map(v=>levels.filter(l=>l!==ref).map(l=>v===l?1:0))}
 /* ---------- concept-check cards: Q = [[isCorrect, statement, explanation], ...] ---------- */
 function qcards(id,Q){const box=document.getElementById(id);
   Q.forEach(([ok,q,a],i)=>{const d=document.createElement('div');d.className='qcard '+(ok?'ok':'no');
