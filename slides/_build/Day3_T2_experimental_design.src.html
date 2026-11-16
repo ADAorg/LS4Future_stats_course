@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 3 · Experimental design</title>
+<style>/*CSS*/</style>
+<style>
+.ttab{border-collapse:collapse;font-size:17px;font-variant-numeric:tabular-nums;width:100%}
+.ttab th{font-weight:400;font-size:13px;letter-spacing:.06em;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
+.ttab td{padding:6px 8px;border-bottom:1px solid var(--line)}
+.ttab td.hi{color:var(--sc1)} .ttab td.pu{color:var(--pc2)}
+.check li{font-size:21px;line-height:1.45;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">Design <em>beats</em> analysis.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:860px;margin:0">Pseudoreplication, batch effects, blocking and randomisation: the mistakes no statistical test can fix afterwards.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 3 · Topic 2 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">Everything so far assumed the data came from a sensible design. This session is about the decisions made before the first measurement. "To consult the statistician after an experiment is finished is often merely to ask him to conduct a post mortem examination" (Fisher, 1938). Every slide is a simulation where we know the truth.</aside>
+</section>
+
+<!-- ============ 2 EXPERIMENTAL UNIT ============ -->
+<section class="slide" id="unit">
+  <h1>What is <em>n</em>?</h1>
+  <div class="controls"><div class="seg" id="unS"><span class="lab">The treatment is…</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.9"><svg id="unSvg" width="740" height="420"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stat"><span class="k">EXPERIMENTAL UNIT</span><span class="v" id="unU" style="font-size:26px"></span></div>
+      <div class="stat"><span class="k">n PER GROUP</span><span class="v num" id="unN"></span></div>
+      <div class="stat"><span class="k">MEASUREMENTS PER GROUP</span><span class="v num" id="unM" style="color:var(--muted)"></span></div>
+      <p class="small" id="unMsg"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section A</span></div>
+  <aside class="notes">Same animals, same cells, three different experiments. The experimental unit is the smallest thing that could independently receive a different treatment. Drug in the drinking water: the whole cage gets it, so cages are the units, n = 3 per group, whatever you measure inside them. Injection with mice randomised within cages: each mouse is a unit, and the cage becomes a block. One mouse per group: n = 1, and no number of cells fixes that; any difference could be that mouse.</aside>
+</section>
+
+<!-- ============ 3 PSEUDOREPLICATION ============ -->
+<section class="slide" id="pseudo">
+  <h1>More cells, <em>more</em> false positives.</h1>
+  <div class="controls"><div class="seg" id="psC"><span class="lab">Cells per mouse</span></div><button class="btn" id="psOne">1 experiment</button><button class="btn primary" id="psMany">+ 500 experiments</button></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.4"><svg id="psSvg" width="560" height="410"></svg></div>
+    <div class="col" style="flex:1"><svg id="psBar" width="420" height="250"></svg>
+      <p class="small" id="psP" style="margin-top:6px"></p><p class="small" id="psMsg"></p></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section A</span></div>
+  <aside class="notes">3 control and 3 treated mice; the treatment does nothing. Mice differ from each other as much as cells within a mouse do (ICC = 0.5). The cell-level t-test treats 150 cells as 150 independent patients: its standard error is far too small, so it is "significant" in most experiments. The test on mouse averages stays at 5%. Change cells per mouse and run again: the cell-level error rate gets worse with more cells, because the extra precision is about each mouse, not about mice in general.</aside>
+</section>
+
+<!-- ============ 4 EFFECTIVE N ============ -->
+<section class="slide" id="neff">
+  <h1>Your <em>effective</em> sample size.</h1>
+  <div class="controls"><span class="seg"><span class="lab">ICC: how alike are cells from the same mouse?</span></span><input type="range" id="neI" min="0.02" max="0.9" step="0.01" value="0.5" style="width:220px;accent-color:#9933ff"><span class="num" id="neIv" style="font-size:18px"></span></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.8"><svg id="neSvg" width="720" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stat"><span class="k">DESIGN EFFECT</span><span class="v num" id="neD" style="font-size:22px"></span></div>
+      <p class="small" style="margin-top:10px">n<sub>eff</sub> = (mice × cells) / [1 + (cells − 1) × ICC]</p>
+      <p class="callout" style="margin-top:14px;font-size:18px">However many cells you measure, n<sub>eff</sub> never exceeds mice / ICC. To gain information, add <em>animals</em>.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · why it happens</span></div>
+  <aside class="notes">The intraclass correlation (ICC) is the share of the total variation that lies between mice. With ICC = 0.5, after a handful of cells each extra cell adds almost nothing: the curves flatten at mice / ICC. Doubling the mice doubles the ceiling. Slide the ICC down: if mice really were nearly identical, cells would carry more information; but you rarely know that, and a mixed model or mouse means handle both cases correctly.</aside>
+</section>
+
+<!-- ============ 5 BATCH ============ -->
+<section class="slide" id="batch">
+  <h1>When treatment and batch <em>line up</em>.</h1>
+  <div class="controls"><div class="seg" id="baD"><span class="lab">Design</span></div><button class="btn" id="baNew">↻ new experiment</button></div>
+  <div class="row" style="gap:22px">
+    <div class="col" style="flex:1.25"><svg id="baSvg" width="500" height="400"></svg></div>
+    <div class="col" style="flex:.55"><svg id="baMat" width="210" height="400"></svg></div>
+    <div class="col" style="flex:1"><table class="ttab" id="baTab"></table><p class="small" id="baMsg" style="margin-top:12px"></p></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section B</span></div>
+  <aside class="notes">12 samples, 6 per run; run B reads 1.5 units higher; the treatment does nothing. Confounded: controls in run A, treated in run B. Look at the design matrix: the treatment column and the batch column are identical, so no model can tell them apart. The false-positive rate is about 64%, and adding batch to the model is impossible: the software will drop a column or refuse. Balanced: every run has 3 of each; batch no longer biases anything, and including it in the model removes its noise and increases power.</aside>
+</section>
+
+<!-- ============ 6 BLOCKING ============ -->
+<section class="slide" id="block">
+  <h1>Blocking: compare <em>like with like</em>.</h1>
+  <div class="controls"><span class="seg"><span class="lab">How different are donors? (block SD)</span></span><input type="range" id="blS" min="0" max="2" step="0.25" value="1" style="width:220px;accent-color:#9933ff"><span class="num" id="blSv" style="font-size:18px"></span><button class="btn" id="blNew">↻ new experiment</button></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1"><svg id="blSvg" width="400" height="400"></svg></div>
+    <div class="col" style="flex:1.35"><svg id="blPow" width="520" height="320"></svg><p class="small" id="blMsg" style="margin-top:4px"></p></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section C</span></div>
+  <aside class="notes">Six donors, each giving one control and one treated dish; the true effect is +1. Every line rises: within a donor the treatment effect is obvious. But donors differ, so the clouds of control and treated values overlap, and an unpaired test sees mostly donor noise. The paired test (or a model with + donor) compares each donor with itself: its power doesn't depend on donor variation at all. You saw the same thing with real data on Day 2: airway with cell line as the block gave about 40% more significant genes.</aside>
+</section>
+
+<!-- ============ 7 RANDOMISATION ============ -->
+<section class="slide" id="random">
+  <h1>Randomise, or <em>bias</em> creeps in.</h1>
+  <div class="controls"><div class="seg" id="raA"><span class="lab">Allocation</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1"><svg id="raMice" width="420" height="400"></svg></div>
+    <div class="col" style="flex:1.3"><svg id="raHist" width="520" height="300"></svg>
+      <table class="ttab" id="raTab" style="margin-top:8px"></table></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section D</span></div>
+  <aside class="notes">20 mice; heavier mice have higher outcome values; the treatment does nothing. "First caught": heavier, slower mice tend to be caught first, so the treated group is heavier, and the estimated effect is shifted by about +1 in every experiment: 40% false positives. Random allocation removes the bias. Matched pairs (rank by weight, pair neighbours, flip a coin within each pair) also removes it and makes the estimate more precise: blocking and randomisation together. Randomisation also balances what you didn't measure.</aside>
+</section>
+
+<!-- ============ 8 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on: <em>experimental design</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day3_HO2_experimental_design.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">DATA</p>
+        <p style="margin:0 0 22px;font-size:22px;color:rgba(255,255,255,.85)">All simulated: 2,000 experiments per scenario, truth always known.</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTIONS</p>
+        <p style="margin:0;font-size:20px;line-height:1.55;color:rgba(255,255,255,.85)">A · pseudoreplication &nbsp; B · batches<br>C · blocking &nbsp; D · randomisation &nbsp; E · plan your own experiment</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">With 200 cells per mouse and no real effect, how often is the cell-level t-test "significant"?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">IN SECTION E</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">Fill in the table for one of <b>your own</b> experiments. We'll discuss two or three.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 40 minutes · in pairs</span></div>
+  <aside class="notes">Seed = pair number. Spread cells_per_mouse (5, 20, 50, 200) and block_sd (0, 0.5, 1, 2) across pairs so the shared sheet fills a whole curve. Answer to the guess: about 86%.</aside>
+</section>
+
+<!-- ============ 9 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which statements are <em>correct</em>?</h1>
+  <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
+  <aside class="notes">Statement 1 is the pseudoreplication failure point; statement 3 is the batch-correction one. Statement 4: fish in a tank with the drug in the water.</aside>
+</section>
+
+<!-- ============ 10 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>Ask the tutor: <em>what is n?</em></h1>
+  <div class="row" style="gap:36px;margin-top:6px">
+    <div class="col" style="flex:1.1">
+      <p class="small" style="margin:0 0 6px">🎓 Paste into Claude / ChatGPT:</p>
+      <div class="prompt">I treated 3 mice with a drug and 3 with vehicle, then measured mitochondrial length in 50 cells per mouse. A t-test on the 150 vs 150 cells gives p = 0.0003. My reviewer says this is pseudoreplication. Is she right? What should I report as n, and how should I reanalyse?</div>
+      <div class="chips" style="margin-top:12px"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+      <p class="small" style="margin:14px 0 0">Then: <em>"All my controls were sequenced in run 1 and all treated samples in run 2. Can I fix this with batch correction?"</em></p>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">Watch for:</p>
+      <ul class="clean x" style="margin-bottom:12px"><li style="font-size:19px">fixes that keep n = 150: "use a Mann–Whitney test", "report the SEM of the cells"</li><li style="font-size:19px">"use a mixed model" with no warning that it still has only 3 mice per group</li><li style="font-size:19px">"ComBat can remove the batch effect" for a fully confounded design</li></ul>
+      <p class="small" style="margin:0 0 4px">A good answer:</p>
+      <div class="card"><span style="font-size:18px">"Yes. The mouse is the experimental unit, so n = 3 per group. Average the cells per mouse and compare 3 vs 3 (or fit a mixed model with mouse as a random effect); expect a much larger p-value. Report the number of mice and cells separately. For more power, add mice, not cells."</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure points</span></div>
+  <aside class="notes">Most tutors get the diagnosis right and the fix half right. The batch question is the sharper test: a good answer says no correction can separate treatment from batch here, and proposes re-running a subset of samples across runs.</aside>
+</section>
+
+<!-- ============ 11 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:30px">
+    <h1 style="font-size:56px">Five questions <em>before</em> the first sample.</h1>
+    <ol class="big" style="padding-left:34px;margin:22px 0 30px;max-width:1100px">
+      <li style="font-size:26px">What does the treatment get applied to? That is your <em>n</em>.</li>
+      <li style="font-size:26px">What else varies a lot (donor, litter, day, plate)? <em>Block</em> on it.</li>
+      <li style="font-size:26px">Is every condition in every <em>batch</em>?</li>
+      <li style="font-size:26px">How is allocation <em>randomised</em>, and who is blinded?</li>
+      <li style="font-size:26px">Which analysis matches this structure? Decide it <em>now</em>.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">Capstone</span>: a full analysis of the lung cancer data, from question to report, with AI as calculator and tutor.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
+  <aside class="notes">Rule of thumb: block what you can, randomise what you can't. Writing the analysis plan before the experiment (question 5) is the cheapest protection against both bad design and p-hacking (Day 1).</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>
+const hooks = {};
+const pct = d3.format('.0%');
+function tPooled(a,b){const na=a.length,nb=b.length,ma=mean(a),mb=mean(b);let s=0;for(const v of a)s+=(v-ma)**2;for(const v of b)s+=(v-mb)**2;
+  const df=na+nb-2,sp=Math.sqrt(s/df*(1/na+1/nb)),t=(mb-ma)/sp;return{diff:mb-ma,t,df,p:tTwoSided(Math.abs(t),df)}}
+const TRT=C.pc2,CTL=C.ink2;
+
+/* ---- 2 experimental unit ---- */
+hooks['unit']={init(){
+  const SC={
+    water:{lab:'in the drinking water',unit:'cage',n:3,m:36,msg:'The whole cage drinks the same water: cages, not mice, are independent replicates. Mice in a cage share water, food, stress and microbiota.'},
+    inject:{lab:'injected, randomised within cages',unit:'mouse',n:9,m:36,msg:'Each mouse can get its own treatment, so the mouse is the unit. Cages become <b>blocks</b>: every cage has both treatments.'},
+    one:{lab:'given to one mouse per group',unit:'nothing: n = 1',n:1,m:36,msg:'One treated mouse vs one control mouse, many cells each. Any difference could be the treatment or just those two mice: <b>no replication</b>.'}};
+  let k='water';const svg=d3.select('#unSvg');
+  const cages=[];for(let c=0;c<6;c++)cages.push({c,x:20+(c%3)*240,y:c<3?20:225});
+  const mice=[];cages.forEach(cg=>{for(let j=0;j<3;j++)mice.push({cg,j,x:cg.x+40+j*70,y:cg.y+95})});
+  const cageR=svg.selectAll('rect.cage').data(cages).join('rect').attr('class','cage').attr('x',d=>d.x).attr('y',d=>d.y).attr('width',220).attr('height',180).attr('rx',14).attr('fill','none');
+  const cageT=svg.selectAll('text.ct').data(cages).join('text').attr('class','lbl ct').attr('x',d=>d.x+12).attr('y',d=>d.y+22).style('font-size','14px').text(d=>`cage ${d.c+1}`);
+  const ms=svg.selectAll('g.m').data(mice).join('g').attr('class','m').attr('transform',d=>`translate(${d.x},${d.y})`);
+  ms.append('circle').attr('class','halo').attr('r',30).attr('fill','none').attr('stroke-width',3);
+  ms.append('ellipse').attr('class','body').attr('rx',20).attr('ry',14);
+  ms.append('circle').attr('class','head').attr('cx',20).attr('cy',-8).attr('r',8);
+  const cl=svg.append('g');mice.forEach(mo=>{for(let q=0;q<4;q++)cl.append('circle').datum(mo).attr('cx',mo.x-14+q*9).attr('cy',mo.y+40).attr('r',3.2).attr('fill',C.muted)});
+  svg.append('text').attr('class','lbl').attr('x',20).attr('y',418).style('font-size','14px').style('fill',C.muted).text('small dots: 4 cells measured per mouse');
+  function draw(){const s=SC[k];
+    const trtMouse=mo=>k==='inject'?(mo.j+mo.cg.c)%2===1:mo.cg.c>=3;
+    const used=mo=>k!=='one'||(mo.j===1&&(mo.cg.c===1||mo.cg.c===4));
+    cageR.transition().duration(500).attr('stroke',d=>k==='water'?C.sc1:C.line).attr('stroke-width',d=>k==='water'?3:1.5).attr('fill',d=>k==='water'?(d.c>=3?'#f3e8ff':'#f2f0f5'):'none');
+    ms.transition().duration(500).attr('opacity',mo=>used(mo)?1:.12);
+    ms.select('.body').transition().duration(500).attr('fill',mo=>trtMouse(mo)?TRT:CTL);ms.select('.head').transition().duration(500).attr('fill',mo=>trtMouse(mo)?TRT:CTL);
+    ms.select('.halo').transition().duration(500).attr('stroke',mo=>k==='water'?'none':C.sc1).attr('opacity',mo=>used(mo)?1:0);
+    cl.selectAll('circle').transition().duration(500).attr('opacity',mo=>used(mo)?1:.12).attr('r',k==='one'?3.2:3.2);
+    document.getElementById('unU').innerHTML=s.unit;document.getElementById('unN').innerHTML=`${s.n}`;
+    document.getElementById('unM').innerHTML=k==='one'?'100s of cells <small>from 1 mouse</small>':`${s.m} <small>cells (${s.m/4} mice)</small>`;
+    document.getElementById('unMsg').innerHTML=s.msg+'<br><span style="color:var(--pc2)">● treated</span> &nbsp; <span style="color:var(--ink2)">● control</span> &nbsp; <span style="color:var(--sc1)">pink outline: the experimental unit</span>'}
+  segButtons('unS',Object.entries(SC).map(([k,v])=>[k,v.lab]),k,v=>{k=v;draw()});draw();
+}};
+
+/* ---- 3 pseudoreplication ---- */
+hooks['pseudo']={init(){
+  let cpm=50,tally={n:0,cells:0,mice:0};const MPG=3,r=mulberry32(4);
+  function experiment(){const g=[[],[]],mm=[[],[]];for(let gi=0;gi<2;gi++)for(let mo=0;mo<MPG;mo++){const lvl=randn(r),ys=[];for(let c=0;c<cpm;c++)ys.push(lvl+randn(r));g[gi].push(ys);mm[gi].push(mean(ys))}
+    return{g,mm,pc:tPooled(g[0].flat(),g[1].flat()).p,pm:tPooled(mm[0],mm[1]).p}}
+  const W=560,H=410,m={l:50,r:20,t:20,b:40},svg=d3.select('#psSvg');
+  const x=d3.scaleBand().domain(d3.range(6)).range([m.l,W-m.r]).padding(.25),y=d3.scaleLinear().domain([-4.5,4.5]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,6,W-m.l-m.r));
+  svg.append('text').attr('class','lbl').attr('x',(x(0)+x(2)+x.bandwidth())/2).attr('y',H-12).attr('text-anchor','middle').text('control mice');
+  svg.append('text').attr('class','lbl purple').attr('x',(x(3)+x(5)+x.bandwidth())/2).attr('y',H-12).attr('text-anchor','middle').text('treated mice');
+  const dots=svg.append('g'),dia=svg.append('g');
+  const W2=420,H2=250,m2={l:150,r:50,t:56,b:40},bs=d3.select('#psBar');
+  const bx=d3.scaleLinear().domain([0,1]).range([m2.l,W2-m2.r]),by=d3.scaleBand().domain(['cells','mice']).range([m2.t,H2-m2.b]).padding(.35);
+  bs.append('g').attr('transform',`translate(0,${H2-m2.b})`).call(g=>axisB(g,bx,5,d3.format('.0%')));
+  bs.append('line').attr('x1',bx(.05)).attr('x2',bx(.05)).attr('y1',m2.t-8).attr('y2',H2-m2.b).attr('stroke',C.sc1).attr('stroke-dasharray','4 4');
+  bs.append('text').attr('class','lbl pink').attr('x',bx(.05)+4).attr('y',m2.t-12).style('font-size','13px').text('5% (correct)');
+  bs.append('text').attr('class','lbl').attr('x',0).attr('y',14).style('font-size','14px').style('fill',C.muted).text('share of null experiments with p < 0.05');
+  const lab={cells:'t-test on cells',mice:'t-test on mouse means'};
+  bs.selectAll('text.bl').data(['cells','mice']).join('text').attr('class','lbl bl').attr('x',m2.l-10).attr('text-anchor','end').attr('y',d=>by(d)+by.bandwidth()/2+5).style('font-size','15px').text(d=>lab[d]);
+  const bars=bs.selectAll('rect.b').data(['cells','mice']).join('rect').attr('class','b').attr('x',bx(0)).attr('y',d=>by(d)).attr('height',by.bandwidth()).attr('fill',d=>d==='cells'?C.sc1:C.pc2);
+  const bt=bs.selectAll('text.bv').data(['cells','mice']).join('text').attr('class','lbl bv num').attr('y',d=>by(d)+by.bandwidth()/2+5).style('font-size','15px');
+  function show(e){const jr=mulberry32(9);dots.selectAll('*').remove();dia.selectAll('*').remove();
+    e.g.forEach((gr,gi)=>gr.forEach((ys,mo)=>{const i=gi*3+mo,cx=x(i)+x.bandwidth()/2;
+      dots.selectAll(null).data(ys).join('circle').attr('cx',()=>cx+(jr()-.5)*x.bandwidth()*.8).attr('cy',v=>y(v)).attr('r',cpm>60?1.8:2.8).attr('fill',gi?TRT:CTL).attr('opacity',cpm>60?.3:.45);
+      dia.append('path').attr('d',d3.symbol(d3.symbolDiamond,180)()).attr('transform',`translate(${cx},${y(mean(ys))})`).attr('fill',gi?TRT:CTL).attr('stroke','#fff').attr('stroke-width',2)}));
+    document.getElementById('psP').innerHTML=`This experiment: cells p = <b style="color:var(--sc1)">${fmtP(e.pc)}</b> · mouse means p = <b style="color:var(--pc2)">${fmtP(e.pm)}</b>`}
+  function bar(){const v={cells:tally.n?tally.cells/tally.n:0,mice:tally.n?tally.mice/tally.n:0};
+    bars.transition().duration(400).attr('width',d=>bx(v[d])-bx(0));bt.transition().duration(400).attr('x',d=>bx(v[d])+6).text(d=>tally.n?pct(v[d]):'');
+    document.getElementById('psMsg').innerHTML=tally.n?`${tally.n} experiment${tally.n>1?'s':''} with ${cpm} cells per mouse.`:'Run experiments to fill the bars.'}
+  function run(k){let e;for(let i=0;i<k;i++){e=experiment();tally.n++;if(e.pc<.05)tally.cells++;if(e.pm<.05)tally.mice++}show(e);bar()}
+  segButtons('psC',[[5,'5'],[20,'20'],[50,'50'],[200,'200']],cpm,v=>{cpm=v;tally={n:0,cells:0,mice:0};run(1)});
+  document.getElementById('psOne').onclick=()=>run(1);document.getElementById('psMany').onclick=()=>run(500);run(1);
+}};
+
+/* ---- 4 effective n ---- */
+hooks['neff']={init(){
+  const W=720,H=400,m={l:60,r:130,t:20,b:50},svg=d3.select('#neSvg');
+  const x=d3.scaleLog().domain([1,500]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,60]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>g.call(d3.axisBottom(x).tickValues([1,2,5,10,20,50,100,200,500]).tickFormat(d3.format('~g'))).attr('class','axis'));
+  const gyA=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  svg.append('text').attr('class','axlab').attr('x',(W-m.r+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Cells measured per mouse (log scale)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Effective n per group');
+  const L=[{mice:3,col:C.ink2},{mice:6,col:C.pc2}].map(o=>({...o,p:svg.append('path').attr('fill','none').attr('stroke',o.col).attr('stroke-width',3.5),
+    cap:svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('stroke',o.col).attr('stroke-dasharray','5 4'),t:svg.append('text').attr('class','lbl').style('fill',o.col),
+    d:svg.append('circle').attr('r',7).attr('fill',o.col).attr('stroke','#fff').attr('stroke-width',2)}));
+  const naive=svg.append('text').attr('class','lbl pink').style('font-size','14px');
+  const sl=document.getElementById('neI');
+  function draw(){const icc=+sl.value,ms=d3.range(0,Math.log(500)+.01,.02).map(Math.exp),ne=(M,c)=>M*c/(1+(c-1)*icc);
+    document.getElementById('neIv').textContent=fmt2(icc);y.domain([0,Math.max(15,ne(6,500))*1.1]).nice();gyA.call(g=>axisL(g,y,6,W-m.l-m.r));
+    L.forEach(o=>{const cap=o.mice/icc;o.p.attr('d',d3.line().x(c=>x(c)).y(c=>y(Math.min(1e9,ne(o.mice,c))))(ms));o.cap.attr('y1',y(cap)).attr('y2',y(cap)).attr('opacity',cap<=y.domain()[1]?1:0);
+      o.t.attr('x',W-m.r+8).attr('y',y(Math.min(1e9,ne(o.mice,500)))+5).text(`${o.mice} mice`);o.d.attr('cx',x(50)).attr('cy',y(Math.min(1e9,ne(o.mice,50))))});
+    naive.attr('x',x(50)+10).attr('y',m.t+12).text('a t-test on cells assumes n = 150 at 50 cells');
+    document.getElementById('neD').innerHTML=`3 mice × 50 cells = 150 → <b style="color:var(--pc2)">${fmt1(ne(3,50))}</b> <small>effective</small>`}
+  sl.oninput=draw;draw();
+}};
+
+/* ---- 5 batch ---- */
+hooks['batch']={init(){
+  let des='confounded',seed=1;const SH=1.5,trt=d3.range(12).map(i=>i<6?0:1);
+  const bat=()=>des==='confounded'?trt.slice():[0,0,0,1,1,1,0,0,0,1,1,1];
+  const W=500,H=400,m={l:50,r:20,t:30,b:40},svg=d3.select('#baSvg');
+  const x=d3.scalePoint().domain([0,1]).range([m.l+90,W-m.r-90]),y=d3.scaleLinear().domain([-2.5,4.5]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,6,W-m.l-m.r));
+  svg.append('text').attr('class','lbl').attr('x',x(0)).attr('y',H-10).attr('text-anchor','middle').text('control');
+  svg.append('text').attr('class','lbl purple').attr('x',x(1)).attr('y',H-10).attr('text-anchor','middle').text('treated');
+  const lg=svg.append('g').attr('transform',`translate(${m.l+10},${m.t-14})`);[['run A',C.pop],['run B','#f28c28']].forEach(([t,c],i)=>{lg.append('circle').attr('cx',i*90).attr('r',6).attr('fill',c);lg.append('text').attr('class','lbl').attr('x',i*90+10).attr('y',5).style('font-size','14px').text(t)});
+  const pts=svg.append('g'),mn=svg.append('g');
+  const mat=d3.select('#baMat');mat.append('text').attr('class','lbl').attr('x',40).attr('y',18).attr('text-anchor','middle').style('font-size','13px').text('treated');mat.append('text').attr('class','lbl').attr('x',120).attr('y',18).attr('text-anchor','middle').style('font-size','13px').text('run B');
+  mat.append('text').attr('class','lbl').attr('x',80).attr('y',392).attr('text-anchor','middle').style('font-size','13px').style('fill',C.muted).text('design matrix');
+  const cells=mat.append('g');const same=mat.append('text').attr('class','lbl pink').attr('x',80).attr('y',372).attr('text-anchor','middle').style('font-size','14px');
+  function sims(){const r=mulberry32(77),b=bat(),X1=trt.map(t=>[1,t]),X2=trt.map((t,i)=>[1,t,b[i]]);let fi=0,fa=0,pi=0,pa=0,est=0;const N=1000;
+    for(let s=0;s<N;s++){const y0=b.map(v=>SH*v+randn(r)),y1=y0.map((v,i)=>v+1.5*trt[i]);const f=ols(X1,y0);est+=f.coef[1].est;if(f.coef[1].p<.05)fi++;if(ols(X1,y1).coef[1].p<.05)pi++;
+      if(des==='balanced'){if(ols(X2,y0).coef[1].p<.05)fa++;if(ols(X2,y1).coef[1].p<.05)pa++}}
+    return{fi:fi/N,fa:fa/N,pi:pi/N,pa:pa/N,est:est/N}}
+  function draw(){const b=bat(),r=mulberry32(seed*31),yv=b.map(v=>SH*v+randn(r)),jr=mulberry32(seed);
+    pts.selectAll('circle').data(yv).join('circle').attr('r',8).attr('stroke','#fff').attr('stroke-width',1.5).attr('fill',(v,i)=>b[i]?'#f28c28':C.pop)
+      .transition().duration(500).attr('cx',(v,i)=>x(trt[i])+(jr()-.5)*70).attr('cy',v=>y(v));
+    mn.selectAll('line').data([0,1]).join('line').attr('stroke',(d)=>d?TRT:CTL).attr('stroke-width',3).transition().duration(500).attr('x1',d=>x(d)-55).attr('x2',d=>x(d)+55).attr('y1',d=>y(mean(yv.filter((_,i)=>trt[i]===d)))).attr('y2',d=>y(mean(yv.filter((_,i)=>trt[i]===d))));
+    cells.selectAll('rect').data(d3.range(24)).join('rect').attr('x',k=>k%2?95:15).attr('y',k=>28+Math.floor(k/2)*27).attr('width',50).attr('height',22).attr('rx',4)
+      .transition().duration(400).attr('fill',k=>{const i=Math.floor(k/2),v=k%2?b[i]:trt[i];return v?(k%2?'#f28c28':TRT):'#f2f0f5'});
+    same.text(des==='confounded'?'identical columns':'');
+    const f1=ols(trt.map(t=>[1,t]),yv),ok=des==='balanced',f2=ok?ols(trt.map((t,i)=>[1,t,b[i]]),yv):null,S=sims();
+    document.getElementById('baTab').innerHTML=`<tr><th></th><th>ignore batch</th><th>+ batch</th></tr>
+      <tr><td>this experiment: effect</td><td>${d3.format('+.2f')(f1.coef[1].est)}</td><td>${ok?d3.format('+.2f')(f2.coef[1].est):'cannot be estimated'}</td></tr>
+      <tr><td>p-value</td><td>${fmtP(f1.coef[1].p)}</td><td>${ok?fmtP(f2.coef[1].p):'–'}</td></tr>
+      <tr><td colspan="3" style="color:var(--muted);font-size:13px;letter-spacing:.06em">1,000 SIMULATED EXPERIMENTS</td></tr>
+      <tr><td>false positives (no effect)</td><td class="${S.fi>.1?'hi':''}">${pct(S.fi)}</td><td>${ok?pct(S.fa):'–'}</td></tr>
+      <tr><td>power (true effect 1.5)</td><td>${des==='confounded'?pct(S.pi)+'*':pct(S.pi)}</td><td class="pu">${ok?pct(S.pa):'–'}</td></tr>`;
+    document.getElementById('baMsg').innerHTML=des==='confounded'?'Average "effect" with no real effect: <b>'+d3.format('+.2f')(S.est)+'</b>, exactly the batch shift. *High "power" is meaningless: the estimate is effect + batch.':'Batch is balanced, so it can\'t bias the comparison. Putting it in the model removes its noise: more power.'}
+  segButtons('baD',[['confounded','confounded'],['balanced','balanced']],des,v=>{des=v;draw()});
+  document.getElementById('baNew').onclick=()=>{seed++;draw()};draw();
+}};
+
+/* ---- 6 blocking ---- */
+hooks['block']={init(){
+  const ND=6,EFF=1,WSD=.5;let seed=1;const sl=document.getElementById('blS');
+  const W=400,H=400,m={l:50,r:20,t:20,b:40},svg=d3.select('#blSvg');
+  const x=d3.scalePoint().domain([0,1]).range([m.l+70,W-m.r-70]),y=d3.scaleLinear().domain([-4,5]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,6,W-m.l-m.r));
+  svg.append('text').attr('class','lbl').attr('x',x(0)).attr('y',H-10).attr('text-anchor','middle').text('control');
+  svg.append('text').attr('class','lbl purple').attr('x',x(1)).attr('y',H-10).attr('text-anchor','middle').text('treated');
+  const g=svg.append('g'),pv=svg.append('text').attr('class','lbl').attr('x',m.l+6).attr('y',m.t+8).style('font-size','14px');
+  const W2=520,H2=320,m2={l:60,r:110,t:20,b:50},pw=d3.select('#blPow');
+  const x2=d3.scaleLinear().domain([0,2]).range([m2.l,W2-m2.r]),y2=d3.scaleLinear().domain([0,1]).range([H2-m2.b,m2.t]);
+  pw.append('g').attr('transform',`translate(0,${H2-m2.b})`).call(gg=>axisB(gg,x2,8));
+  pw.append('g').attr('transform',`translate(${m2.l},0)`).call(gg=>axisL(gg,y2,5,W2-m2.l-m2.r)).call(gg=>gg.selectAll('.tick text').text(d=>pct(d)));
+  pw.append('text').attr('class','axlab').attr('x',(W2-m2.r+m2.l)/2).attr('y',H2-8).attr('text-anchor','middle').text('Block SD (donor-to-donor variation)');
+  pw.append('text').attr('class','axlab').attr('transform',`translate(14,${(H2-m2.b+m2.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Power (true effect +1)');
+  const sim=(bsd,N=1500)=>{const r=mulberry32(Math.round(bsd*100)+5);let pu=0,pp=0;for(let s=0;s<N;s++){const c=[],t=[];for(let d=0;d<ND;d++){const dv=bsd*randn(r);c.push(dv+WSD*randn(r));t.push(dv+EFF+WSD*randn(r))}
+    if(tPooled(c,t).p<.05)pu++;if(pairedT(t,c).p<.05)pp++}return{pu:pu/N,pp:pp/N}};
+  const grid=d3.range(0,2.01,.25).map(b=>({b,...sim(b)}));
+  [['pu',C.ink2,'unpaired'],['pp',C.pc2,'paired']].forEach(([k,c,t])=>{pw.append('path').attr('d',d3.line().x(d=>x2(d.b)).y(d=>y2(d[k])).curve(d3.curveMonotoneX)(grid)).attr('fill','none').attr('stroke',c).attr('stroke-width',3);
+    pw.append('text').attr('class','lbl').style('fill',c).attr('x',x2(2)+8).attr('y',y2(grid[grid.length-1][k])+5).text(t)});
+  const mk=pw.append('line').attr('y1',m2.t).attr('y2',H2-m2.b).attr('stroke',C.sc1).attr('stroke-dasharray','4 4'),d1=pw.append('circle').attr('r',7).attr('fill',C.ink2).attr('stroke','#fff').attr('stroke-width',2),d2=pw.append('circle').attr('r',7).attr('fill',C.pc2).attr('stroke','#fff').attr('stroke-width',2);
+  function draw(){const bsd=+sl.value,r=mulberry32(seed*13+Math.round(bsd*8)),c=[],t=[];document.getElementById('blSv').textContent=fmt2(bsd);
+    for(let d=0;d<ND;d++){const dv=bsd*randn(r);c.push(dv+WSD*randn(r));t.push(dv+EFF+WSD*randn(r))}
+    g.selectAll('line').data(c).join('line').attr('stroke',C.pop).attr('stroke-width',2).transition().duration(400).attr('x1',x(0)).attr('x2',x(1)).attr('y1',v=>y(v)).attr('y2',(v,i)=>y(t[i]));
+    g.selectAll('circle.c').data(c).join('circle').attr('class','c').attr('r',7).attr('fill',CTL).transition().duration(400).attr('cx',x(0)).attr('cy',v=>y(v));
+    g.selectAll('circle.t').data(t).join('circle').attr('class','t').attr('r',7).attr('fill',TRT).transition().duration(400).attr('cx',x(1)).attr('cy',v=>y(v));
+    pv.text(`unpaired p = ${fmtP(tPooled(c,t).p)} · paired p = ${fmtP(pairedT(t,c).p)}`);
+    const gp=grid.find(o=>Math.abs(o.b-bsd)<1e-9);mk.attr('x1',x2(bsd)).attr('x2',x2(bsd));d1.attr('cx',x2(bsd)).attr('cy',y2(gp.pu));d2.attr('cx',x2(bsd)).attr('cy',y2(gp.pp));
+    document.getElementById('blMsg').innerHTML=`At block SD ${fmt2(bsd)}: power <b style="color:var(--ink2)">${pct(gp.pu)}</b> unpaired vs <b style="color:var(--pc2)">${pct(gp.pp)}</b> paired, with the same 12 dishes. `+(bsd===0?'With identical donors, pairing costs a little (fewer degrees of freedom).':'')}
+  sl.oninput=draw;document.getElementById('blNew').onclick=()=>{seed++;draw()};draw();
+}};
+
+/* ---- 7 randomisation ---- */
+hooks['random']={init(){
+  let k='first_caught';
+  function allocate(w,r){const n=20,tr=new Array(n).fill(false);let pairs=null;
+    if(k==='first_caught'){const sc=w.map(v=>v+3*randn(r)),oo=d3.range(n).sort((a,b)=>sc[b]-sc[a]);oo.slice(0,10).forEach(i=>tr[i]=true)}
+    else if(k==='random'){shuffled(d3.range(n),r).slice(0,10).forEach(i=>tr[i]=true)}
+    else{const o=d3.range(n).sort((a,b)=>w[a]-w[b]);pairs=[];for(let p=0;p<10;p++){const f=r()<.5?0:1,a=o[2*p+f],b=o[2*p+1-f];tr[a]=true;pairs.push([a,b])}}
+    return{tr,pairs}}
+  function estimate(y,al){if(al.pairs){const d=al.pairs.map(([a,b])=>y[a]-y[b]);const md=mean(d),se=Math.sqrt(varS(d)/10),t=md/se;return{e:md,p:tTwoSided(Math.abs(t),9)}}
+    const a=y.filter((_,i)=>al.tr[i]),b=y.filter((_,i)=>!al.tr[i]),f=tPooled(b,a);return{e:f.diff,p:f.p}}
+  const W=420,H=400,svg=d3.select('#raMice');const pl=svg.append('g');svg.append('text').attr('class','lbl').attr('x',0).attr('y',16).style('font-size','14px').style('fill',C.muted).text('One experiment: 20 mice, sorted by weight');
+  const gx=d3.scaleLinear().domain([18,32]).range([40,W-20]);svg.append('g').attr('transform',`translate(0,${H-40})`).call(g=>axisB(g,gx,7));
+  svg.append('text').attr('class','axlab').attr('x',W/2).attr('y',H-6).attr('text-anchor','middle').text('Body weight (g)');
+  const mg=svg.append('g'),note=svg.append('text').attr('class','lbl').attr('x',0).attr('y',40).style('font-size','14px');
+  const W2=520,H2=300,m2={l:50,r:20,t:20,b:44},hs=d3.select('#raHist');
+  const hx=d3.scaleLinear().domain([-2.5,2.5]).range([m2.l,W2-m2.r]),hy=d3.scaleLinear().range([H2-m2.b,m2.t]);
+  hs.append('g').attr('transform',`translate(0,${H2-m2.b})`).call(g=>axisB(g,hx,10));
+  hs.append('text').attr('class','axlab').attr('x',(W2+m2.l)/2).attr('y',H2-6).attr('text-anchor','middle').text('Estimated treatment effect (2,000 experiments)');
+  const hb=hs.append('g'),z=hs.append('line').attr('x1',hx(0)).attr('x2',hx(0)).attr('y1',m2.t).attr('y2',H2-m2.b).attr('stroke',C.sc1).attr('stroke-width',2);
+  hs.append('text').attr('class','lbl pink').attr('x',hx(0)+4).attr('y',m2.t+10).style('font-size','13px').text('truth = 0');
+  const av=hs.append('line').attr('y1',m2.t).attr('y2',H2-m2.b).attr('stroke',C.pc1).attr('stroke-dasharray','5 4').attr('stroke-width',2);
+  function draw(){const r=mulberry32(2026),E=[],P=[];let ex=null;
+    for(let s=0;s<2000;s++){const w=d3.range(20).map(()=>25+3*randn(r)),y=w.map(v=>.3*(v-25)+randn(r)),al=allocate(w,r),f=estimate(y,al);E.push(f.e);P.push(f.p);if(s===0)ex={w,al}}
+    const bins=d3.bin().domain(hx.domain()).thresholds(40)(E);hy.domain([0,d3.max(bins,b=>b.length)*1.1]);
+    hb.selectAll('rect').data(bins).join('rect').attr('x',b=>hx(b.x0)+.5).attr('width',b=>Math.max(0,hx(b.x1)-hx(b.x0)-1)).attr('fill',C.pop).transition().duration(500).attr('y',b=>hy(b.length)).attr('height',b=>hy(0)-hy(b.length));
+    av.transition().duration(500).attr('x1',hx(mean(E))).attr('x2',hx(mean(E)));
+    const o=d3.range(20).sort((a,b)=>ex.w[a]-ex.w[b]);
+    const pos={};o.forEach((i,j)=>pos[i]=[gx(ex.w[i]),H-70-(j%5)*34]);
+    mg.selectAll('g').data(o,i=>i).join(en=>{const gg=en.append('g');gg.append('ellipse').attr('rx',11).attr('ry',8);gg.append('circle').attr('cx',11).attr('cy',-5).attr('r',5);return gg})
+      .transition().duration(500).attr('transform',i=>`translate(${pos[i][0]},${pos[i][1]})`).attr('fill',i=>ex.al.tr[i]?TRT:CTL);
+    const tw=mean(ex.w.filter((_,i)=>ex.al.tr[i])),cw=mean(ex.w.filter((_,i)=>!ex.al.tr[i]));
+    note.html(`treated mean <tspan style="fill:${TRT}">${fmt1(tw)} g</tspan> · control mean <tspan style="fill:${CTL}">${fmt1(cw)} g</tspan>`);
+    pl.selectAll('*').remove();if(ex.al.pairs)ex.al.pairs.forEach(([a,b])=>pl.append('line').attr('x1',pos[a][0]).attr('x2',pos[b][0]).attr('y1',pos[a][1]).attr('y2',pos[b][1]).attr('stroke',C.sc1).attr('stroke-width',2.5).attr('opacity',.7));
+    const fp=mean(P.map(p=>p<.05?1:0));
+    document.getElementById('raTab').innerHTML=`<tr><th>average estimate (bias)</th><th>spread (SD)</th><th>false positives</th></tr><tr><td class="${Math.abs(mean(E))>.2?'hi':''}">${d3.format('+.2f')(mean(E))}</td><td>${fmt2(sdS(E))}</td><td class="${fp>.1?'hi':''}">${pct(fp)}</td></tr>`}
+  segButtons('raA',[['first_caught','first caught'],['random','random'],['matched_pairs','matched pairs']],k,v=>{k=v;draw()});draw();
+}};
+
+/* ---- 9 statements ---- */
+hooks['statements']={init(){qcards('qcards',[
+  [false,'3 mice per group × 50 cells each gives n = 150 per group, as long as cells are analysed with a mixed model.','The mixed model is the right tool, but n is still 3 mice per group: that is how much independent information about the treatment you have.'],
+  [true,'If every batch contains every condition, batch effects add noise but no bias.','Correct: then include batch in the model (or as a block) to remove that noise.'],
+  [false,'If all controls were run on Monday and all treated samples on Tuesday, a batch-correction tool can recover the treatment effect.','Day and treatment are completely confounded: any correction removes the treatment effect along with the batch, or nothing at all.'],
+  [true,'With the drug dissolved in the tank water, 4 tanks per group with 10 fish each give n = 4 per group, not 40.','Correct: the tank is the unit that received the treatment. The fish are measurements within it.']])}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>

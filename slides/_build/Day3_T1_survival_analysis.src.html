@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 3 · Survival analysis</title>
+<style>/*CSS*/</style>
+<style>
+.ttab{border-collapse:collapse;font-size:17px;font-variant-numeric:tabular-nums;width:100%}
+.ttab th{font-weight:400;font-size:13px;letter-spacing:.06em;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
+.ttab td{padding:6px 8px;border-bottom:1px solid var(--line)}
+.ttab td.hi{color:var(--sc1)} .ttab td.pu{color:var(--pc2)}
+.ttab tr.cur td{background:var(--wash)}
+.ttab tr.fut td{color:#cfc7d9}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">Time to <em>event</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:820px;margin:0">Censoring, Kaplan–Meier curves, the log-rank test, and what a hazard ratio does (and doesn't) mean.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 3 · Topic 1 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">On Day 1 (choosing a test, card 5) we hit a wall: a t-test on survival times with 56% of patients still alive. Today we climb it. Three ideas: censoring is partial information, not missing data; Kaplan–Meier uses it properly; the hazard ratio is a rate ratio, and the most misread number in clinical papers.</aside>
+</section>
+
+<!-- ============ 2 CENSORING ============ -->
+<section class="slide" id="censoring">
+  <h1>Censored is not <em>missing</em>.</h1>
+  <div class="steps" id="cnSteps"></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.1"><svg id="cnSvg" width="790" height="440"></svg></div>
+    <div class="col" style="flex:1"><div class="stepbox" id="cnText"></div></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · censoring</span></div>
+  <aside class="notes">Fourteen simulated patients. Step 1: real studies recruit over months or years, so patients start on different calendar dates. Step 2: the analysis happens on one date; anyone still alive is censored, as is anyone lost to follow-up. Step 3: survival analysis re-aligns everyone at their own start: time since entry. Now the censored patients sit at all follow-up lengths, not only at the end. Step 4: the faded dashes are what we would see if we could wait forever. A censored time is a lower bound: "survived at least this long". Throwing it away, or treating it as a death, both distort the answer.</aside>
+</section>
+
+<!-- ============ 3 THREE MEDIANS ============ -->
+<section class="slide" id="medians">
+  <h1>Two shortcuts, both <em>wrong</em>.</h1>
+  <div class="controls"><div class="seg" id="mdL"><span class="lab">Study length (months)</span></div><button class="btn" id="mdNew">↻ new sample</button></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2"><svg id="mdSvg" width="760" height="420"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stat"><span class="k">CENSORED</span><span class="v num" id="mdCens"></span></div>
+      <table class="ttab" id="mdTab" style="margin-top:6px"></table>
+      <p class="small" id="mdMsg" style="margin-top:12px"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section A</span></div>
+  <aside class="notes">200 simulated patients, true median survival 24 months (dashed). Recruitment runs through the first half of the study. Shortcut 1 treats every censored time as a death: far too pessimistic. Shortcut 2 drops censored patients: even worse, because the ones dropped are exactly the long survivors. Kaplan–Meier tracks the truth at every study length; at 12 and 24 months it says "median not reached", which is the honest answer. Ask the room: at 120 months, why do the shortcuts nearly work? (Almost nobody is censored.)</aside>
+</section>
+
+<!-- ============ 4 KM BY HAND ============ -->
+<section class="slide" id="kmhand">
+  <h1>Kaplan–Meier, <em>one step at a time</em>.</h1>
+  <div class="steps" id="khSteps"></div>
+  <div class="row" style="gap:28px">
+    <div class="col" style="flex:1.45"><svg id="khSvg" width="560" height="450"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stepbox" id="khText" style="min-height:120px"></div>
+      <table class="ttab" id="khTab"></table>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section B</span></div>
+  <aside class="notes">Ten patients, four event times. At each event time ask one question: of those still at risk right now, what fraction got through? Multiply those fractions. A censored patient counts in the denominator up to the moment they leave, then simply drops out: no step in the curve. That's all Kaplan–Meier is. The median is where the curve first reaches 50%.</aside>
+</section>
+
+<!-- ============ 5 KM REAL ============ -->
+<section class="slide" id="kmreal">
+  <h1>Real curves, <em>with numbers at risk</em>.</h1>
+  <div class="controls"><div class="seg" id="krDs"><span class="lab">Dataset</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2"><svg id="krSvg" width="770" height="440"></svg></div>
+    <div class="col" style="flex:1">
+      <table class="ttab" id="krTab"></table>
+      <p class="small" style="margin-top:12px">Ticks mark censored patients. Hover the curves to read survival at any time.</p>
+      <p class="small" id="krMsg"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section B</span></div>
+  <aside class="notes">GBSG2: hormone therapy vs none, recurrence-free survival. Lung: women vs men, overall survival. Point at the numbers at risk: the right end of each curve rests on a handful of patients, so the last big drops mean little. Always report survival at a fixed, clinically meaningful time with the median; when the median isn't reached, the fixed-time number is all you have.</aside>
+</section>
+
+<!-- ============ 6 LOG-RANK ============ -->
+<section class="slide" id="logrank">
+  <h1>Log-rank: <em>observed</em> vs <em>expected</em> events.</h1>
+  <div class="controls"><div class="seg" id="lrDs"><span class="lab">Dataset</span></div><button class="btn primary" id="lrPlay">▶ play</button><input type="range" id="lrT" min="0" max="1" step="0.001" value="1" style="width:300px;accent-color:#9933ff"></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2"><svg id="lrSvg" width="760" height="410"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stat"><span class="k" id="lrK">EVENTS IN COMPARISON GROUP</span><span class="v num" id="lrOE"></span></div>
+      <div class="stat"><span class="k">LOG-RANK TEST (WHOLE FOLLOW-UP)</span><span class="v num" id="lrP" style="font-size:24px"></span></div>
+      <div class="stat"><span class="k">t-TEST ON OBSERVED TIMES (INVALID)</span><span class="v num" id="lrTT" style="font-size:24px;color:var(--muted)"></span></div>
+      <p class="small" id="lrMsg"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section C</span></div>
+  <aside class="notes">At each event time, the patients at risk are a mix of both groups. If the groups had the same hazard, events should land in each group in proportion to its share of the risk set: that's the expected count. Press play and watch the gap open: in GBSG2, hormone-therapy patients have fewer events than expected all along. The log-rank statistic is (O − E)² / V, compared with a χ² distribution. The t-test p-value on the observed times is smaller here, but it is meaningless: observed time mixes survival with how long each patient happened to be followed.</aside>
+</section>
+
+<!-- ============ 7 HAZARD RATIO ============ -->
+<section class="slide" id="hazard">
+  <h1>A hazard ratio is a <em>rate</em> ratio.</h1>
+  <div class="controls">
+    <span class="seg"><span class="lab">Hazard ratio</span></span><input type="range" id="hzHR" min="0.3" max="1.5" step="0.05" value="0.7" style="width:150px;accent-color:#9933ff"><span class="num" id="hzHRv" style="font-size:18px;min-width:40px"></span>
+    <span class="seg" style="margin-left:14px"><span class="lab">Events by 5 years, control</span></span><input type="range" id="hzP0" min="0.05" max="0.95" step="0.01" value="0.56" style="width:150px;accent-color:#9933ff"><span class="num" id="hzP0v" style="font-size:18px"></span>
+  </div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.8"><svg id="hzSvg" width="700" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <table class="ttab" id="hzTab"></table>
+      <p class="callout" style="margin-top:14px;font-size:18px">HR 0.7: <em>at any moment</em>, among patients still event-free, the event rate is 70% of the control rate. Not "30% fewer events", not "live 30% longer".</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section D</span></div>
+  <aside class="notes">The hazard is the event rate among those still at risk, per unit time. Proportional hazards means the treated curve is the control curve raised to the power HR. Fix HR at 0.7 and move the control event rate. When events are rare by 5 years, the risk ratio is close to 0.7. When most control patients have the event, the risk ratio shrinks towards 1 (everyone eventually has the event in both groups), and the absolute difference first grows then shrinks. Same story as odds ratios yesterday: a relative number needs a baseline to become something a patient can use.</aside>
+</section>
+
+<!-- ============ 8 COX ============ -->
+<section class="slide" id="cox">
+  <h1>Cox regression: hazard ratios, <em>adjusted</em>.</h1>
+  <div class="controls"><div class="seg" id="cxDs"><span class="lab">Dataset</span></div><span style="width:10px"></span><div class="seg" id="cxM"><span class="lab">Model</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.9"><svg id="cxSvg" width="740" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stat"><span class="k" id="cxK">GROUP HAZARD RATIO</span><span class="v num" id="cxHR"></span></div>
+      <p class="small" id="cxMsg"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section D</span></div>
+  <aside class="notes">Cox regression is to survival what linear and logistic regression were yesterday: exp(coefficient) is a hazard ratio, and each one is adjusted for the others in the model. Start with Simulated: crude HR 0.93, nothing to see; add age and it drops to 0.64, near the true 0.6. The drug went to older patients, and age raises the hazard, so the benefit was hidden. GBSG2 is the contrast: the therapy groups differ in menopausal status (Day 1) but adjusting barely moves the HR, because a confounder must be tied to both the treatment and the outcome. All values computed with lifelines, as in the notebook.</aside>
+</section>
+
+<!-- ============ 9 PH ============ -->
+<section class="slide" id="ph">
+  <h1>One number assumes the effect <em>doesn't change</em>.</h1>
+  <div class="controls"><div class="seg" id="phS"><span class="lab">Scenario</span></div></div>
+  <div class="row" style="gap:20px">
+    <div class="col" style="flex:1.25"><svg id="phSurv" width="560" height="380"></svg></div>
+    <div class="col" style="flex:1"><svg id="phHR" width="440" height="250"></svg><p class="small" id="phMsg" style="margin-top:6px"></p></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section E (optional)</span></div>
+  <aside class="notes">Proportional hazards: the HR is the same at every time point (right panel flat). Early harm, late benefit: surgery, aggressive chemotherapy. The curves cross; a log-rank test and a single Cox HR average the harm and the benefit and can find nothing. Effect wears off: the curves separate and then run parallel. In both cases report the curves, or HRs for separate time windows, rather than one HR. In GBSG2, tumour grade III fails the Schoenfeld test (p = 0.003): its effect is strongest early.</aside>
+</section>
+
+<!-- ============ 10 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on: <em>survival analysis</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day3_HO1_survival_analysis.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">DATASET</p>
+        <p style="margin:0 0 22px;font-size:22px;color:rgba(255,255,255,.85)"><b>gbsg2</b>: hormone therapy · <b>lung</b>: sex · then <b>simulated</b>: truth known, with a trap.</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTIONS</p>
+        <p style="margin:0;font-size:20px;line-height:1.55;color:rgba(255,255,255,.85)">A · censoring simulation &nbsp; B · Kaplan–Meier<br>C · log-rank &nbsp; D · Cox &nbsp; E ⭐ proportional hazards</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">If the hazard ratio is 0.7, what fraction of treated patients avoid the event thanks to treatment?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">IN SECTION D, NOTE</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">The crude and adjusted HR. In <b>simulated</b>, explain why they differ.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 40 minutes · in pairs</span></div>
+  <aside class="notes">Assign study_length in section A (12, 24, 48, 120) across pairs, and gbsg2/lung for B–D. The guess has no answer from the HR alone: that's the point. It needs the baseline event rate (slide 7).</aside>
+</section>
+
+<!-- ============ 11 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which statements are <em>correct</em>?</h1>
+  <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
+  <aside class="notes">Statement 1 is the AI failure point. Statement 3 is about informative censoring: the assumption behind everything today.</aside>
+</section>
+
+<!-- ============ 12 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>"30% lower hazard" ≠ "<em>live 30% longer</em>".</h1>
+  <div class="row" style="gap:36px;margin-top:6px">
+    <div class="col" style="flex:1.1">
+      <p class="small" style="margin:0 0 6px">🎓 Paste into Claude / ChatGPT:</p>
+      <div class="prompt">A Cox model gives a hazard ratio of 0.70 (95% CI 0.54 to 0.89) for hormone therapy vs no hormone therapy, with recurrence-free survival as the outcome. Explain to a patient what this means for her.</div>
+      <div class="chips" style="margin-top:12px"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+      <p class="small" style="margin:14px 0 0">Did your tutor ask for the baseline risk? Without it, no answer for a patient is possible.</p>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">Watch for:</p>
+      <ul class="clean x" style="margin-bottom:12px"><li style="font-size:19px">"patients live 30% longer"</li><li style="font-size:19px">"30% of patients benefit"</li><li style="font-size:19px">"30% lower risk of recurrence" (without saying it's a rate, at every moment)</li></ul>
+      <p class="small" style="margin:0 0 4px">A good answer, in numbers a patient can use:</p>
+      <div class="card"><span style="font-size:18px" id="aiGood"></span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure point</span></div>
+  <aside class="notes">The good answer comes from the Kaplan–Meier curves on slide 5, computed here from the data. "Live 30% longer" confuses a ratio of rates with a ratio of times; under very specific assumptions (constant hazards) an HR of 0.7 corresponds to median survival about 1.4 times longer, which is not 30% either.</aside>
+</section>
+
+<!-- ============ 13 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:30px">
+    <h1 style="font-size:56px">Four things to <em>keep</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:22px 0 34px;max-width:1080px">
+      <li style="font-size:27px">A censored time is <em>information</em>: "at least this long". Never drop it or call it an event.</li>
+      <li style="font-size:27px">Kaplan–Meier + numbers at risk; report survival at a <em>fixed time</em> as well as the median.</li>
+      <li style="font-size:27px">Hazard ratio = ratio of event <em>rates</em> among those still at risk, assumed constant over time.</li>
+      <li style="font-size:27px">Translate HRs into <em>absolute</em> survival for patients; adjust in Cox like any regression.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">Experimental design</span>: no analysis can rescue a design that confounds or pseudoreplicates.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
+  <aside class="notes">Bridge: the simulated dataset showed confounding that adjustment could fix because age was measured. Next we look at confounding that no model can fix, and at how design prevents it.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const LUNG = __JSON:lung__;
+const COX = __JSON:cox3__;
+const hooks = {};
+const pct = d3.format('.0%');
+/* ---------- Kaplan–Meier with extras ---------- */
+function km(time,event){const pts=kaplanMeier(time,event),tmax=d3.max(time);
+  const S=t=>{let s=1;for(const p of pts){if(p[0]<=t)s=p[1];else break}return s};
+  const med=(pts.find(p=>p[1]<=0.5)||[Infinity])[0];
+  return{pts,tmax,S,med,atRisk:t=>time.filter(v=>v>=t).length,cens:time.filter((v,i)=>!event[i])}}
+function kmPath(k,x,y){const p=k.pts.concat([[k.tmax,k.pts[k.pts.length-1][1]]]);return d3.line().curve(d3.curveStepAfter).x(d=>x(d[0])).y(d=>y(d[1]))(p)}
+/* ---------- datasets (as in the notebook) ---------- */
+function groupRows(time,event,g){return[0,1].map(v=>{const ix=d3.range(time.length).filter(i=>g[i]===v);return{t:ix.map(i=>time[i]),e:ix.map(i=>event[i])}})}
+const DS={
+  gbsg2:{label:'GBSG2',unit:'days',h:1825,hl:'5 years',out:'recurrence-free',groups:['no hormone therapy','hormone therapy'],short:['no therapy','therapy'],
+    d:groupRows(DATA.time,DATA.cens,DATA.horTh),xmax:2700},
+  lung:{label:'Lung',unit:'days',h:365,hl:'1 year',out:'alive',groups:['men','women'],short:['men','women'],
+    d:groupRows(LUNG.time,LUNG.status,LUNG.sex.map(s=>s===2?1:0)),xmax:1050},
+  sim:{label:'Simulated',unit:'months',h:36,hl:'3 years',out:'alive',groups:['control','drug'],short:['control','drug'],
+    d:groupRows(COX.simdata.t,COX.simdata.e,COX.simdata.g),xmax:62}};
+for(const k in DS)DS[k].km=DS[k].d.map(g=>km(g.t,g.e));
+const GCOL=[C.ink2,C.pc2];
+
+/* ---- 2 censoring ---- */
+hooks['censoring']={init(){
+  const r=mulberry32(11),N=14,END=48,pts=[];
+  for(let i=0;i<N;i++){const entry=r()*24,tt=-Math.log(1-r())*30/Math.LN2,drop=i===4||i===10?entry+6+r()*12:Infinity;
+    const stop=Math.min(entry+tt,END,drop),ev=entry+tt<=Math.min(END,drop);pts.push({i,entry,tt,stop,ev,why:ev?'event':(drop<END&&drop<entry+tt?'lost':'alive')})}
+  pts.sort((a,b)=>a.entry-b.entry).forEach((p,k)=>p.row=k);
+  const W=790,H=440,m={l:40,r:30,t:24,b:50},svg=d3.select('#cnSvg');
+  const x=d3.scaleLinear().domain([0,72]).range([m.l,W-m.r]),y=d3.scaleBand().domain(d3.range(N)).range([m.t,H-m.b]).padding(.35);
+  const gx=svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,12));
+  const xl=svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle');
+  const endL=svg.append('line').attr('x1',x(END)).attr('x2',x(END)).attr('y1',m.t-12).attr('y2',H-m.b).attr('stroke',C.sc1).attr('stroke-dasharray','6 4').attr('stroke-width',2);
+  const endT=svg.append('text').attr('class','lbl pink').attr('x',x(END)+6).attr('y',m.t-2).style('font-size','14px').text('analysis date');
+  const ghost=svg.append('g').selectAll('line').data(pts.filter(p=>!p.ev)).join('line').attr('stroke',C.pop).attr('stroke-dasharray','2 4').attr('stroke-width',2).attr('opacity',0);
+  const lines=svg.append('g').selectAll('line').data(pts).join('line').attr('stroke',C.pc1).attr('stroke-width',2.5);
+  const ends=svg.append('g').selectAll('circle').data(pts).join('circle').attr('r',7).attr('stroke',C.pc1).attr('stroke-width',2);
+  const tags=svg.append('g').selectAll('text').data(pts.filter(p=>!p.ev)).join('text').attr('class','lbl').style('font-size','13px').attr('opacity',0);
+  const ghostEnd=svg.append('g').selectAll('path').data(pts.filter(p=>!p.ev)).join('path').attr('d','M-5,-5L5,5M-5,5L5,-5').attr('stroke',C.pop).attr('stroke-width',2).attr('opacity',0);
+  const cy=p=>y(p.row)+y.bandwidth()/2;
+  const T=[['1 · Patients join over time','<p>A study recruits for two years. Each line is a patient, from the day they joined to the last time we saw them.</p><p>● event (recurrence, death)</p>'],
+    ['2 · The study stops','<p>On the analysis date, some patients are still alive: <b>censored</b> (○). Two others moved away: <b>lost to follow-up</b>, also censored.</p><p>We know each censored patient survived <em>at least</em> this long.</p>'],
+    ['3 · Re-align at time zero','<p>Survival analysis uses <b>time since entry</b>. Now censored patients appear at <em>every</em> follow-up length, not only at the end.</p><p>Those recruited late have short follow-up through no fault of their own.</p>'],
+    ['4 · What censoring hides','<p>Faded dashes: the follow-up we would get if we could wait. Many censored patients would survive much longer.</p><p>Dropping them, or treating their times as events, throws this away. The methods today keep it.</p>']];
+  const st=stepper('cnSteps',4,s=>{document.getElementById('cnText').innerHTML=`<h3>${T[s][0]}</h3>${T[s][1]}`;
+    const al=s>=2,x0=p=>al?0:p.entry,D=900;
+    xl.text(al?'Months since entry':'Calendar time (months since the study opened)');
+    endL.transition().duration(D).attr('opacity',s===1?1:(al?0:.5));endT.transition().duration(D).attr('opacity',s===1?1:(al?0:.5));
+    lines.transition().duration(D).attr('x1',p=>x(x0(p))).attr('x2',p=>x(x0(p)+p.stop-p.entry)).attr('y1',cy).attr('y2',cy);
+    ends.transition().duration(D).attr('cx',p=>x(x0(p)+p.stop-p.entry)).attr('cy',cy).attr('fill',p=>p.ev?C.pc1:'#fff').attr('opacity',p=>s===0&&!p.ev?0:1);
+    tags.transition().duration(D).attr('x',p=>x(x0(p)+p.stop-p.entry)+12).attr('y',p=>cy(p)+4).attr('opacity',s===1||s===2?1:0).text(p=>p.why==='lost'?'lost to follow-up':'alive at analysis').style('fill',p=>p.why==='lost'?C.sc1:C.ink2);
+    ghost.transition().duration(D).attr('x1',p=>x(x0(p)+p.stop-p.entry)).attr('x2',p=>x(Math.min(72,x0(p)+p.tt))).attr('y1',cy).attr('y2',cy).attr('opacity',s===3?1:0);
+    ghostEnd.transition().duration(D).attr('transform',p=>`translate(${x(Math.min(72,x0(p)+p.tt))},${cy(p)})`).attr('opacity',p=>s===3&&x0(p)+p.tt<=72?1:0)});
+  this.st=st;st.go(0);
+},enter(){this.st.go(0)}};
+
+/* ---- 3 three medians ---- */
+hooks['medians']={init(){
+  let L=24,seed=1;const W=760,H=420,m={l:60,r:20,t:20,b:50},svg=d3.select('#mdSvg');
+  const x=d3.scaleLinear().domain([0,60]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,1]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>pct(d)));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,12));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Months');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Proportion still alive');
+  svg.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(.5)).attr('y2',y(.5)).attr('stroke',C.muted).attr('stroke-width',.8);
+  const endL=svg.append('line').attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.sc1).attr('stroke-dasharray','3 4');
+  const endT=svg.append('text').attr('class','lbl pink').attr('y',m.t+12).style('font-size','13px');
+  svg.append('path').attr('d',d3.line().x(t=>x(t)).y(t=>y(Math.exp(-Math.LN2/24*t)))(d3.range(0,60.1,.5))).attr('fill','none').attr('stroke',C.pc1).attr('stroke-width',2.5).attr('stroke-dasharray','8 5');
+  const cols={naive:'#f28c28',drop:C.pop,km:C.pc2};
+  const paths={};['drop','naive','km'].forEach(k=>paths[k]=svg.append('path').attr('fill','none').attr('stroke',cols[k]).attr('stroke-width',k==='km'?3.5:2.5));
+  const lg=svg.append('g').attr('transform',`translate(${x(34)},${y(.9)})`);
+  [['true survival',C.pc1,'8 5'],['1 · censored = deaths',cols.naive],['2 · censored dropped',cols.drop],['3 · Kaplan–Meier',cols.km]].forEach(([t,c,da],i)=>{lg.append('line').attr('x1',0).attr('x2',26).attr('y1',i*22).attr('y2',i*22).attr('stroke',c).attr('stroke-width',3).attr('stroke-dasharray',da||null);lg.append('text').attr('class','lbl').attr('x',34).attr('y',i*22+5).style('font-size','14px').text(t)});
+  function draw(){const r=mulberry32(seed*97+L),n=200,ob=[],ev=[];
+    for(let i=0;i<n;i++){const t=-Math.log(1-r())*24/Math.LN2,f=L/2+r()*L/2;ob.push(Math.min(t,f));ev.push(t<=f?1:0)}
+    const kN=km(ob,ob.map(()=>1)),obE=ob.filter((_,i)=>ev[i]),kD=km(obE,obE.map(()=>1)),kK=km(ob,ev);
+    [['naive',kN],['drop',kD],['km',kK]].forEach(([k,kk])=>paths[k].transition().duration(500).attr('d',kmPath(kk,x,y)));
+    endL.attr('x1',x(Math.min(L,60))).attr('x2',x(Math.min(L,60))).attr('opacity',L<=60?1:0);endT.attr('x',x(Math.min(L,60))-6).attr('text-anchor','end').attr('opacity',L<=60?1:0).text('study ends');
+    const c=1-mean(ev);document.getElementById('mdCens').innerHTML=`${pct(c)} <small>of 200 patients</small>`;
+    const f=v=>isFinite(v)?`${fmt1(v)} mo`:'not reached';
+    document.getElementById('mdTab').innerHTML=`<tr><th>method</th><th>median</th></tr><tr><td>truth</td><td>24.0 mo</td></tr>
+      <tr><td>1 · censored = deaths</td><td class="hi">${fmt1(d3.median(ob))} mo</td></tr><tr><td>2 · censored dropped</td><td class="hi">${fmt1(d3.median(obE))} mo</td></tr>
+      <tr><td>3 · Kaplan–Meier</td><td class="pu">${f(kK.med)}</td></tr>`;
+    document.getElementById('mdMsg').innerHTML=isFinite(kK.med)?(c<.15?'With almost no censoring, all three agree.':(Math.abs(d3.median(ob)-kK.med)<1.5?'Shortcut 1 happens to get the median right here: nobody was censored before month '+L/2+'. Look beyond the median: the curves still diverge.':'Both shortcuts are too short: they ignore that censored patients were still alive.')):'Fewer than half have died by the end of follow-up, so Kaplan–Meier <b>refuses to guess</b>. The shortcuts give a number anyway, and it is badly wrong.'}
+  segButtons('mdL',[[12,'12'],[24,'24'],[48,'48'],[120,'120']],L,v=>{L=v;draw()});
+  document.getElementById('mdNew').onclick=()=>{seed++;draw()};draw();
+}};
+
+/* ---- 4 KM by hand ---- */
+hooks['kmhand']={init(){
+  const P=[[3,1],[5,0],[6,1],[6,1],[8,0],[10,1],[12,0],[15,1],[18,0],[20,0]];
+  const W=560,m={l:50,r:20},svg=d3.select('#khSvg');const x=d3.scaleLinear().domain([0,21]).range([m.l,W-m.r]);
+  const yb=d3.scaleBand().domain(d3.range(10)).range([10,215]).padding(.3),ys=d3.scaleLinear().domain([0,1]).range([410,250]);
+  svg.append('g').attr('transform','translate(0,220)').call(g=>axisB(g,x,10));
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,ys,4,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>pct(d)));
+  svg.append('g').attr('transform','translate(0,410)').call(g=>axisB(g,x,10));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',446).attr('text-anchor','middle').text('Months since entry');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(12,330) rotate(-90)`).attr('text-anchor','middle').text('S(t)');
+  const cur=svg.append('line').attr('y1',0).attr('y2',410).attr('stroke',C.sc1).attr('stroke-width',1.5).attr('stroke-dasharray','4 4');
+  const rows=svg.append('g').selectAll('g').data(P).join('g').attr('transform',(d,i)=>`translate(0,${yb(i)+yb.bandwidth()/2})`);
+  rows.append('line').attr('x1',x(0)).attr('x2',d=>x(d[0])).attr('stroke-width',3);
+  rows.append('circle').attr('cx',d=>x(d[0])).attr('r',6).attr('stroke',C.pc1).attr('stroke-width',2).attr('fill',d=>d[1]?C.pc1:'#fff');
+  const curve=svg.append('path').attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',3.5);
+  const medL=svg.append('g').attr('opacity',0);
+  const times=[3,6,10,15];let S=1;const steps=[{t:0,S:1}];
+  times.forEach(t=>{const n=P.filter(p=>p[0]>=t).length,d=P.filter(p=>p[0]===t&&p[1]).length;S*=1-d/n;steps.push({t,n,d,S})});
+  medL.append('line').attr('x1',m.l).attr('x2',x(15)).attr('y1',ys(.5)).attr('y2',ys(.5)).attr('stroke',C.sc1).attr('stroke-dasharray','4 4');
+  medL.append('line').attr('x1',x(15)).attr('x2',x(15)).attr('y1',ys(.5)).attr('y2',410).attr('stroke',C.sc1).attr('stroke-dasharray','4 4');
+  medL.append('text').attr('class','lbl pink').attr('x',x(15)+6).attr('y',ys(.5)-8).text('median = 15 months');
+  const TX=['<h3>Start</h3><p>10 patients, all alive at time 0: S = 100%. Filled dots are events, open dots are censored.</p>',
+    '<h3>Month 3: first event</h3><p>All 10 are at risk; 1 has the event. Survival through this moment: 9/10.</p>',
+    '<h3>Month 6: two events</h3><p>One patient was censored at month 5: no step, but they <b>leave the risk set</b>. 8 at risk, 2 events: 6/8 survive.</p>',
+    '<h3>Month 10</h3><p>Another censoring at 8. 5 at risk, 1 event: 4/5.</p>',
+    '<h3>Month 15</h3><p>Censored at 12, so 3 at risk; 1 event: 2/3. The curve crosses 50%: the <b>median</b>.</p>',
+    '<h3>End of follow-up</h3><p>Two patients censored at 18 and 20: the curve stays flat. Every patient contributed for exactly as long as we watched them.</p>'];
+  const st=stepper('khSteps',6,s=>{const tNow=s===0?0:(s===5?20:times[s-1]);document.getElementById('khText').innerHTML=TX[s];
+    cur.transition().duration(500).attr('x1',x(tNow)).attr('x2',x(tNow));
+    rows.select('line').attr('stroke',d=>s===0?C.pc1:(d[0]>=tNow&&s<5?C.pc2:C.popL));
+    rows.select('circle').attr('opacity',d=>d[0]<=tNow||s===0?1:.25);
+    const upto=steps.filter(o=>o.t<=tNow),last=upto[upto.length-1].S,pp=upto.map(o=>[o.t,o.S]).concat([[tNow,last]]);
+    curve.attr('d',d3.line().curve(d3.curveStepAfter).x(d=>x(d[0])).y(d=>ys(d[1]))(pp));medL.attr('opacity',s>=4?1:0);
+    document.getElementById('khTab').innerHTML='<tr><th>month</th><th>at risk</th><th>events</th><th>survive</th><th>S(t)</th></tr>'+steps.slice(1).map((o,i)=>
+      `<tr class="${i+1===s?'cur':(i+1>s?'fut':'')}"><td>${o.t}</td><td>${o.n}</td><td>${o.d}</td><td>${o.n-o.d}/${o.n}</td><td class="pu">${i+1<=s?pct(o.S):''}</td></tr>`).join('')});
+  this.st=st;st.go(0);
+},enter(){this.st.go(0)}};
+
+/* ---- 5 KM real ---- */
+hooks['kmreal']={init(){
+  const W=770,H=440,m={l:100,r:20,t:20,b:110},svg=d3.select('#krSvg');
+  const x=d3.scaleLinear().range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,1]).range([H-m.b,m.t]);
+  const gx=svg.append('g').attr('transform',`translate(0,${H-m.b})`);svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>pct(d)));
+  const xl=svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-m.b+40).attr('text-anchor','middle');
+  const yl=svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle');
+  const hz=svg.append('line').attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.sc1).attr('stroke-dasharray','3 4');
+  const g=svg.append('g'),risk=svg.append('g'),hov=svg.append('line').attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.pc1).attr('opacity',0);
+  let k='gbsg2';
+  function draw(){const ds=DS[k];x.domain([0,ds.xmax]);gx.call(gg=>axisB(gg,x,8));xl.text(`Time (${ds.unit})`);yl.text(`Proportion ${ds.out}`);
+    hz.attr('x1',x(ds.h)).attr('x2',x(ds.h));g.selectAll('*').remove();risk.selectAll('*').remove();
+    ds.km.forEach((kk,j)=>{g.append('path').attr('d',kmPath(kk,x,y)).attr('fill','none').attr('stroke',GCOL[j]).attr('stroke-width',3);
+      g.append('g').selectAll('line').data(kk.cens).join('line').attr('x1',t=>x(t)).attr('x2',t=>x(t)).attr('y1',t=>y(kk.S(t))-5).attr('y2',t=>y(kk.S(t))+5).attr('stroke',GCOL[j]).attr('stroke-width',1.2);
+      g.append('line').attr('x1',W-m.r-210).attr('x2',W-m.r-184).attr('y1',m.t+10+j*22).attr('y2',m.t+10+j*22).attr('stroke',GCOL[j]).attr('stroke-width',3);
+      g.append('text').attr('class','lbl').style('fill',GCOL[j]).attr('x',W-m.r-176).attr('y',m.t+15+j*22).text(ds.groups[j]);
+      risk.append('text').attr('class','lbl').attr('x',m.l-22).attr('y',H-m.b+66+j*20).attr('text-anchor','end').style('font-size','13px').style('fill',GCOL[j]).text(ds.short[j]);
+      risk.selectAll(null).data(x.ticks(8)).join('text').attr('class','lbl num').attr('x',t=>x(t)).attr('y',H-m.b+66+j*20).attr('text-anchor','middle').style('font-size','13px').style('fill',GCOL[j]).text(t=>kk.atRisk(t))});
+    risk.append('text').attr('class','lbl').attr('x',m.l-22).attr('y',H-m.b+48).attr('text-anchor','end').style('font-size','12px').style('fill',C.muted).text('at risk');
+    g.append('text').attr('class','lbl pink').attr('x',x(ds.h)-5).attr('text-anchor','end').attr('y',H-m.b-8).style('font-size','13px').text(ds.hl);
+    const f=v=>isFinite(v)?d3.format(',.0f')(v):'not reached';
+    document.getElementById('krTab').innerHTML=`<tr><th>group</th><th>n</th><th>median (${ds.unit})</th><th>at ${ds.hl}</th></tr>`+ds.km.map((kk,j)=>`<tr><td style="color:${GCOL[j]}">${ds.groups[j]}</td><td>${ds.d[j].t.length}</td><td>${f(kk.med)}</td><td class="pu">${pct(kk.S(ds.h))}</td></tr>`).join('');
+    document.getElementById('krMsg').innerHTML=k==='sim'?'Simulated: the curves barely differ, although the drug works (truth HR 0.6). Hold that thought for the Cox slide.':''}
+  svg.on('mousemove',ev=>{const [mx]=d3.pointer(ev);if(mx<m.l||mx>W-m.r){hov.attr('opacity',0);hideTip();return}const ds=DS[k],t=x.invert(mx);hov.attr('x1',mx).attr('x2',mx).attr('opacity',.4);
+    showTip(ev,`${d3.format(',.0f')(t)} ${ds.unit}: `+ds.km.map((kk,j)=>`${ds.groups[j]} ${pct(kk.S(t))}`).join(' · '))}).on('mouseleave',()=>{hov.attr('opacity',0);hideTip()});
+  segButtons('krDs',[['gbsg2','GBSG2 · hormone therapy'],['lung','Lung · sex'],['sim','Simulated · drug']],k,v=>{k=v;draw()});draw();
+}};
+
+/* ---- 6 log-rank ---- */
+hooks['logrank']={init(){
+  let k='gbsg2',timer=null;const W=760,H=410,m={l:60,r:30,t:20,b:50},svg=d3.select('#lrSvg');
+  const x=d3.scaleLinear().range([m.l,W-m.r]),y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gx=svg.append('g').attr('transform',`translate(0,${H-m.b})`),gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  const xl=svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Cumulative events, comparison group');
+  const pE=svg.append('path').attr('fill','none').attr('stroke',C.pc1).attr('stroke-width',2.5).attr('stroke-dasharray','7 5'),pO=svg.append('path').attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',3.5);
+  const gap=svg.append('line').attr('stroke',C.sc1).attr('stroke-width',3),cur=svg.append('line').attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.muted).attr('stroke-dasharray','3 4');
+  const tO=svg.append('text').attr('class','lbl purple').style('font-size','15px'),tE=svg.append('text').attr('class','lbl').style('font-size','15px');
+  const sl=document.getElementById('lrT');let series=null;
+  function prep(){const ds=DS[k],[a,b]=ds.d;const T=[...new Set([...a.t.filter((_,i)=>a.e[i]),...b.t.filter((_,i)=>b.e[i])])].sort((p,q)=>p-q);
+    let O=0,E=0,V=0;const s=[{t:0,O:0,E:0,V:0}];
+    for(const t of T){let n0=0,n1=0,d0=0,d1=0;a.t.forEach((v,i)=>{if(v>=t){n0++;if(v===t&&a.e[i])d0++}});b.t.forEach((v,i)=>{if(v>=t){n1++;if(v===t&&b.e[i])d1++}});
+      const n=n0+n1,d=d0+d1;O+=d1;E+=d*n1/n;if(n>1)V+=d*(n1/n)*(n0/n)*(n-d)/(n-1);s.push({t,O,E,V})}
+    series=s;x.domain([0,ds.xmax]);y.domain([0,Math.max(O,E)*1.08]);gx.call(g=>axisB(g,x,8));gy.call(g=>axisL(g,y,6,W-m.l-m.r));xl.text(`Time (${ds.unit})`);
+    const fin=s[s.length-1],stat=(fin.O-fin.E)**2/fin.V;document.getElementById('lrP').innerHTML=`χ² = ${fmt2(stat)}, p = ${fmtP(chi2SF(stat,1))}`;
+    document.getElementById('lrTT').innerHTML=`p = ${fmtP(welch(b.t,a.t).p)}`;document.getElementById('lrK').textContent=`EVENTS AMONG ${ds.groups[1].toUpperCase()}`;
+    document.getElementById('lrMsg').innerHTML=`Expected = events that would have fallen in the ${ds.groups[1]} group if both groups had the same hazard, given who was still at risk.`}
+  function draw(){const ds=DS[k],tm=+sl.value*ds.xmax,s=series.filter(o=>o.t<=tm),last=s[s.length-1];
+    const line=key=>d3.line().curve(d3.curveStepAfter).x(o=>x(o.t)).y(o=>y(o[key]))(s.concat([{...last,t:tm}]));
+    pO.attr('d',line('O'));pE.attr('d',line('E'));cur.attr('x1',x(tm)).attr('x2',x(tm));
+    gap.attr('x1',x(tm)).attr('x2',x(tm)).attr('y1',y(last.O)).attr('y2',y(last.E));
+    tO.attr('x',x(tm)+8).attr('y',y(last.O)+(last.O<last.E?16:-6)).attr('text-anchor',tm>ds.xmax*.8?'end':'start').attr('dx',tm>ds.xmax*.8?-16:0).text(`observed ${last.O}`);
+    tE.attr('x',x(tm)+8).attr('y',y(last.E)+(last.O<last.E?-6:16)).attr('text-anchor',tm>ds.xmax*.8?'end':'start').attr('dx',tm>ds.xmax*.8?-16:0).text(`expected ${fmt1(last.E)}`);
+    document.getElementById('lrOE').innerHTML=`${last.O} <small>observed vs</small> ${fmt1(last.E)} <small>expected</small>`}
+  function play(){clearInterval(timer);sl.value=0;timer=setInterval(()=>{sl.value=Math.min(1,+sl.value+.008);draw();if(+sl.value>=1)clearInterval(timer)},30)}
+  segButtons('lrDs',[['gbsg2','GBSG2'],['lung','Lung'],['sim','Simulated']],k,v=>{k=v;prep();draw()});
+  sl.oninput=()=>{clearInterval(timer);draw()};document.getElementById('lrPlay').onclick=play;prep();draw();this.play=play;this.stop=()=>clearInterval(timer);
+},leave(){this.stop&&this.stop()}};
+
+/* ---- 7 hazard ratio ---- */
+hooks['hazard']={init(){
+  const W=700,H=400,m={l:60,r:110,t:20,b:50},svg=d3.select('#hzSvg');
+  const x=d3.scaleLinear().domain([0,10]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,1]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>pct(d)));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,10));
+  svg.append('text').attr('class','axlab').attr('x',(W-m.r+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Years');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Proportion event-free');
+  svg.append('line').attr('x1',x(5)).attr('x2',x(5)).attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.muted).attr('stroke-dasharray','3 4');
+  const p0=svg.append('path').attr('fill','none').attr('stroke',C.ink2).attr('stroke-width',3),p1=svg.append('path').attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',3);
+  const br=svg.append('path').attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2.5),bt=svg.append('text').attr('class','lbl pink').style('font-size','14px');
+  const l0=svg.append('text').attr('class','lbl').style('fill',C.ink2),l1=svg.append('text').attr('class','lbl purple');
+  const sH=document.getElementById('hzHR'),sP=document.getElementById('hzP0');
+  function draw(){const HR=+sH.value,q=+sP.value,h0=-Math.log(1-q)/5,S0=t=>Math.exp(-h0*t),S1=t=>Math.exp(-h0*HR*t),ts=d3.range(0,10.01,.05);
+    document.getElementById('hzHRv').textContent=fmt2(HR);document.getElementById('hzP0v').textContent=pct(q);
+    p0.attr('d',d3.line().x(t=>x(t)).y(t=>y(S0(t)))(ts));p1.attr('d',d3.line().x(t=>x(t)).y(t=>y(S1(t)))(ts));
+    l0.attr('x',x(10)+6).attr('y',y(S0(10))+5).text('control');l1.attr('x',x(10)+6).attr('y',y(S1(10))+5).text('treated');
+    br.attr('d',`M${x(5)+8},${y(S0(5))}h6V${y(S1(5))}h-6`);bt.attr('x',x(5)+20).attr('y',(y(S0(5))+y(S1(5)))/2+5).text(`${d3.format('+.0f')(100*(S1(5)-S0(5)))} points`);
+    const r0=1-S0(5),r1=1-S1(5),ar=r0-r1;
+    document.getElementById('hzTab').innerHTML=`<tr><th>at 5 years</th><th>control</th><th>treated</th></tr>
+      <tr><td>had the event</td><td>${pct(r0)}</td><td>${pct(r1)}</td></tr>
+      <tr><td>hazard ratio</td><td colspan="2" class="pu">${fmt2(HR)} (every moment)</td></tr>
+      <tr><td>risk ratio</td><td colspan="2" class="hi">${fmt2(r1/r0)}</td></tr>
+      <tr><td>risk difference</td><td colspan="2">${d3.format('+.1f')(100*(r1-r0))} points</td></tr>
+      <tr><td>treat to prevent one</td><td colspan="2">${Math.abs(ar)>.005?Math.ceil(1/Math.abs(ar))+' patients':'–'}</td></tr>`}
+  sH.oninput=draw;sP.oninput=draw;draw();
+}};
+
+/* ---- 8 Cox ---- */
+hooks['cox']={init(){
+  let k='sim',mi=0;const W=740,H=400,m={l:250,r:120,t:20,b:50},svg=d3.select('#cxSvg');const g=svg.append('g');
+  const msg={sim:'The drug went to patients about <b>10 years older</b>, and age itself raises the hazard (HR 1.04 per year ≈ 1.5 per decade). Crude: the benefit is hidden. Adjusted for age: close to the truth, <b>0.6</b> (pink).',
+    gbsg2:'The therapy groups differ in menopausal status and age (Day 1), yet adjusting barely moves the HR. A confounder must be linked to <b>both</b> treatment and outcome.',
+    lung:'Women do better than men, crude or adjusted for age and performance status. ECOG is the strongest predictor: each point roughly doubles the hazard.'};
+  function draw(){const md=COX[k].models[mi],items=md.terms;g.selectAll('*').remove();
+    const x=d3.scaleLog().domain([.3,3.6]).range([m.l,W-m.r]),y=d3.scaleBand().domain(items.map(d=>d.v)).range([m.t,H-m.b]).padding(.35);
+    g.append('g').attr('transform',`translate(0,${H-m.b})`).call(gg=>gg.call(d3.axisBottom(x).tickValues([.3,.5,1,2,3]).tickFormat(d3.format('~g')).tickSize(5)).attr('class','axis'));
+    g.append('text').attr('class','axlab').attr('x',(W-m.r+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('hazard ratio (log scale), 95% CI');
+    g.append('line').attr('x1',x(1)).attr('x2',x(1)).attr('y1',m.t-10).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-dasharray','5 4');
+    const r=g.selectAll('g.r').data(items).join('g').attr('class','r').attr('transform',d=>`translate(0,${y(d.v)+y.bandwidth()/2})`);
+    r.append('text').attr('class','lbl').attr('x',0).attr('y',5).style('fill',(d,i)=>i?C.ink2:C.pc2).text(d=>d.v);
+    r.append('line').attr('x1',d=>x(Math.max(.3,d.lo))).attr('x2',d=>x(Math.min(3.6,d.hi))).attr('stroke',(d,i)=>i?C.pop:C.pc2).attr('stroke-width',3);
+    r.append('circle').attr('cx',d=>x(d.hr)).attr('r',(d,i)=>i?6:9).attr('fill',(d,i)=>i?C.pop:C.pc2).attr('stroke','#fff').attr('stroke-width',2);
+    r.append('text').attr('class','lbl num').attr('x',W-m.r+10).attr('y',5).style('font-size','14px').text(d=>`${fmt2(d.hr)} [${fmt2(d.lo)}, ${fmt2(d.hi)}]`);
+    if(k==='sim'){const tr={'drug vs control':.6,'age (per year)':1.04};r.filter(d=>tr[d.v]).append('path').attr('d',d=>`M${x(tr[d.v])},-15v30`).attr('stroke',C.sc1).attr('stroke-width',2.5);
+      r.filter(d=>tr[d.v]).append('text').attr('class','lbl pink').attr('x',d=>x(tr[d.v])).attr('y',-19).attr('text-anchor','middle').style('font-size','12px').text(d=>`truth ${tr[d.v]}`)}
+    const t=items[0];document.getElementById('cxK').textContent=`${t.v.toUpperCase()} · ${md.name.toUpperCase()}`;
+    document.getElementById('cxHR').innerHTML=`${fmt2(t.hr)} <small>[${fmt2(t.lo)}, ${fmt2(t.hi)}] · p = ${fmtP(t.p)}</small>`;
+    document.getElementById('cxMsg').innerHTML=msg[k]+`<br><span class="tiny">${md.n} patients, ${md.events} events.</span>`}
+  const mbox=document.getElementById('cxM');
+  function models(){mbox.querySelectorAll('button').forEach(b=>b.remove());mi=Math.min(mi,COX[k].models.length-1);
+    segButtons('cxM',COX[k].models.map((d,i)=>[i,d.name==='+ all'?'+ all covariates':d.name]),mi,v=>{mi=v;draw()})}
+  segButtons('cxDs',[['sim','Simulated'],['gbsg2','GBSG2'],['lung','Lung']],k,v=>{k=v;mi=0;models();draw()});models();draw();
+}};
+
+/* ---- 9 proportional hazards ---- */
+hooks['ph']={init(){
+  const SC={prop:{lab:'proportional',hr:t=>.6,msg:'The hazard ratio is the same at every time: one number summarises the effect well.'},
+    cross:{lab:'early harm, late benefit',hr:t=>t<1?2.2:.35,msg:'Treatment is harmful at first, then protective. The curves <b>cross</b>; a single HR (or the log-rank test) averages harm and benefit and may find "no effect".'},
+    wear:{lab:'effect wears off',hr:t=>t<2?.35:1,msg:'Strong early benefit that fades: the curves separate, then run parallel. A single HR understates the early effect and overstates the late one.'}};
+  let k='prop';const h0=.25;
+  const W=560,H=380,m={l:60,r:90,t:20,b:50},sv=d3.select('#phSurv');
+  const x=d3.scaleLinear().domain([0,6]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,1]).range([H-m.b,m.t]);
+  sv.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>pct(d)));
+  sv.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,6));
+  sv.append('text').attr('class','axlab').attr('x',(W-m.r+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Years');
+  sv.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Proportion event-free');
+  const c0=sv.append('path').attr('fill','none').attr('stroke',C.ink2).attr('stroke-width',3),c1=sv.append('path').attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',3);
+  const l0=sv.append('text').attr('class','lbl').style('fill',C.ink2).text('control'),l1=sv.append('text').attr('class','lbl purple').text('treated');
+  const W2=440,H2=250,m2={l:60,r:20,t:24,b:44},hv=d3.select('#phHR');
+  const x2=d3.scaleLinear().domain([0,6]).range([m2.l,W2-m2.r]),y2=d3.scaleLog().domain([.25,3]).range([H2-m2.b,m2.t]);
+  hv.append('g').attr('transform',`translate(0,${H2-m2.b})`).call(g=>axisB(g,x2,6));
+  hv.append('g').attr('transform',`translate(${m2.l},0)`).call(g=>g.call(d3.axisLeft(y2).tickValues([.25,.5,1,2,3]).tickFormat(d3.format('~g'))).attr('class','axis'));
+  hv.append('line').attr('x1',m2.l).attr('x2',W2-m2.r).attr('y1',y2(1)).attr('y2',y2(1)).attr('stroke',C.pc1).attr('stroke-dasharray','5 4');
+  hv.append('text').attr('class','axlab').attr('x',(W2+m2.l)/2).attr('y',H2-6).attr('text-anchor','middle').text('Years');
+  hv.append('text').attr('class','lbl').attr('x',m2.l).attr('y',12).style('font-size','14px').text('hazard ratio at each moment (treated / control)');
+  const hp=hv.append('path').attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',3);
+  function draw(){const s=SC[k],ts=d3.range(0,6.001,.02);let H1=0,prev=0;const S1=[],S0=[];
+    ts.forEach(t=>{H1+=h0*s.hr(t)*(t-prev);prev=t;S1.push([t,Math.exp(-H1)]);S0.push([t,Math.exp(-h0*t)])});
+    const ln=d3.line().x(d=>x(d[0])).y(d=>y(d[1]));c0.transition().duration(600).attr('d',ln(S0));c1.transition().duration(600).attr('d',ln(S1));
+    l0.transition().duration(600).attr('x',x(6)+6).attr('y',y(S0[S0.length-1][1])+(S0[S0.length-1][1]>S1[S1.length-1][1]?-4:14));
+    l1.transition().duration(600).attr('x',x(6)+6).attr('y',y(S1[S1.length-1][1])+(S0[S0.length-1][1]>S1[S1.length-1][1]?14:-4));
+    hp.transition().duration(600).attr('d',d3.line().curve(d3.curveStepAfter).x(t=>x2(t)).y(t=>y2(s.hr(t)))(ts));
+    document.getElementById('phMsg').innerHTML=s.msg}
+  segButtons('phS',Object.entries(SC).map(([k,v])=>[k,v.lab]),k,v=>{k=v;draw()});draw();
+}};
+
+/* ---- 11 statements ---- */
+hooks['statements']={init(){qcards('qcards',[
+  [false,'HR = 0.70 for hormone therapy means treated patients live 30% longer.','No: an HR compares event <em>rates</em> at each moment, not survival times. To describe the benefit, give survival at a fixed time in each group (58% vs 44% at 5 years).'],
+  [true,'If the Kaplan–Meier median is "not reached", report survival at a fixed time point instead.','Correct: fewer than half the patients had the event during follow-up, so the data can\'t locate the median. Survival at, say, 5 years is still estimable.'],
+  [false,'Patients who leave the study because they feel too ill to attend can safely be treated as censored.','That is <em>informative</em> censoring: those leaving have worse prospects than those staying, so Kaplan–Meier will be too optimistic. Censoring must be unrelated to prognosis.'],
+  [true,'A non-significant log-rank test does not prove the treatment has no effect, especially if the curves cross.','Correct: early harm and late benefit cancel in the log-rank sum. Look at the curves.']])}};
+
+/* ---- 12 AI ---- */
+hooks['ai-tutor']={init(){const [a,b]=DS.gbsg2.km;
+  document.getElementById('aiGood').innerHTML=`"Among women in this trial, about <b>${pct(b.S(1825))}</b> of those on hormone therapy were recurrence-free at 5 years, versus <b>${pct(a.S(1825))}</b> without it. At any point during follow-up, the rate of recurrence among women still recurrence-free was about 30% lower with therapy (HR 0.70, 95% CI 0.54–0.89). This assumes the benefit is roughly constant over time, and your own risk depends on your tumour."`}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>
