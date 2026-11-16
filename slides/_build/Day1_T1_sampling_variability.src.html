@@ -17,17 +17,15 @@
     <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
   </div>
   <div style="position:relative;margin-top:150px">
-    <div class="kicker">Day 1 · Topic 1 · Practical statistics for biomedical researchers</div>
     <h1 style="font-size:84px;margin-bottom:22px">Sampling <em>variability</em>.</h1>
     <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:720px;margin:0">Your study is one draw from many possible studies. How much could the answer have wobbled?</p>
   </div>
-  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span></span></div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 1 · Topic 1 · Practical statistics for biomedical researchers</span></div>
   <aside class="notes">Opening (1 min). Today is about one idea that everything else this week builds on: your data are one sample, and a different sample would have given a different answer. Confidence intervals, p-values and power are all ways of putting a number on that wobble. Every chart in this deck is a live simulation on the real GBSG2 data, the same data as in the notebooks.</aside>
 </section>
 
 <!-- ============ 2 ESTIMATE ============ -->
 <section class="slide" id="estimate">
-  <div class="kicker">The problem</div>
   <h1>Every number you report is an <em>estimate</em>.</h1>
   <div class="row" style="margin-top:20px">
     <div class="col" style="flex:1.1">
@@ -49,13 +47,12 @@
       </ul>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The problem</span></div>
   <aside class="notes">Ask: who has re-run an experiment and got a different answer? That difference is not necessarily a mistake. Part of it is sampling variability: you measured different mice, cells or patients. The rest of the hour is about how big that wobble is and what controls it. Click the left panel to draw a new sample: the highlighted dots change every time, and so does the sample mean.</aside>
 </section>
 
 <!-- ============ 3 POPULATION ============ -->
 <section class="slide" id="population">
-  <div class="kicker">Our playground · GBSG2 breast cancer trial</div>
   <h1>Meet the <em>population</em>.</h1>
   <div class="row">
     <div class="col" style="flex:2.1">
@@ -70,13 +67,12 @@
       <p class="small" id="popShape" style="margin-top:12px"></p>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Our playground · GBSG2 breast cancer trial</span></div>
   <aside class="notes">Notebook section A. Tumour size is right-skewed: most tumours are 15–35 mm, with a long tail of big ones that pulls the mean above the median. Switch to positive nodes for an even more skewed variable, and to age for a roughly symmetric one. We will come back to the skew: it matters for whether the "bell curve" shows up later. Hover over the bars for counts.</aside>
 </section>
 
 <!-- ============ 4 ONE STUDY ============ -->
 <section class="slide" id="one-study">
-  <div class="kicker">Notebook section B</div>
   <h1>One study = <em>one draw</em>.</h1>
   <div class="row" style="gap:24px">
     <div class="col" style="flex:3">
@@ -90,13 +86,12 @@
       <div class="stat"><span class="k">TRUE MEAN</span><span class="v num" id="oneTrue"></span></div>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section B</span></div>
   <aside class="notes">Get a few guesses out loud before clicking. Then click 5–6 times. Each click recruits 20 random patients (pink dots in the population), drops them into a study row and marks that study's mean (pink bar). The dashed line is the truth. Point out: no single study is "wrong", there was no error in measurement, yet the means typically span 8–12 mm. That's sampling variability, nothing else.</aside>
 </section>
 
 <!-- ============ 5 MANY STUDIES ============ -->
 <section class="slide" id="many-studies">
-  <div class="kicker">Notebook section C</div>
   <h1>Thousands of studies make the <em>sampling distribution</em>.</h1>
   <div class="row" style="gap:24px">
     <div class="col" style="flex:3">
@@ -116,13 +111,12 @@
       <p class="small" style="margin-top:12px">Same x-axis as the patients above. The study means are packed far more tightly than the patients.</p>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section C</span></div>
   <aside class="notes">Click +1 a few times: each study's 20 patients flash on the population (top), and the study's mean drops into the bottom histogram. Then +100 and "Run to 2,000". The bottom histogram is the sampling distribution of the mean: the answers you could have got. Its spread is what the notebook prints as "spread of the study means". Don't reveal how it changes with n: that's what the room will find in the hands-on.</aside>
 </section>
 
 <!-- ============ 6 SD vs SE ============ -->
 <section class="slide" id="sd-vs-se">
-  <div class="kicker">The most common mix-up in papers</div>
   <h1>Two spreads, <em>two questions</em>.</h1>
   <div class="row" style="gap:30px">
     <div class="col" style="flex:1.05">
@@ -141,7 +135,7 @@
       <svg id="seSvg" width="540" height="430"></svg>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The most common mix-up in papers</span></div>
   <aside class="notes">Same 20 patients, two error bars. Mean ± SD says "patients vary by about ±14 mm". Mean ± SE says "if I repeated the study, my mean would typically move by about ±3 mm", the spread of the histogram on the previous slide. Ask: which one should go on a figure? Depends on the message, but always say which. A bar chart with ±SE bars can make noisy data look very precise. In practice we don't have 2,000 studies; we estimate the SE from one sample. The notebook's tutor prompt tests exactly this.</aside>
 </section>
 
@@ -152,7 +146,6 @@
     <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
   </div>
   <div style="position:relative">
-    <div class="kicker">Your turn · about 30 minutes · in pairs</div>
     <h1 style="font-size:58px">Hands-on 1: <em>sampling variability</em>.</h1>
     <div class="row" style="margin-top:22px;gap:56px">
       <div class="col">
@@ -172,13 +165,12 @@
       </div>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span></span></div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
   <aside class="notes">Assign values: two pairs per n (5, 10, 20, 40, 80, 160). Make sure everyone writes a guess for the 20→80 question before starting; most will say "a quarter". Remind them: one "CHANGE THIS" line per cell, driver and navigator swap halfway. While they work, open the next slide and type in the shared-sheet values as they arrive.</aside>
 </section>
 
 <!-- ============ 8 ROOM ============ -->
 <section class="slide" id="room">
-  <div class="kicker">Debrief · after the hands-on</div>
   <h1>What did the <em>room</em> find?</h1>
   <div class="row" style="gap:36px">
     <div class="col" style="flex:0 0 360px">
@@ -196,13 +188,12 @@
       <svg id="roomSvg" width="700" height="460"></svg>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · after the hands-on</span></div>
   <aside class="notes">Type the shared-sheet values into the table (or click "Fill from simulation" if the sheet isn't working). Ask: compare n = 20 with n = 80. Four times the patients, but the spread only halves. Same for 40 → 160. Then "Reveal the rule". Expected values are in the facilitator notes. Pairs with the same n will differ slightly: the spread itself is estimated from 2,000 random studies.</aside>
 </section>
 
 <!-- ============ 9 SQRT N ============ -->
 <section class="slide" id="sqrt-n">
-  <div class="kicker">Notebook section D</div>
   <h1>Precision grows with <em>√n</em>, not with <em>n</em>.</h1>
   <div class="row" style="gap:28px">
     <div class="col" style="flex:2">
@@ -221,13 +212,12 @@
       <svg id="sqrtMini" width="300" height="150" style="margin-top:6px"></svg>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section D</span></div>
   <aside class="notes">Drag the slider. The histogram is 2,000 freshly simulated studies at each n; the pink bracket is ±1 SE. The practical punchline: 10 → 40 mice halves your SE; to halve it again you need 160. Diminishing returns are built into statistics, which is why sample-size planning (Hands-on 5) matters. In real life σ is unknown, so we plug in the sample SD: SE ≈ s/√n.</aside>
 </section>
 
 <!-- ============ 10 CLT ============ -->
 <section class="slide" id="clt">
-  <div class="kicker">Concept check 1 · the central limit theorem</div>
   <h1>Averages <em>forget</em> the shape of the data.</h1>
   <div class="controls">
     <div class="seg" id="cltVar"><span class="lab">Variable</span></div>
@@ -243,13 +233,12 @@
       <svg id="cltSvg" width="720" height="420"></svg>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check 1 · the central limit theorem</span></div>
   <aside class="notes">Start with positive nodes at n = 1: the "means" are just patients, so the histogram is as skewed as the data. Step up n: by 30 the means sit almost exactly on the bell curve (pink line), even though the data never do. That's why tomorrow's CIs and t-tests work for non-normal data with decent n. The caveat for small studies: at n = 5 with skewed data the bell curve is still off, which is why confidence intervals in Hands-on 2 cover a bit less than 95%.</aside>
 </section>
 
 <!-- ============ 11 BIAS ============ -->
 <section class="slide" id="bias">
-  <div class="kicker">Discussion question 3 · the random sampling assumption</div>
   <h1>More data shrinks <em>noise</em>, not <em>bias</em>.</h1>
   <div class="row" style="gap:28px">
     <div class="col" style="flex:2.1">
@@ -263,13 +252,12 @@
       <div class="stat"><span class="k">TRUE MEAN</span><span class="v num" id="biasT"></span></div>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Discussion question 3 · the random sampling assumption</span></div>
   <aside class="notes">Everything so far assumed patients were picked at random. Here, recruitment favours larger tumours. Increase n: both distributions get narrower, but the pink one homes in on the wrong value, about 7 mm too high. Large n gives you a very precise wrong answer. The SE and every CI or p-value built on it only describe random noise; they say nothing about how patients got into your study. Ask the room for examples from their own work: convenience samples, only the mice that survived, only the cells that attached.</aside>
 </section>
 
 <!-- ============ 12 AI ============ -->
 <section class="slide" id="ai-tutor">
-  <div class="kicker">AI as tutor · check its answer</div>
   <h1>Does the tutor know <em>SD from SE</em>?</h1>
   <div class="row" style="gap:40px;margin-top:8px">
     <div class="col" style="flex:1.2">
@@ -293,7 +281,7 @@
       </ul>
     </div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
   <aside class="notes">Ask two or three pairs to read out how they scored their AI answer. Most current models get the definitions right; the misses are usually in "specific" (no actual SE calculated) and "actionable" (no advice about which to report on a figure). If someone's answer recommended SE "because it looks cleaner", use it: that's a reporting choice, not a statistical reason.</aside>
 </section>
 
@@ -304,7 +292,6 @@
     <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
   </div>
   <div style="position:relative;margin-top:40px">
-    <div class="kicker">Take home</div>
     <h1 style="font-size:56px">Three things to <em>keep</em>.</h1>
     <ol class="big" style="font-size:28px;line-height:1.5;padding-left:34px;margin:26px 0 40px;max-width:1000px">
       <li>Your result is <em>one draw</em>. A repeat study would give a different number.</li>
@@ -313,7 +300,7 @@
     </ol>
     <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">Confidence intervals</span>: if a mean ± 2 SE is drawn around every study, how often does it catch the truth?</p>
   </div>
-  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span></span></div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
   <aside class="notes">Bridge to Hands-on 2: on slide 5, the middle 95% of study means was roughly the true mean ± 2 spreads. Flip it round: if each study draws ± 2 SE around its own mean, most of those intervals will contain the truth. That's a confidence interval.</aside>
 </section>
 
