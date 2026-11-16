@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 1 · False positives</title>
+<style>/*CSS*/</style>
+<style>
+.err{display:grid;grid-template-columns:170px 1fr 1fr;gap:10px;margin-top:10px}
+.err .h{font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:flex-end;padding:0 6px 4px}
+.err .rh{font-size:18px;color:var(--ink2);display:flex;align-items:center;padding-right:10px;line-height:1.3}
+.err .cell{border-radius:14px;padding:16px 18px;font-size:20px;line-height:1.35;min-height:120px;background:var(--wash)}
+.err .cell b{font-weight:400;display:block;font-size:24px;margin-bottom:4px}
+.err .cell.t1{background:#fff;border:2px solid var(--sc1)} .err .cell.t1 b{color:var(--sc1)}
+.err .cell.t2{background:#fff;border:2px dashed var(--pc2)} .err .cell.t2 b{color:var(--pc2)}
+.heat td{width:86px;height:40px;text-align:center;font-size:16px;border-radius:6px;font-variant-numeric:tabular-nums;transition:background .3s,color .3s}
+.heat th{font-weight:400;font-size:14px;color:var(--ink2);padding:2px 6px;text-align:left}
+.heat thead th{text-align:center;font-size:13px;line-height:1.2;vertical-align:bottom}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">False <em>positives</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:760px;margin:0">Test something that does nothing, often enough, and it will look like it works.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 1 · Topic 4 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">This topic starts with the puzzle, before any explanation: pairs run section A of the notebook first, and the lecture explains what they found. Keep the introduction to one sentence.</aside>
+</section>
+
+<!-- ============ 2 PUZZLE ============ -->
+<section class="slide dark" id="puzzle">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Puzzle first: <em>does the drug work?</em></h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day1_HO4_false_positives.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTION A ONLY, SEED = YOUR PAIR NUMBER</p>
+        <p style="margin:0 0 22px;font-size:22px;color:rgba(255,255,255,.85)">20 experiments. In each, 100 GBSG2 patients are split into "Drug" and "Placebo" <em>by coin flip</em>. Nobody received anything.</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">📋 Enter <b>seed</b> and <b>"significant" results / 20</b> in the shared sheet.</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">Out of 20 experiments with no real effect, how many will reach p &lt; 0.05?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">THEN STOP</p>
+        <p style="margin:0;font-size:21px;line-height:1.5;color:rgba(255,255,255,.85)">Sections B and C come after the lecture.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Hands-on 4, section A · about 10 minutes · in pairs</span></div>
+  <aside class="notes">Make sure everyone writes a guess. Common answers: "zero, there is no effect" and "one". Collect the counts on the next slide as they come in.</aside>
+</section>
+
+<!-- ============ 3 ROOM ============ -->
+<section class="slide" id="room">
+  <h1>Who found a drug that <em>works</em>?</h1>
+  <div class="row" style="gap:36px">
+    <div class="col" style="flex:0 0 330px">
+      <table class="room" id="roomTable"><tr><th>Pair (seed)</th><th>Significant / 20</th></tr></table>
+      <div class="controls" style="margin-top:12px">
+        <button class="btn" id="roomFill">Fill from simulation</button>
+        <button class="btn" id="roomClear">Clear</button>
+      </div>
+    </div>
+    <div class="col">
+      <svg id="roomSvg" width="740" height="340"></svg>
+      <div class="row" style="gap:20px;margin-top:6px">
+        <div class="stat" style="flex:1"><span class="k">PAIRS REPORTING</span><span class="v num" id="roomPairs">0</span></div>
+        <div class="stat" style="flex:1"><span class="k">PAIRS WITH AT LEAST ONE "HIT"</span><span class="v num" id="roomAny">–</span></div>
+        <div class="stat" style="flex:1"><span class="k" style="color:var(--sc1)">POOLED "SIGNIFICANT" RATE</span><span class="v num" id="roomPooled">–</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief of section A · discussion question 1</span></div>
+  <aside class="notes">Type in the counts. Ask the pairs with 2 or 3 hits: would you have published? Then point at the outlined bars: that's how many pairs we'd expect at each count if every test has a 5% false-positive rate. Some pairs get 0, some get 3, and that spread is itself chance. The pooled rate is what to compare with 5%.</aside>
+</section>
+
+<!-- ============ 4 ERRORS ============ -->
+<section class="slide" id="errors">
+  <h1>Two ways to be <em>wrong</em>.</h1>
+  <div class="err">
+    <div></div><div class="h">Truth: no effect</div><div class="h">Truth: real effect</div>
+    <div class="rh">Test says<br>"significant"</div>
+    <div class="cell t1"><b>False positive</b>Type I error. Happens with probability <em>α</em> (you choose it, usually 5%).</div>
+    <div class="cell">Correct detection. Its probability is the <em>power</em>.</div>
+    <div class="rh">Test says<br>"not significant"</div>
+    <div class="cell">Correct. No effect, none claimed.</div>
+    <div class="cell t2"><b>False negative</b>Type II error, probability <em>β</em>. Power = 1 − β.</div>
+  </div>
+  <p class="small" style="margin-top:20px">Today: the pink cell. <span style="color:var(--pc2)">Next topic: the dashed one, and why small studies live there.</span></p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture</span></div>
+  <aside class="notes">Your coin-flip experiments all live in the left column: there was no effect, so every "significant" result was a false positive. α isn't a property of the data; it's the false-positive rate you agree to accept, decided before you look. The right column needs a real effect, which we simulate in the next hands-on.</aside>
+</section>
+
+<!-- ============ 5 FLAT ============ -->
+<section class="slide" id="flat">
+  <h1>With no effect, p-values are <em>flat</em>.</h1>
+  <div class="controls">
+    <div class="seg" id="flEff"><span class="lab">True effect</span></div><span style="width:14px"></span>
+    <div class="seg" id="flA"><span class="lab">α</span></div><span style="width:14px"></span>
+    <div class="seg" id="flZoom"><span class="lab">Show p from</span></div>
+  </div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:3">
+      <svg id="flSvg" width="860" height="420"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <button class="btn primary" id="flRun" style="width:100%">Run 2,000 experiments</button>
+      <div class="stat" style="margin-top:12px"><span class="k">EXPERIMENTS</span><span class="v num" id="flCount">0</span></div>
+      <div class="stat"><span class="k" style="color:var(--sc1)">p BELOW α</span><span class="v num" id="flRate">–</span></div>
+      <p class="small" style="margin-top:10px" id="flMsg">Each experiment: 50 vs 50 GBSG2 patients by coin flip, Welch t-test on tumour size.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section B · concept check</span></div>
+  <aside class="notes">Run with no effect: the histogram fills evenly, every bar at about the dashed line. So the share below any threshold equals the threshold: that's why α is the false-positive rate. Switch α to 0.01 and 0.10 to see it hold. Zoom to 0–0.1 (the Gemini prompt): still flat. Then switch the true effect to 3 or 6 mm and run again: now p-values pile up near zero. That pile is power, which is the next topic.</aside>
+</section>
+
+<!-- ============ 6 MANY ============ -->
+<section class="slide" id="many">
+  <h1>Many tests, one study: <em>someone</em> will light up.</h1>
+  <div class="controls">
+    <div class="seg" id="mtK"><span class="lab">Tests per study</span></div><span style="width:14px"></span>
+    <div class="seg" id="mtCorr"><span class="lab">Threshold</span></div>
+  </div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2">
+      <svg id="mtSvg" width="720" height="430"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <div class="stat"><span class="k" style="color:var(--sc1)">STUDIES WITH ≥ 1 FALSE POSITIVE</span><span class="v num" id="mtSim"></span></div>
+      <div class="stat"><span class="k">THEORY: 1 − (1 − α)<sup>k</sup></span><span class="v num" id="mtTh"></span></div>
+      <svg id="mtCurve" width="330" height="170" style="margin-top:6px"></svg>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Notebook section C</span></div>
+  <aside class="notes">Each row is a study, each square a biomarker with no real effect. Pink squares are false positives. With 1 test, about 1 study in 20 has a hit. With 20 tests, most studies have at least one. With 100, almost all. Then switch to Bonferroni (α divided by the number of tests): the share of studies with any hit drops back to about 5%, at a price in power. An RNA-seq experiment runs about 20,000 tests: that's Day 2's false discovery rate.</aside>
+</section>
+
+<!-- ============ 7 FORKING ============ -->
+<section class="slide" id="forking">
+  <h1>The garden of <em>forking paths</em>.</h1>
+  <div class="row" style="gap:28px">
+    <div class="col" style="flex:1.6">
+      <div class="controls"><button class="btn primary" id="fkFlip">New coin flip</button><button class="btn" id="fkHow">How often does this happen?</button></div>
+      <table class="heat" id="fkTable"></table>
+      <p class="small" id="fkMsg" style="margin-top:12px"></p>
+    </div>
+    <div class="col" style="flex:1">
+      <p class="small" style="margin-top:0">One fake trial: GBSG2 patients split into "Drug" and "Placebo" by coin flip. Now analyse it the way real projects drift: another measurement, a subgroup, another split…</p>
+      <div class="stat"><span class="k">ANALYSES TRIED</span><span class="v num">28</span></div>
+      <div class="stat"><span class="k" style="color:var(--sc1)">"SIGNIFICANT" IN THIS FLIP</span><span class="v num" id="fkN"></span></div>
+      <div class="stat"><span class="k">FLIPS WITH ≥ 1 HIT (OF 500)</span><span class="v num" id="fkRate">–</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Discussion question 2 · where this bites in your own work</span></div>
+  <aside class="notes">Nobody runs 20 identical tests on purpose. But many analyses drift: a different readout, only the postmenopausal patients, only high-grade tumours. Each looks reasonable on its own. Click "New coin flip" a few times; then "How often" to see what share of pure-noise trials offer at least one publishable-looking cell. The tests overlap, so it's not exactly 1 − 0.95²⁸, but it's still high. Remedies: decide the primary outcome and analysis in advance, report everything you tried, treat subgroup findings as hypotheses.</aside>
+</section>
+
+<!-- ============ 8 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which statements are <em>correct</em>?</h1>
+  <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
+  <aside class="notes">Statement 4 is the bridge to the next topic: tightening α protects against false positives but costs power. There's no free threshold.</aside>
+</section>
+
+<!-- ============ 9 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>One of 20 biomarkers, p = 0.04: what does the tutor <em>say</em>?</h1>
+  <div class="row" style="gap:40px;margin-top:8px">
+    <div class="col" style="flex:1.2">
+      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook:</p>
+      <div class="prompt">I measured 20 serum biomarkers in treated and control mice. One of them, IL-6, differed with p = 0.04. Can I conclude that the treatment affects IL-6?</div>
+      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
+      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+      <p class="small" style="margin:22px 0 6px">🧮 Calculator check: after zooming the histogram to p between 0 and 0.1, are the bars still roughly flat?</p>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">A good answer mentions:</p>
+      <ul class="clean" style="margin-bottom:14px">
+        <li style="font-size:19px">20 tests → about 1 false positive expected</li>
+        <li style="font-size:19px">a correction (Bonferroni: 0.05 / 20 = 0.0025) or FDR</li>
+        <li style="font-size:19px">replication in an independent experiment</li>
+        <li style="font-size:19px">the size of the IL-6 difference, not only p</li>
+      </ul>
+      <p class="small" style="margin:0 0 4px">Watch for:</p>
+      <ul class="clean x">
+        <li style="font-size:19px">"yes, p &lt; 0.05 so the effect is significant"</li>
+        <li style="font-size:19px">a correction suggested, but not applied to the numbers</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
+  <aside class="notes">Most current models raise multiple testing here, because the prompt says "20 biomarkers". A useful follow-up for pairs who finish early: remove "20 serum biomarkers" from the prompt and just say "IL-6 differed with p = 0.04". Does the tutor ask how many other things were measured? Usually not, and neither do reviewers.</aside>
+</section>
+
+<!-- ============ 10 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:40px">
+    <h1 style="font-size:56px">Three things to <em>keep</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:26px 0 40px;max-width:1060px">
+      <li>With no effect, p-values are flat: <em>α</em> is the false-positive rate you accept.</li>
+      <li>Many tests, or many ways of analysing, make <em>some</em> hit almost certain.</li>
+      <li>Decide the main analysis <em>in advance</em>; correct, replicate, and report everything you tried.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">Power and sample size</span>: when there <em>is</em> an effect, how often do we find it?</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
+  <aside class="notes">Bridge to Hands-on 5: on the flat-p-values slide, switching on a real effect made p-values pile up near zero. How high that pile gets below 0.05 is the power, and it depends mostly on sample size.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const hooks = {};
+const TS = DATA.tsize, NP = TS.length;
+// one coin-flip experiment: 100 random patients without replacement, first 50 "Drug" (+effect mm), last 50 "Placebo"
+const _idx = Int32Array.from({length:NP},(_,i)=>i);
+function coinTrial(effect=0,n=50,r=R){
+  let sa=0,qa=0,sb=0,qb=0;
+  for(let i=0;i<2*n;i++){const q=i+Math.floor(r()*(NP-i)),t=_idx[i];_idx[i]=_idx[q];_idx[q]=t;const v=TS[_idx[i]];
+    if(i<n){const w=v+effect;sa+=w;qa+=w*w}else{sb+=v;qb+=v*v}}
+  const ma=sa/n,mb=sb/n,va=(qa-n*ma*ma)/(n-1)/n,vb=(qb-n*mb*mb)/(n-1)/n,se=Math.sqrt(va+vb);
+  const df=(va+vb)**2/(va*va/(n-1)+vb*vb/(n-1));return tTwoSided(Math.abs((ma-mb)/se),df);
+}
+
+/* ---- 3 room ---- */
+hooks['room']={init(){
+  const P=12,tb=document.getElementById('roomTable');
+  for(let i=1;i<=P;i++){const tr=document.createElement('tr');tr.innerHTML=`<td class="num">${i}</td><td><input type="number" min="0" max="20" step="1" data-p="${i}"></td>`;tb.appendChild(tr)}
+  const inputs=[...tb.querySelectorAll('input')];
+  const W=740,H=340,m={l:50,r:20,t:30,b:50},K=7;
+  const svg=d3.select('#roomSvg');
+  const x=d3.scaleBand().domain(d3.range(K)).range([m.l,W-m.r]).padding(0.25);
+  const y=d3.scaleLinear().domain([0,8]).range([H-m.b,m.t]);
+  const gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>g.call(d3.axisBottom(x).tickFormat(d=>d===K-1?`${d}+`:d).tickSize(0).tickPadding(8)).attr('class','axis'));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('"Significant" results out of 20 (no real effect)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Number of pairs');
+  const exp=svg.append('g'),dots=svg.append('g');
+  const pk=d3.range(K).map(k=>k<K-1?binomPMF(k,20,.05):1-d3.sum(d3.range(K-1),j=>binomPMF(j,20,.05)));
+  const lg=svg.append('g').attr('transform',`translate(${W-m.r-300},${m.t-14})`);
+  lg.append('rect').attr('width',14).attr('height',10).attr('fill','none').attr('stroke',C.pc1).attr('stroke-dasharray','3 2');lg.append('text').attr('class','lbl').attr('x',20).attr('y',10).text('expected if the false-positive rate is 5%');
+  function render(){
+    const v=inputs.filter(i=>i.value!=='').map(i=>({p:+i.dataset.p,c:Math.max(0,Math.min(20,+i.value))}));
+    const n=v.length,ymax=Math.max(4,n*pk[1]*1.15,...d3.range(K).map(k=>v.filter(d=>Math.min(d.c,K-1)===k).length));
+    y.domain([0,Math.ceil(ymax)]);axisL(gy.transition().duration(300),y,Math.min(8,Math.ceil(ymax)),W-m.l-m.r);
+    exp.selectAll('rect').data(pk).join('rect').attr('fill','none').attr('stroke',C.pc1).attr('stroke-dasharray','4 3').attr('stroke-width',1.5)
+      .transition().duration(300).attr('x',(d,k)=>x(k)).attr('width',x.bandwidth()).attr('y',d=>y(d*Math.max(n,1))).attr('height',d=>y(0)-y(d*Math.max(n,1)));
+    const cnt={};v.forEach(d=>{const k=Math.min(d.c,K-1);d.k=k;d.s=(cnt[k]=(cnt[k]||0)+1)-1});
+    dots.selectAll('rect').data(v,d=>d.p).join('rect').attr('rx',4)
+      .on('mousemove',(ev,d)=>showTip(ev,`Pair ${d.p}: <b>${d.c}</b> / 20`)).on('mouseleave',hideTip)
+      .transition().duration(300).attr('x',d=>x(d.k)+6).attr('width',x.bandwidth()-12).attr('y',d=>y(d.s+1)+2).attr('height',d=>Math.max(0,y(d.s)-y(d.s+1)-4)).attr('fill',d=>d.c>0?C.sc1:C.pop);
+    document.getElementById('roomPairs').textContent=n;
+    if(n){document.getElementById('roomAny').innerHTML=`${v.filter(d=>d.c>0).length} <small>of ${n}</small>`;
+      document.getElementById('roomPooled').innerHTML=`${fmt1(100*d3.sum(v,d=>d.c)/(20*n))}% <small>of ${20*n} tests</small>`}
+    else{document.getElementById('roomAny').textContent='–';document.getElementById('roomPooled').textContent='–'}
+  }
+  inputs.forEach(i=>i.addEventListener('input',render));
+  document.getElementById('roomFill').onclick=()=>{inputs.forEach(i=>{const r=mulberry32(+i.dataset.p*104729+(Date.now()%997));let c=0;for(let e=0;e<20;e++)if(coinTrial(0,50,r)<0.05)c++;i.value=c});render()};
+  document.getElementById('roomClear').onclick=()=>{inputs.forEach(i=>i.value='');render()};
+  render();
+}};
+
+/* ---- 5 flat ---- */
+hooks['flat']={init(){
+  let eff=0,alpha=.05,zoom=1,ps=[],timer=null;
+  const W=860,H=420,m={l:56,r:20,t:24,b:50};
+  const svg=d3.select('#flSvg');
+  const x=d3.scaleLinear().range([m.l,W-m.r]),y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gx=svg.append('g').attr('transform',`translate(0,${H-m.b})`),gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  const shade=svg.append('rect').attr('y',m.t).attr('height',H-m.b-m.t).attr('fill',C.sc3).attr('opacity',.3);
+  const bars=svg.append('g');
+  const ref=svg.append('line').attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  const refl=svg.append('text').attr('class','lbl').attr('text-anchor','end');
+  const al=svg.append('line').attr('stroke',C.sc1).attr('stroke-width',2.5).attr('y1',m.t-6).attr('y2',H-m.b);
+  const alt=svg.append('text').attr('class','lbl pink').attr('y',m.t-10);
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('p-value');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Number of experiments');
+  function render(dur=150){
+    const bw=zoom/20;x.domain([0,zoom]);
+    const inRange=ps.filter(p=>p<=zoom);
+    const bins=d3.bin().domain([0,zoom]).thresholds(d3.range(0,zoom,bw))(inRange);
+    const expect=ps.length*bw;
+    y.domain([0,Math.max(10,d3.max(bins,b=>b.length)||0,expect*1.3)]).nice();
+    gx.call(g=>axisB(g,x,10));axisL(gy.transition().duration(dur),y,5,W-m.l-m.r);
+    shade.attr('x',x(0)).attr('width',Math.max(0,x(Math.min(alpha,zoom))-x(0)));
+    bars.selectAll('path').data(bins).join('path').attr('fill',b=>b.x1<=alpha+1e-12?C.sc1:C.pop)
+      .on('mousemove',(ev,b)=>showTip(ev,`p ${d3.format('.3~f')(b.x0)}–${d3.format('.3~f')(b.x1)}: <b>${b.length}</b>`)).on('mouseleave',hideTip)
+      .transition().duration(dur).attr('d',b=>barPath(x(b.x0)+1,x(b.x1)-1,y(0),y(b.length),2));
+    ref.attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(expect)).attr('y2',y(expect)).attr('opacity',ps.length?1:0);
+    refl.attr('x',W-m.r).attr('y',y(expect)-6).attr('opacity',ps.length&&eff===0?1:0).text('flat: what no effect predicts');
+    al.attr('x1',x(Math.min(alpha,zoom))).attr('x2',x(Math.min(alpha,zoom)));alt.attr('x',x(Math.min(alpha,zoom))+6).text(`α = ${alpha}`);
+    document.getElementById('flCount').textContent=d3.format(',')(ps.length);
+    document.getElementById('flRate').innerHTML=ps.length?`${fmt1(100*ps.filter(p=>p<alpha).length/ps.length)}% <small>(α = ${alpha*100}%)</small>`:'–';
+    document.getElementById('flMsg').innerHTML=eff===0?'Each experiment: 50 vs 50 GBSG2 patients by coin flip, Welch t-test on tumour size. <b>No real effect.</b>':`Same, but the "Drug" group's tumours are made <b>${eff} mm larger</b>: a real effect. Now "p below α" is the <b>power</b>.`;
+  }
+  function stop(){if(timer){timer.stop();timer=null}}
+  function run(){stop();ps=[];timer=d3.interval(()=>{for(let i=0;i<100;i++)ps.push(coinTrial(eff));render(100);if(ps.length>=2000)stop()},90)}
+  segButtons('flEff',[[0,'none'],[3,'3 mm'],[6,'6 mm']],eff,v=>{eff=v;stop();ps=[];render()});
+  segButtons('flA',[[.01,'0.01'],[.05,'0.05'],[.1,'0.10']],alpha,v=>{alpha=v;render(300)});
+  segButtons('flZoom',[[1,'0–1'],[.1,'0–0.1']],zoom,v=>{zoom=v;render(300)});
+  document.getElementById('flRun').onclick=run;render(0);this.stop=stop;
+},leave(){this.stop&&this.stop()}};
+
+/* ---- 6 many tests ---- */
+hooks['many']={init(){
+  let k=20,bonf=false;const show=20,n=30,alpha=.05;let S=2000;
+  const W=720,H=430,m={l:70,r:10,t:10,b:30};
+  const svg=d3.select('#mtSvg');const g=svg.append('g');
+  svg.append('text').attr('class','axlab').attr('x',m.l).attr('y',H-6).text('each square = one biomarker with no real effect; pink = "significant"');
+  // curve
+  const cW=330,cH=170,cm={l:40,r:10,t:10,b:30};const cs=d3.select('#mtCurve');
+  const cx=d3.scaleLog().domain([1,100]).range([cm.l,cW-cm.r]),cy=d3.scaleLinear().domain([0,1]).range([cH-cm.b,cm.t]);
+  cs.append('g').attr('transform',`translate(0,${cH-cm.b})`).call(gg=>gg.call(d3.axisBottom(cx).tickValues([1,5,20,100]).tickFormat(d3.format('d')).tickSize(4)).attr('class','axis'));
+  cs.append('g').attr('transform',`translate(${cm.l},0)`).call(gg=>gg.call(d3.axisLeft(cy).ticks(3).tickFormat(d3.format('.0%')).tickSize(4)).attr('class','axis'));
+  cs.append('text').attr('class','axlab').attr('x',cW-cm.r).attr('y',cH-2).attr('text-anchor','end').style('font-size','12px').text('tests per study (log)');
+  const curve=cs.append('path').attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2);
+  const cdot=cs.append('circle').attr('r',6).attr('fill',C.sc1).attr('stroke','#fff').attr('stroke-width',2);
+  function draw(){
+    const thr=bonf?alpha/k:alpha;S=k>=100?1000:2000;   // keep k = 100 responsive
+    // simulate: S studies × k tests, two groups of n normal values (as in the notebook)
+    const P=new Float64Array(S*k);
+    for(let s=0;s<S;s++)for(let j=0;j<k;j++){let a=0,qa=0,b=0,qb=0;for(let i=0;i<n;i++){const u=randn(),v=randn();a+=u;qa+=u*u;b+=v;qb+=v*v}
+      const ma=a/n,mb=b/n,va=(qa-n*ma*ma)/(n-1),vb=(qb-n*mb*mb)/(n-1),sp=Math.sqrt((va+vb)/2*2/n);P[s*k+j]=tTwoSided(Math.abs((ma-mb)/sp),2*n-2)}
+    let any=0;for(let s=0;s<S;s++){for(let j=0;j<k;j++)if(P[s*k+j]<thr){any++;break}}
+    const cols=Math.min(k,50),rowsPer=Math.ceil(k/cols);const cell=Math.min(28,(W-m.l-m.r)/cols);const rh=(H-m.t-m.b-20)/show;
+    const sq=Math.min(cell-2,(rh-3)/rowsPer-1);
+    const data=[];for(let s=0;s<show;s++)for(let j=0;j<k;j++)data.push({s,j,p:P[s*k+j]});
+    g.selectAll('text.sl').data(d3.range(show)).join('text').attr('class','lbl sl').attr('x',0).attr('y',s=>m.t+s*rh+rh/2+5).style('font-size','13px').attr('fill',C.ink2).text(s=>`Study ${s+1}`);
+    g.selectAll('rect.t').data(data,d=>`${d.s}-${d.j}`).join('rect').attr('class','t').attr('rx',Math.min(3,sq/3))
+      .attr('x',d=>m.l+(d.j%cols)*cell).attr('y',d=>m.t+d.s*rh+Math.floor(d.j/cols)*(sq+1)+(rh-rowsPer*(sq+1))/2).attr('width',sq).attr('height',sq)
+      .on('mousemove',(ev,d)=>showTip(ev,`Study ${d.s+1}, biomarker ${d.j+1}: p = ${fmtP(d.p)}`)).on('mouseleave',hideTip)
+      .attr('fill',C.line).transition().delay(d=>d.s*25).duration(250).attr('fill',d=>d.p<thr?C.sc1:C.popL);
+    const th=1-(1-thr)**k;
+    document.getElementById('mtSim').innerHTML=`${fmt1(100*any/S)}% <small>of ${d3.format(',')(S)} studies</small>`;
+    document.getElementById('mtTh').innerHTML=`${fmt1(100*th)}% <small>${bonf?`with α / ${k} = ${d3.format('.2~g')(thr)}`:''}</small>`;
+    curve.attr('d',d3.line().x(d=>cx(d)).y(d=>cy(1-(1-(bonf?alpha/d:alpha))**d))(d3.range(1,101)));
+    cdot.transition().duration(300).attr('cx',cx(k)).attr('cy',cy(th));
+  }
+  segButtons('mtK',[[1,'1'],[5,'5'],[20,'20'],[100,'100']],k,v=>{k=v;draw()});
+  segButtons('mtCorr',[[false,'α = 0.05'],[true,'Bonferroni']],bonf,v=>{bonf=v;draw()});
+  draw();
+}};
+
+/* ---- 7 forking paths ---- */
+hooks['forking']={init(){
+  const outs=[['tsize','Tumour size'],['pnodes','Positive nodes'],['progrec','Progesterone rec.'],['estrec','Oestrogen rec.']];
+  const subs=[['All',()=>true],['Premenopausal',i=>DATA.menostat[i]===0],['Postmenopausal',i=>DATA.menostat[i]===1],['Grade I–II',i=>DATA.tgrade[i]<3],['Grade III',i=>DATA.tgrade[i]===3],['Age < 50',i=>DATA.age[i]<50],['Age ≥ 50',i=>DATA.age[i]>=50]];
+  const masks=subs.map(([,f])=>d3.range(NP).filter(f));
+  const tb=document.getElementById('fkTable');
+  tb.innerHTML='<thead><tr><th></th>'+subs.map(([s])=>`<th>${s}</th>`).join('')+'</tr></thead><tbody>'+outs.map(([k,l])=>`<tr><th>${l}</th>`+subs.map((_,j)=>`<td data-o="${k}" data-s="${j}"></td>`).join('')+'</tr>').join('')+'</tbody>';
+  const cells=[...tb.querySelectorAll('td')];
+  function analyse(flip){const res=[];for(const [k] of outs)masks.forEach((idx,j)=>{const a=[],b=[];for(const i of idx)(flip[i]?a:b).push(DATA[k][i]);res.push({k,j,p:welch(a,b).p})});return res}
+  function draw(){
+    const flip=Array.from({length:NP},()=>R()<0.5?1:0);const res=analyse(flip);
+    cells.forEach((td,i)=>{const r=res[i],sig=r.p<0.05;td.textContent=fmtP(r.p);td.style.background=sig?C.sc1:(r.p<0.2?C.wash||'#f6f3f9':'#f6f3f9');td.style.color=sig?'#fff':C.ink2});
+    const n=res.filter(r=>r.p<0.05).length;
+    document.getElementById('fkN').innerHTML=`${n} <small>of 28</small>`;
+    document.getElementById('fkMsg').innerHTML=n?`Pure coin flip, yet ${n===1?'one cell looks':'some cells look'} like a finding: "the drug changes ${outs.find(o=>o[0]===res.find(r=>r.p<0.05).k)[1].toLowerCase()} in ${subs[res.find(r=>r.p<0.05).j][0].toLowerCase()} patients".`:'Nothing this time. Flip again.';
+  }
+  document.getElementById('fkFlip').onclick=draw;
+  document.getElementById('fkHow').onclick=()=>{let hit=0;for(let t=0;t<500;t++){const flip=Array.from({length:NP},()=>R()<0.5?1:0);if(analyse(flip).some(r=>r.p<0.05))hit++}
+    document.getElementById('fkRate').innerHTML=`${fmt1(hit/5)}% <small>vs 5% for one planned test</small>`};
+  draw();
+}};
+
+/* ---- 8 statements ---- */
+hooks['statements']={init(){qcards('qcards',[
+  [false,'With no real effect, p-values near 0 are rarer than p-values near 1.','With no effect, p-values are flat: every value between 0 and 1 is equally likely.'],
+  [true,'Choosing α = 0.05 means accepting that about 5% of tests of true "no effect" hypotheses will come out significant.','Correct. α is the false-positive rate you agree to, decided before seeing data.'],
+  [false,'If 1 of 20 biomarkers has p = 0.04, the treatment probably affects that biomarker.','With 20 tests, about one false positive is expected. Correct for multiple testing or replicate before believing it.'],
+  [true,'Lowering α to 0.01 reduces false positives but makes real effects harder to detect.','Correct. Fewer false positives, more false negatives: the trade-off in the next topic.']])}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>
