@@ -199,7 +199,7 @@ ul.clean.x li::before{background:var(--sc1);border-radius:2px;transform:rotate(4
 <!-- ============ 6 LOG-RANK ============ -->
 <section class="slide" id="logrank">
   <h1>Log-rank: <em>observed</em> vs <em>expected</em> events.</h1>
-  <div class="controls"><div class="seg" id="lrDs"><span class="lab">Dataset</span></div><button class="btn primary" id="lrPlay">▶ play</button><input type="range" id="lrT" min="0" max="1" step="0.001" value="1" style="width:300px;accent-color:#9933ff"></div>
+  <div class="controls"><div class="seg" id="lrDs"><span class="lab">Dataset</span></div><button class="btn primary" id="lrPlay">▶ play</button><input type="range" id="lrT" min="0" max="1" step="0.001" value="0" style="width:300px;accent-color:#9933ff"></div>
   <div class="row" style="gap:24px">
     <div class="col" style="flex:2"><svg id="lrSvg" width="760" height="410"></svg></div>
     <div class="col" style="flex:1">
@@ -758,11 +758,12 @@ hooks['logrank']={init(){
     gap.attr('x1',x(tm)).attr('x2',x(tm)).attr('y1',y(last.O)).attr('y2',y(last.E));
     tO.attr('x',x(tm)+8).attr('y',y(last.O)+(last.O<last.E?16:-6)).attr('text-anchor',tm>ds.xmax*.8?'end':'start').attr('dx',tm>ds.xmax*.8?-16:0).text(`observed ${last.O}`);
     tE.attr('x',x(tm)+8).attr('y',y(last.E)+(last.O<last.E?-6:16)).attr('text-anchor',tm>ds.xmax*.8?'end':'start').attr('dx',tm>ds.xmax*.8?-16:0).text(`expected ${fmt1(last.E)}`);
-    document.getElementById('lrOE').innerHTML=`${last.O} <small>observed vs</small> ${fmt1(last.E)} <small>expected</small>`}
+    document.getElementById('lrOE').innerHTML=`${last.O} <small>observed vs</small> ${fmt1(last.E)} <small>expected</small>`;
+    const done=+sl.value>=1;['lrP','lrTT'].forEach(id=>document.getElementById(id).style.visibility=done?'visible':'hidden')}
   function play(){clearInterval(timer);sl.value=0;timer=setInterval(()=>{sl.value=Math.min(1,+sl.value+.008);draw();if(+sl.value>=1)clearInterval(timer)},30)}
-  segButtons('lrDs',[['gbsg2','GBSG2'],['lung','Lung'],['sim','Simulated']],k,v=>{k=v;prep();draw()});
-  sl.oninput=()=>{clearInterval(timer);draw()};document.getElementById('lrPlay').onclick=play;prep();draw();this.play=play;this.stop=()=>clearInterval(timer);
-},leave(){this.stop&&this.stop()}};
+  segButtons('lrDs',[['gbsg2','GBSG2'],['lung','Lung'],['sim','Simulated']],k,v=>{k=v;clearInterval(timer);sl.value=0;prep();draw()});
+  sl.oninput=()=>{clearInterval(timer);draw()};document.getElementById('lrPlay').onclick=play;prep();draw();this.play=play;this.stop=()=>clearInterval(timer);this.reset=()=>{clearInterval(timer);sl.value=0;draw()};
+},enter(){this.reset()},leave(){this.stop&&this.stop()}};
 
 /* ---- 7 hazard ratio ---- */
 hooks['hazard']={init(){
