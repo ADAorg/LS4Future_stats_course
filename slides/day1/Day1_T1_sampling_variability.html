@@ -469,6 +469,36 @@ function permDiffs(vals,nA,k,r=R){const N=vals.length,idx=Int32Array.from({lengt
 function shuffled(a,r=R){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
 function fmtP(p){if(p>=0.001)return d3.format('.2~g')(p).replace(/^0\./,'0.');const e=Math.floor(Math.log10(p)),m=p/10**e;
   const sup=String(e).replace('-','⁻').replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);return `${m.toFixed(1)} × 10${sup}`}
+/* ---------- more tests: paired, rank-based, exact, survival (checked against scipy / lifelines) ---------- */
+function rankAvg(v){const o=v.map((x,i)=>[x,i]).sort((a,b)=>a[0]-b[0]),r=new Array(v.length);let ties=0;
+  for(let i=0;i<o.length;){let j=i;while(j+1<o.length&&o[j+1][0]===o[i][0])j++;const rk=(i+j)/2+1;for(let k=i;k<=j;k++)r[o[k][1]]=rk;const t=j-i+1;ties+=t*t*t-t;i=j+1}
+  return{r,ties}}
+function pairedT(x,y){const d=x.map((v,i)=>v-y[i]),n=d.length,md=mean(d),se=Math.sqrt(varS(d)/n),t=md/se;return{diff:md,se,df:n-1,t,p:tTwoSided(Math.abs(t),n-1)}}
+function wilcoxonSR(x,y){ // exact two-sided (no ties, no zeros, n <= 25), like scipy's default for small n
+  const d=x.map((v,i)=>v-y[i]).filter(v=>v!==0),n=d.length,{r}=rankAvg(d.map(Math.abs));let wp=0;d.forEach((v,i)=>{if(v>0)wp+=r[i]});
+  const M=n*(n+1)/2,cnt=new Float64Array(M+1);cnt[0]=1;for(let k=1;k<=n;k++)for(let s=M;s>=k;s--)cnt[s]+=cnt[s-k];
+  const tot=2**n;let lo=0,hi=0;for(let s=0;s<=M;s++){if(s<=wp)lo+=cnt[s];if(s>=wp)hi+=cnt[s]}
+  return{W:Math.min(wp,M-wp),p:Math.min(1,2*Math.min(lo,hi)/tot)}}
+function mannWhitney(x,y){ // exact when both n <= 8 and no ties, else normal approximation with tie and continuity correction (scipy 'auto')
+  const n1=x.length,n2=y.length,all=x.concat(y),{r,ties}=rankAvg(all);let R1=0;for(let i=0;i<n1;i++)R1+=r[i];
+  const U1=R1-n1*(n1+1)/2,U=Math.max(U1,n1*n2-U1);
+  if(n1<=8&&n2<=8&&ties===0){ // count arrangements with U >= observed
+    const f=(()=>{const memo=new Map();const g=(a,b,u)=>{if(u<0)return 0;if(a===0||b===0)return u===0?1:0;const k=a+','+b+','+u;if(memo.has(k))return memo.get(k);const v=g(a-1,b,u-b)+g(a,b-1,u);memo.set(k,v);return v};return g})();
+    let tot=0,ge=0;for(let u=0;u<=n1*n2;u++){const c=f(n1,n2,u);tot+=c;if(u>=U)ge+=c}return{U:U1,p:Math.min(1,2*ge/tot)}}
+  const mu=n1*n2/2,N=n1+n2,s=Math.sqrt(n1*n2/12*((N+1)-ties/(N*(N-1))));const z=(U-mu-0.5)/s;return{U:U1,p:Math.min(1,2*(1-normCDF(z)))}}
+function fisher2x2(t){ // t = [[a,b],[c,d]], two-sided
+  const [a,b]=t[0],[c,d]=t[1],r1=a+b,c1=a+c,N=a+b+c+d;const lc=(n,k)=>lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1);
+  const pr=k=>Math.exp(lc(c1,k)+lc(N-c1,r1-k)-lc(N,r1));const po=pr(a);let p=0;
+  for(let k=Math.max(0,r1-(N-c1));k<=Math.min(r1,c1);k++){const q=pr(k);if(q<=po*(1+1e-7))p+=q}return Math.min(1,p)}
+function chi2Plain(t){const R=t.map(r=>d3.sum(r)),Cc=t[0].map((_,j)=>d3.sum(t,r=>r[j])),N=d3.sum(R);let x=0;const E=t.map((r,i)=>r.map((_,j)=>R[i]*Cc[j]/N));
+  t.forEach((r,i)=>r.forEach((o,j)=>x+=(o-E[i][j])**2/E[i][j]));const df=(t.length-1)*(t[0].length-1);return{stat:x,df,p:chi2SF(x,df),E}}
+function kaplanMeier(time,event){const idx=d3.range(time.length).sort((a,b)=>time[a]-time[b]);let atRisk=time.length,S=1;const pts=[[0,1]];
+  for(let i=0;i<idx.length;){const t=time[idx[i]];let d=0,c=0;while(i<idx.length&&time[idx[i]]===t){if(event[idx[i]])d++;else c++;i++}
+    if(d>0){S*=1-d/atRisk;pts.push([t,S])}atRisk-=d+c}return pts}
+function logRank(t1,e1,t2,e2){const T=[...new Set([...t1.filter((_,i)=>e1[i]),...t2.filter((_,i)=>e2[i])])].sort((a,b)=>a-b);let O=0,E=0,V=0;
+  for(const t of T){let n1=0,n2=0,d1=0,d2=0;t1.forEach((v,i)=>{if(v>=t){n1++;if(v===t&&e1[i])d1++}});t2.forEach((v,i)=>{if(v>=t){n2++;if(v===t&&e2[i])d2++}});
+    const n=n1+n2,d=d1+d2;O+=d1;E+=d*n1/n;if(n>1)V+=d*(n1/n)*(n2/n)*(n-d)/(n-1)}
+  const stat=(O-E)**2/V;return{stat,p:chi2SF(stat,1),O,E}}
 /* ---------- concept-check cards: Q = [[isCorrect, statement, explanation], ...] ---------- */
 function qcards(id,Q){const box=document.getElementById(id);
   Q.forEach(([ok,q,a],i)=>{const d=document.createElement('div');d.className='qcard '+(ok?'ok':'no');

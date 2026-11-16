@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 1 · Choosing a test</title>
+<style>/*CSS*/</style>
+<style>
+.big-p{font-size:44px;font-variant-numeric:tabular-nums;color:var(--pc2)}
+.verdict{border-radius:14px;padding:14px 18px;font-size:18px;line-height:1.45;background:var(--wash);margin-top:10px;min-height:120px;border:2px solid transparent;transition:border-color .3s}
+.verdict.ok{border-color:var(--pc2);background:#fff}
+.verdict.no{border-color:var(--sc1);background:#fff}
+.verdict .tag{font-size:14px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.verdict.ok .tag{color:var(--pc2)} .verdict.no .tag{color:var(--sc1)}
+.cardq{font-size:20px;line-height:1.4;color:var(--ink2);margin:0 0 8px;max-width:1120px}
+.ptab{border-collapse:collapse;font-size:19px;margin-top:6px}
+.ptab th{font-weight:400;font-size:14px;color:var(--muted);letter-spacing:.06em;text-align:left;padding:6px 14px;border-bottom:1px solid var(--line)}
+.ptab td{padding:9px 14px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.ptab td.right{color:var(--pc2);font-weight:600}
+.ptab td.bad{color:var(--muted)}
+.tree-node{cursor:pointer}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">Choosing a <em>test</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:780px;margin:0">Paired or not, counts or measurements, finished or still running. The design picks the test, not the p-value.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 1 · Topic 6 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">All day we've used the t-test on two independent groups. Real data come in other shapes. This session is about recognising the shape, and about checking whether the AI recognised it.</aside>
+</section>
+
+<!-- ============ 2 TREE ============ -->
+<section class="slide" id="tree">
+  <h1>The design picks the <em>test</em>.</h1>
+  <div class="controls"><div class="seg" id="trCard"><span class="lab">Show the path for</span></div></div>
+  <svg id="trSvg" width="1150" height="450"></svg>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Decision guide (also in the notebook)</span></div>
+  <aside class="notes">Three questions do most of the work: what kind of outcome, are measurements paired, and are there enough data for the usual approximation. Click a final box to see its path, or a card button after the hands-on. Rule of thumb: answer these from the design, before any p-value exists. Choosing whichever test gives the nicest p-value is p-hacking.</aside>
+</section>
+
+<!-- ============ 3 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on 6: <em>five cards</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day1_HO6_choosing_a_test.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">FOR EACH CARD</p>
+        <ol style="margin:0;padding-left:26px;font-size:21px;line-height:1.6;color:rgba(255,255,255,.88)">
+          <li>Read the scenario.</li>
+          <li>Paste the AI prompt into the 🎓 tutor; note its test.</li>
+          <li>Check it against the decision guide.</li>
+          <li>Set <code>my_test</code>, run, then try the alternatives.</li>
+        </ol>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">THE CARDS</p>
+        <p style="margin:0 0 22px;font-size:21px;line-height:1.7;color:rgba(255,255,255,.88)">1 · Two groups<br>2 · Paired data<br>3 · Proportions, small numbers<br>4 · Skewed data<br>5 · The trap</p>
+        <p style="margin:0;font-size:20px;color:rgba(255,255,255,.75)">Keep a note: on which cards did the AI pick the test you would pick?</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
+  <aside class="notes">No shared sheet. Two prompts are built to mislead: Card 2 calls paired data "groups", Card 5 doesn't mention censoring. Pairs that finish early: rewrite those prompts so the AI gets it right, and note what they had to add.</aside>
+</section>
+
+<!-- ============ 4 CARD 1 ============ -->
+<section class="slide" id="card1">
+  <h1>Card 1 · Two <em>independent</em> groups.</h1>
+  <p class="cardq">Do pre- and postmenopausal GBSG2 patients differ in tumour size? 290 vs 396 different patients.</p>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.7"><svg id="c1Svg" width="720" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="controls"><div class="seg" id="c1T"></div></div>
+      <div class="stat"><span class="k">p-VALUE</span><span class="big-p" id="c1P">–</span></div>
+      <div class="verdict" id="c1V"><span class="small">Choose a test.</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · card 1</span></div>
+  <aside class="notes">The easy card, on purpose. Different patients, so no pairing. Tumour size is skewed, but with about 300 per group the central limit theorem from this morning has done its job: Welch and Mann–Whitney agree that there's no clear difference. They ask slightly different questions (means vs a shift in the whole distribution).</aside>
+</section>
+
+<!-- ============ 5 CARD 2 ============ -->
+<section class="slide" id="card2">
+  <h1>Card 2 · The same mice, <em>twice</em>.</h1>
+  <p class="cardq">Tumour volume (mm³) in 10 mice before and after two weeks of treatment. The AI prompt calls them "groups".</p>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.7"><svg id="c2Svg" width="720" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="controls"><div class="seg" id="c2T"></div></div>
+      <div class="stat"><span class="k">p-VALUE</span><span class="big-p" id="c2P">–</span></div>
+      <div class="verdict" id="c2V"><span class="small">Choose a test.</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · card 2 · built-in AI failure point</span></div>
+  <aside class="notes">Click Welch first: the lines disappear, because an unpaired test throws away which "after" belongs to which "before". The big mouse-to-mouse differences swamp the treatment effect. Then paired: every single mouse went down, and the test only looks at those within-mouse changes. Same numbers, conclusions orders of magnitude apart. Ask: did your AI notice they were the same mice? What word in the prompt misled it?</aside>
+</section>
+
+<!-- ============ 6 CARD 3 ============ -->
+<section class="slide" id="card3">
+  <h1>Card 3 · Proportions, <em>small numbers</em>.</h1>
+  <p class="cardq">Tumours developed in 1 of 10 mice on a protective diet and 6 of 10 control mice.</p>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.7"><svg id="c3Svg" width="720" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="controls"><div class="seg" id="c3T"></div></div>
+      <div class="stat"><span class="k">p-VALUE</span><span class="big-p" id="c3P">–</span></div>
+      <div class="verdict" id="c3V"><span class="small">Choose a test.</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · card 3</span></div>
+  <aside class="notes">The chi-square p-value relies on an approximation that needs expected counts of about 5 or more in every cell. Here the expected tumour counts are 3.5 per group, so we use Fisher's exact test, which counts every possible arrangement of the 7 tumours among the 20 mice. Note that the "right" test lands above 0.05 while the approximate one lands below. That's not a reason to prefer either; the design decides. Report the proportions (10% vs 60%) whichever test you use.</aside>
+</section>
+
+<!-- ============ 7 CARD 4 ============ -->
+<section class="slide" id="card4">
+  <h1>Card 4 · Skewed data, <em>one outlier</em>.</h1>
+  <p class="cardq">Serum IL-6 (pg/mL) in 8 healthy controls and 8 patients. Cytokines are typically right-skewed; one patient is very high.</p>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.7"><svg id="c4Svg" width="720" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="controls"><div class="seg" id="c4T"></div></div>
+      <div class="stat"><span class="k">p-VALUE</span><span class="big-p" id="c4P">–</span></div>
+      <div class="verdict" id="c4V"><span class="small">Choose a test.</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · card 4</span></div>
+  <aside class="notes">Watch the y-axis change with the test. Welch works on the raw values: the 82.9 outlier inflates the patients' SD and the test loses almost all its power. Mann–Whitney replaces values by ranks: 7 of 8 patients rank above every control. The log scale (common for concentrations) tames the skew and the outlier. Both of those are defensible if chosen in advance; the problem is choosing after seeing which p-value is smallest. On the Gemini prompt: with 8 values a normality test has almost no power; a plot tells you more.</aside>
+</section>
+
+<!-- ============ 8 CARD 5 ============ -->
+<section class="slide" id="card5">
+  <h1>Card 5 · The trap: <em>unfinished</em> stories.</h1>
+  <p class="cardq">Do patients with hormonal therapy stay recurrence-free longer? <code>time</code> is days to recurrence <em>or to the last follow-up visit</em>.</p>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.7"><svg id="c5Svg" width="720" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="controls"><div class="seg" id="c5T"></div></div>
+      <div class="stat"><span class="k">p-VALUE</span><span class="big-p" id="c5P">–</span></div>
+      <div class="verdict" id="c5V"><span class="small">Choose a test.</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · card 5 · built-in AI failure point · preview of Day 3</span></div>
+  <aside class="notes">More than half the patients were still recurrence-free when follow-up ended (open circles): we only know their time is longer than recorded. A t-test or Mann–Whitney treats every open circle as if the recurrence happened that day. Kaplan–Meier curves and the log-rank test use each patient only while we actually know their status. Here the p-values happen to agree on direction, but they answer different questions, and with heavier censoring they can disagree badly. Discussion question 3: even with the right test, Hands-on 3 showed these groups differ in age and menopausal status, so the log-rank difference is not a clean treatment effect. Day 3.</aside>
+</section>
+
+<!-- ============ 9 SUMMARY ============ -->
+<section class="slide" id="summary">
+  <h1>Same data, <em>different answers</em>.</h1>
+  <div class="row" style="gap:36px">
+    <div class="col" style="flex:1.6">
+      <table class="ptab" id="sumTab"></table>
+    </div>
+    <div class="col" style="flex:1">
+      <p class="small" style="margin-top:0">In cards 2, 3 and 4 the choice of test moves p across 0.05, in both directions.</p>
+      <p class="callout" style="margin-top:16px">Choosing the test <em>after</em> seeing the p-values is p-hacking, even when each test is "valid" on its own.</p>
+      <p class="small" style="margin-top:16px">Write the analysis plan first: outcome, test, and what you will do with skewed or censored data.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Discussion question 2</span></div>
+  <aside class="notes">Every number here is computed live in the page with the same methods as the notebook. Purple marks the test the design calls for. Grey marks tests that are wrong for the design. Note the right test is sometimes the one with the larger p-value (card 3). That's why the decision has to come first.</aside>
+</section>
+
+<!-- ============ 10 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>Where did the tutor <em>go wrong</em>?</h1>
+  <div class="row" style="gap:40px;margin-top:8px">
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">Built-in failure points:</p>
+      <ul class="clean x" style="margin-bottom:16px">
+        <li style="font-size:19px"><b>Card 2:</b> the prompt says "groups", and many answers recommend an independent t-test without asking whether the mice are the same</li>
+        <li style="font-size:19px"><b>Card 5:</b> the prompt doesn't mention censoring, so answers suggest a t-test or Mann–Whitney on <code>time</code></li>
+      </ul>
+      <p class="small" style="margin:0 0 4px">What fixed it, in pairs that tried:</p>
+      <ul class="clean">
+        <li style="font-size:19px">describing the <em>design</em>: "the same 10 mice, measured twice"</li>
+        <li style="font-size:19px">describing the <em>data</em>: "time to recurrence or last follow-up; 56% never recurred"</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 6px">🧮 Calculator check (card 4):</p>
+      <div class="prompt">Add a check of normality for each group before the test.</div>
+      <p class="small" style="margin:12px 0 18px">With 8 values per group, a normality test almost never rejects. A plot tells you more.</p>
+      <p class="small" style="margin:0 0 8px">Score each tutor answer:</p>
+      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · discussion question 1</span></div>
+  <aside class="notes">The lesson generalises: the AI answers the question as described. It can't see your design unless you describe it, and the details that matter (pairing, censoring, how a variable was measured) are exactly the ones people leave out of a prompt. Ask the room for their best rewritten prompts.</aside>
+</section>
+
+<!-- ============ 11 DAY 1 WRAP ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:24px">
+    <h1 style="font-size:52px">Day 1 in <em>six lines</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:18px 0 30px;max-width:1100px">
+      <li style="font-size:25px">Your result is one draw; the SE says how much it could wobble.</li>
+      <li style="font-size:25px">A 95% CI comes from a method that catches the truth 95% of the time.</li>
+      <li style="font-size:25px">p = how surprising the data would be if there were no difference. Not more.</li>
+      <li style="font-size:25px">Test enough things and something will be "significant".</li>
+      <li style="font-size:25px">Small studies miss real effects and exaggerate the ones they find.</li>
+      <li style="font-size:25px">The design picks the test, and you must describe the design to the AI.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Tomorrow · <span style="color:var(--sc3)">Regression</span>: every test today is a linear model in disguise.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home · end of Day 1</span></div>
+  <aside class="notes">One line per topic of the day. Bridge to Day 2 Hands-on 1, "tests as linear models": the t-test, the paired t-test and even the chi-square test can all be written as regressions, which is how we'll handle more than one variable at a time.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const hooks = {};
+const OK = C.pc2, BAD = C.sc1;
+// card data (as in the notebook)
+const CARD = {
+  c1:(()=>{const pre=DATA.tsize.filter((_,i)=>!DATA.menostat[i]),post=DATA.tsize.filter((_,i)=>DATA.menostat[i]);return{pre,post}})(),
+  c2:{before:[645,93,450,332,346,374,158,372,296,799],after:[552,74,378,272,278,312,141,313,266,676]},
+  c3:{table:[[1,9],[6,4]]},
+  c4:{controls:[5.5,3.8,4.1,1.5,12.3,8.9,4.2,7.4],patients:[82.9,9.1,19.6,10.3,10.2,8.1,15.1,11.4]},
+  c5:(()=>{const y=[],n=[];DATA.time.forEach((t,i)=>(DATA.horTh[i]?y:n).push({t,e:DATA.cens[i]}));return{y,n}})()
+};
+const PV = {
+  c1:{welch:welch(CARD.c1.pre,CARD.c1.post).p, mw:mannWhitney(CARD.c1.pre,CARD.c1.post).p, paired:null},
+  c2:{welch:welch(CARD.c2.before,CARD.c2.after).p, paired:pairedT(CARD.c2.before,CARD.c2.after).p, wilcoxon:wilcoxonSR(CARD.c2.before,CARD.c2.after).p},
+  c3:{chi:chi2Plain(CARD.c3.table).p, fisher:fisher2x2(CARD.c3.table)},
+  c4:{welch:welch(CARD.c4.controls,CARD.c4.patients).p, mw:mannWhitney(CARD.c4.controls,CARD.c4.patients).p, log:welch(CARD.c4.controls.map(Math.log),CARD.c4.patients.map(Math.log)).p},
+  c5:(()=>{const Y=CARD.c5.y,N=CARD.c5.n;return{welch:welch(Y.map(d=>d.t),N.map(d=>d.t)).p, mw:mannWhitney(Y.map(d=>d.t),N.map(d=>d.t)).p, logrank:logRank(Y.map(d=>d.t),Y.map(d=>d.e),N.map(d=>d.t),N.map(d=>d.e)).p}})()
+};
+// generic card controller: tests = [[key,label,isRight,verdictHTML]]
+function cardControls(id,tests,onPick){
+  const pv=PV[id];
+  segButtons(id+'T',tests.map(t=>[t[0],t[1]]),null,key=>{
+    const t=tests.find(q=>q[0]===key);const v=document.getElementById(id+'V');
+    document.getElementById(id+'P').textContent=pv[key]==null?'n/a':fmtP(pv[key]);
+    v.className='verdict '+(t[2]?'ok':'no');
+    v.innerHTML=`<div class="tag">${t[2]?'✓ fits the design':'✗ wrong for this design'}</div>${t[3]}`;
+    onPick&&onPick(key);
+  });
+}
+
+/* ---- 2 decision tree ---- */
+hooks['tree']={init(){
+  const svg=d3.select('#trSvg');
+  const N={
+    root:{x:575,y:34,w:280,t:'What is the outcome?',q:1},
+    M:{x:250,y:118,w:190,t:'A measurement'},Y:{x:650,y:118,w:150,t:'Yes / no'},T:{x:990,y:118,w:220,t:'Time until an event'},
+    Mq:{x:250,y:200,w:290,t:'Same subjects measured twice?',q:1},
+    P:{x:95,y:300,w:190,t:'Paired t-test',s:'or Wilcoxon signed-rank',leaf:1},
+    Mq2:{x:335,y:300,w:240,t:'Small, skewed or outliers?',q:1},
+    W:{x:250,y:400,w:170,t:'Welch t-test',leaf:1},MW:{x:500,y:400,w:220,t:'Mann–Whitney',s:'or t-test on log scale',leaf:1},
+    Yq:{x:650,y:200,w:240,t:'Expected counts below 5?',q:1},
+    F:{x:610,y:300,w:150,t:"Fisher's exact",leaf:1},CH:{x:780,y:300,w:140,t:'Chi-square',leaf:1},
+    Tq:{x:990,y:200,w:260,t:'Some without the event yet?',s:'(censored)',q:1},
+    LR:{x:990,y:300,w:220,t:'Log-rank / Cox',s:'Kaplan–Meier · Day 3',leaf:1}};
+  const E=[['root','M'],['root','Y'],['root','T'],['M','Mq'],['Mq','P','yes'],['Mq','Mq2','no'],['Mq2','W','no'],['Mq2','MW','yes'],['Y','Yq'],['Yq','F','yes'],['Yq','CH','no'],['T','Tq'],['Tq','LR','yes']];
+  const H=d=>N[d].s?54:40;
+  const eg=svg.append('g'),ng=svg.append('g');
+  const edges=eg.selectAll('g').data(E).join('g');
+  edges.append('path').attr('fill','none').attr('stroke',C.popL).attr('stroke-width',2)
+    .attr('d',([a,b])=>{const A=N[a],B=N[b],y1=A.y+H(a)/2,y2=B.y-H(b)/2,ym=(y1+y2)/2;return`M${A.x},${y1}V${ym}H${B.x}V${y2}`});
+  edges.filter(d=>d[2]).append('text').attr('class','lbl').style('font-size','14px').style('fill',C.muted)
+    .attr('x',([a,b])=>N[b].x+(N[b].x<N[a].x?-8:8)).attr('text-anchor',([a,b])=>N[b].x<N[a].x?'end':'start').attr('y',([a,b])=>N[b].y-H(b)/2-8).text(d=>d[2]);
+  const nodes=ng.selectAll('g').data(Object.keys(N)).join('g').attr('class','tree-node').attr('transform',k=>`translate(${N[k].x},${N[k].y})`);
+  nodes.append('rect').attr('x',k=>-N[k].w/2).attr('y',k=>-H(k)/2).attr('width',k=>N[k].w).attr('height',H).attr('rx',12)
+    .attr('fill',k=>N[k].leaf?'#fff':(N[k].q?C.line:'#f6f3f9')).attr('stroke',k=>N[k].leaf?C.pc2:'none').attr('stroke-width',1.5);
+  nodes.append('text').attr('class','lbl').attr('text-anchor','middle').attr('y',k=>N[k].s?-3:6).style('font-size',k=>N[k].leaf?'18px':'16px').style('font-style',k=>N[k].q?'italic':'normal').text(k=>N[k].t);
+  nodes.filter(k=>N[k].s).append('text').attr('class','lbl').attr('text-anchor','middle').attr('y',17).style('font-size','13px').style('fill',C.ink2).text(k=>N[k].s);
+  const parent={};E.forEach(([a,b])=>parent[b]=a);
+  function highlight(leaf){const path=new Set();let k=leaf;while(k){path.add(k);k=parent[k]}
+    edges.select('path').transition().duration(300).attr('stroke',([a,b])=>path.has(a)&&path.has(b)?C.pc2:C.popL).attr('stroke-width',([a,b])=>path.has(a)&&path.has(b)?3.5:2);
+    nodes.select('rect').transition().duration(300).attr('fill',k=>path.has(k)?(N[k].leaf?C.pc2:'#ead9ff'):(N[k].leaf?'#fff':(N[k].q?C.line:'#f6f3f9')));
+    nodes.selectAll('text').transition().duration(300).style('fill',function(){const k=d3.select(this.parentNode).datum();return path.has(k)&&N[k].leaf?'#fff':null});}
+  nodes.filter(k=>N[k].leaf).on('click',(ev,k)=>highlight(k));
+  const cardLeaf={1:'W',2:'P',3:'F',4:'MW',5:'LR'};
+  segButtons('trCard',[[1,'Card 1'],[2,'Card 2'],[3,'Card 3'],[4,'Card 4'],[5,'Card 5']],null,c=>highlight(cardLeaf[c]));
+}};
+
+/* ---- 4 card 1 ---- */
+hooks['card1']={init(){
+  const W=720,H=400,m={l:150,r:20,t:20,b:50};const svg=d3.select('#c1Svg');const {pre,post}=CARD.c1;
+  const x=d3.scaleLinear().domain([0,120]).range([m.l,W-m.r]);const rows=[[pre,'Premenopausal (290)',100,C.pop],[post,'Postmenopausal (396)',240,C.pc2]];
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,12));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Tumour size (mm)');
+  const jr=mulberry32(9);
+  rows.forEach(([v,lab,y,col])=>{svg.append('text').attr('class','lbl').attr('x',0).attr('y',y+5).text(lab);
+    svg.append('g').selectAll('circle').data(v).join('circle').attr('r',2.6).attr('fill',col).attr('opacity',.6).attr('cx',d=>x(d)).attr('cy',()=>y+(jr()-.5)*90);
+    const mu=mean(v),md=d3.median(v);
+    svg.append('rect').attr('x',x(mu)-2).attr('width',4).attr('y',y-55).attr('height',110).attr('rx',2).attr('fill',C.sc1);
+    svg.append('text').attr('class','lbl pink').attr('x',x(mu)+8).attr('y',y-44).text(`mean ${fmt1(mu)}`);
+    svg.append('line').attr('x1',x(md)).attr('x2',x(md)).attr('y1',y-55).attr('y2',y+55).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','4 3');
+    svg.append('text').attr('class','lbl').attr('x',x(md)-6).attr('text-anchor','end').attr('y',y+70).style('font-size','14px').text(`median ${fmt1(md)}`)});
+  cardControls('c1',[
+    ['welch','Welch t-test',true,'Different patients, about 300 per group: the mean is well estimated even though tumour size is skewed (central limit theorem).'],
+    ['mw','Mann–Whitney',true,'Also fine: compares ranks, so it is robust to the skew. It asks whether one group tends to have larger values, not about means.'],
+    ['paired','Paired t-test',false,'Not possible: these are different patients, so there is nothing to pair.']]);
+}};
+
+/* ---- 5 card 2 ---- */
+hooks['card2']={init(){
+  const W=720,H=400,m={l:60,r:20,t:20,b:40};const svg=d3.select('#c2Svg');const {before,after}=CARD.c2;const n=before.length;
+  const y=d3.scaleLinear().domain([0,850]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,380));
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Tumour volume (mm³)');
+  const xb=150,xa=360;
+  svg.append('text').attr('class','lbl').attr('x',xb).attr('y',H-12).attr('text-anchor','middle').text('before');
+  svg.append('text').attr('class','lbl').attr('x',xa).attr('y',H-12).attr('text-anchor','middle').text('after');
+  const lines=svg.append('g').selectAll('line').data(d3.range(n)).join('line').attr('x1',xb).attr('x2',xa).attr('y1',i=>y(before[i])).attr('y2',i=>y(after[i])).attr('stroke',C.pop).attr('stroke-width',1.5);
+  const jr=mulberry32(4);const jb=before.map(()=>(jr()-.5)*40),ja=after.map(()=>(jr()-.5)*40);
+  const db=svg.append('g').selectAll('circle').data(before).join('circle').attr('r',6).attr('fill',C.pop).attr('cx',xb).attr('cy',d=>y(d));
+  const da=svg.append('g').selectAll('circle').data(after).join('circle').attr('r',6).attr('fill',C.pc2).attr('cx',xa).attr('cy',d=>y(d));
+  // differences panel
+  const dx=560,dy=d3.scaleLinear().domain([-150,50]).range([H-m.b,m.t]);
+  const dg=svg.append('g').attr('opacity',.25);
+  dg.append('g').attr('transform',`translate(${dx-40},0)`).call(g=>g.call(d3.axisLeft(dy).ticks(5).tickSize(4)).attr('class','axis'));
+  dg.append('line').attr('x1',dx-40).attr('x2',dx+80).attr('y1',dy(0)).attr('y2',dy(0)).attr('stroke',C.pc1).attr('stroke-dasharray','4 3');
+  dg.append('text').attr('class','lbl').attr('x',dx+20).attr('y',H-12).attr('text-anchor','middle').text('after − before');
+  dg.append('g').selectAll('circle').data(d3.range(n)).join('circle').attr('r',6).attr('fill',C.pc2).attr('cx',i=>dx+20+(jr()-.5)*40).attr('cy',i=>dy(after[i]-before[i]));
+  dg.append('text').attr('class','lbl purple').attr('x',dx+20).attr('y',dy(10)-8).attr('text-anchor','middle').text('all 10 below 0');
+  function view(paired){
+    lines.transition().duration(600).attr('opacity',paired?1:0);
+    db.transition().duration(600).attr('cx',(d,i)=>xb+(paired?0:jb[i]));da.transition().duration(600).attr('cx',(d,i)=>xa+(paired?0:ja[i]));
+    dg.transition().duration(600).attr('opacity',paired?1:.12);
+  }
+  cardControls('c2',[
+    ['welch','Welch',false,'Treats before and after as unrelated mice. The large differences <em>between</em> mice (93 to 799 mm³) swamp the consistent drop <em>within</em> each mouse.'],
+    ['paired','Paired t',true,'Uses each mouse as its own control: it tests the 10 within-mouse changes, which are all negative.'],
+    ['wilcoxon','Wilcoxon',true,'The rank-based paired test. With all 10 changes negative, the p-value is the smallest possible for 10 pairs: 2 / 2¹⁰.']],k=>view(k!=='welch'));
+}};
+
+/* ---- 6 card 3 ---- */
+hooks['card3']={init(){
+  const svg=d3.select('#c3Svg');const t=CARD.c3.table;const ch=chi2Plain(t);
+  const rows=[['Protective diet',t[0][0],70],['Control',t[1][0],190]];
+  rows.forEach(([lab,k,y])=>{svg.append('text').attr('class','lbl').attr('x',0).attr('y',y+6).text(lab);
+    const g=svg.append('g');for(let i=0;i<10;i++){const cx=170+i*44;g.append('circle').attr('cx',cx).attr('cy',y).attr('r',17).attr('fill',i<k?C.sc1:'#fff').attr('stroke',i<k?C.sc1:C.pop).attr('stroke-width',2)
+      .on('mousemove',ev=>showTip(ev,i<k?'tumour':'no tumour')).on('mouseleave',hideTip)}
+    svg.append('text').attr('class','lbl').attr('x',630).attr('y',y+6).text(`${k} / 10`)});
+  const lg=svg.append('g').attr('transform','translate(170,240)');
+  lg.append('circle').attr('r',7).attr('fill',C.sc1);lg.append('text').attr('class','lbl').attr('x',14).attr('y',5).text('tumour');
+  lg.append('circle').attr('cx',110).attr('r',7).attr('fill','#fff').attr('stroke',C.pop).attr('stroke-width',2);lg.append('text').attr('class','lbl').attr('x',124).attr('y',5).text('no tumour');
+  const tb=svg.append('g').attr('transform','translate(170,290)');
+  tb.append('text').attr('class','lbl').attr('y',0).text('Expected counts if diet had no effect:');
+  [['','tumour','no tumour'],['diet',ch.E[0][0],ch.E[0][1]],['control',ch.E[1][0],ch.E[1][1]]].forEach((r,i)=>r.forEach((v,j)=>{
+    tb.append('text').attr('class','lbl').attr('x',j*130).attr('y',30+i*28).style('fill',(i>0&&j===1)?C.sc1:null).style('font-size','17px').text(typeof v==='number'?fmt1(v):v)}));
+  tb.append('text').attr('class','lbl pink').attr('x',400).attr('y',72).style('font-size','15px').text('← below 5');
+  cardControls('c3',[
+    ['chi','Chi-square',false,'Its p-value is an approximation that needs expected counts of about 5 or more in every cell. Here two cells expect only 3.5.'],
+    ['fisher',"Fisher's exact",true,'Counts every possible way the 7 tumours could fall among the 20 mice: no approximation, so it suits small counts.']]);
+}};
+
+/* ---- 7 card 4 ---- */
+hooks['card4']={init(){
+  const W=720,H=400,m={l:70,r:20,t:20,b:40};const svg=d3.select('#c4Svg');const {controls,patients}=CARD.c4;
+  const all=controls.concat(patients),{r:ranks}=rankAvg(all);
+  const pts=all.map((v,i)=>({v,rk:ranks[i],g:i<8?0:1,j:i%8}));
+  const scales={welch:d3.scaleLinear().domain([0,90]).range([H-m.b,m.t]),log:d3.scaleLog().domain([1,100]).range([H-m.b,m.t]),mw:d3.scaleLinear().domain([0,17]).range([H-m.b,m.t])};
+  const titles={welch:'IL-6 (pg/mL)',log:'IL-6 (pg/mL), log scale',mw:'Rank among all 16 values'};
+  const gy=svg.append('g').attr('transform',`translate(${m.l},0)`);const yl=svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle');
+  const xs=[230,480];
+  svg.append('text').attr('class','lbl').attr('x',xs[0]).attr('y',H-12).attr('text-anchor','middle').text('controls');
+  svg.append('text').attr('class','lbl purple').attr('x',xs[1]).attr('y',H-12).attr('text-anchor','middle').text('patients');
+  const dots=svg.append('g').selectAll('circle').data(pts).join('circle').attr('r',7).attr('fill',d=>d.g?C.pc2:C.pop).attr('stroke','#fff').attr('stroke-width',1.5)
+    .attr('cx',d=>xs[d.g]+(d.j-3.5)*14).on('mousemove',(ev,d)=>showTip(ev,`${d.v} pg/mL · rank ${d.rk}`)).on('mouseleave',hideTip);
+  const mk=svg.append('g');
+  const out=svg.append('text').attr('class','lbl pink').style('font-size','14px');
+  function view(k){const y=scales[k];
+    gy.transition().duration(600).call(g=>k==='log'?g.call(d3.axisLeft(y).tickValues([1,2,5,10,20,50,100]).tickFormat(d3.format('d')).tickSize(-(W-m.l-m.r))).attr('class','axis grid').call(s=>s.selectAll('.tick line').attr('stroke',C.line)).call(s=>s.select('.domain').remove()):axisL(g,y,6,W-m.l-m.r));
+    yl.text(titles[k]);
+    dots.transition().duration(700).attr('cy',d=>y(k==='mw'?d.rk:d.v));
+    const val=d=>k==='mw'?d.rk:(k==='log'?Math.exp(d3.mean(d,q=>Math.log(q))):d3.mean(d));
+    const summ=[0,1].map(g=>{const v=pts.filter(d=>d.g===g);return k==='mw'?d3.mean(v,d=>d.rk):(k==='log'?Math.exp(d3.mean(v,d=>Math.log(d.v))):d3.mean(v,d=>d.v))});
+    mk.selectAll('line').data(summ).join('line').attr('stroke',C.sc1).attr('stroke-width',3).transition().duration(700).attr('x1',(d,g)=>xs[g]-62).attr('x2',(d,g)=>xs[g]+62).attr('y1',d=>y(d)).attr('y2',d=>y(d));
+    mk.selectAll('text').data(summ).join('text').attr('class','lbl pink').style('font-size','14px').transition().duration(700).attr('x',(d,g)=>xs[g]+68).attr('y',d=>y(d)+5).text(d=>k==='mw'?`mean rank ${fmt1(d)}`:(k==='log'?`geo. mean ${fmt1(d)}`:`mean ${fmt1(d)}`));
+    out.transition().duration(700).attr('x',xs[1]+60).attr('y',(k==='mw'?y(16):y(82.9))+5).text(k==='mw'?'':'← 82.9');
+  }
+  view('welch');
+  cardControls('c4',[
+    ['welch','Welch t-test',false,'On raw values, one patient at 82.9 inflates the spread so much that the test loses its power. With n = 8 the mean is not protected by the central limit theorem.'],
+    ['mw','Mann–Whitney',true,'Works on ranks: only the order matters, so the outlier counts as "highest", nothing more. 7 of 8 patients rank above every control.'],
+    ['log','Welch on log',true,'Concentrations are often log-normal: on the log scale the skew and the outlier shrink, and the test compares geometric means.']],view);
+}};
+
+/* ---- 8 card 5 ---- */
+hooks['card5']={init(){
+  const W=720,H=400,svg=d3.select('#c5Svg');const {y:Y,n:Nn}=CARD.c5;
+  const cens=1-d3.mean(DATA.cens);
+  // left: 24 example timelines
+  const r=mulberry32(21);const pick=(a,k)=>d3.range(k).map(()=>a[Math.floor(r()*a.length)]);
+  const ex=[...pick(Y,12).map(d=>({...d,g:1})),...pick(Nn,12).map(d=>({...d,g:0}))].sort((a,b)=>a.g-b.g||a.t-b.t);
+  const xT=d3.scaleLinear().domain([0,2700]).range([20,320]);const yT=d3.scaleBand().domain(d3.range(ex.length)).range([30,H-50]).padding(.3);
+  svg.append('text').attr('class','lbl').attr('x',20).attr('y',16).text('24 example patients');
+  const tl=svg.append('g');
+  tl.selectAll('line').data(ex).join('line').attr('x1',xT(0)).attr('x2',d=>xT(d.t)).attr('y1',(d,i)=>yT(i)+yT.bandwidth()/2).attr('y2',(d,i)=>yT(i)+yT.bandwidth()/2).attr('stroke',d=>d.g?C.pc2:C.pop).attr('stroke-width',2.5);
+  const ends=tl.selectAll('circle').data(ex).join('circle').attr('cx',d=>xT(d.t)).attr('cy',(d,i)=>yT(i)+yT.bandwidth()/2).attr('r',5).attr('stroke',C.sc1).attr('stroke-width',2);
+  svg.append('g').attr('transform',`translate(0,${H-46})`).call(g=>g.call(d3.axisBottom(xT).ticks(4).tickSize(4)).attr('class','axis'));
+  svg.append('text').attr('class','axlab').attr('x',170).attr('y',H-10).attr('text-anchor','middle').text('days since surgery');
+  const lg=svg.append('g').attr('transform',`translate(20,${H+22})`);
+  // right: KM
+  const xk=d3.scaleLinear().domain([0,2700]).range([380,W-10]),yk=d3.scaleLinear().domain([0,1]).range([H-50,30]);
+  const km=svg.append('g');
+  km.append('text').attr('class','lbl').attr('x',380).attr('y',16).text('Kaplan–Meier: recurrence-free');
+  km.append('g').attr('transform',`translate(380,0)`).call(g=>g.call(d3.axisLeft(yk).ticks(5).tickFormat(d3.format('.0%')).tickSize(4)).attr('class','axis'));
+  km.append('g').attr('transform',`translate(0,${H-46})`).call(g=>g.call(d3.axisBottom(xk).ticks(4).tickSize(4)).attr('class','axis'));
+  const step=pts=>{let d=`M${xk(0)},${yk(1)}`;pts.forEach(([t,s],i)=>{if(i)d+=`H${xk(t)}V${yk(s)}`});return d+`H${xk(2700)}`};
+  const kY=kaplanMeier(Y.map(d=>d.t),Y.map(d=>d.e)),kN=kaplanMeier(Nn.map(d=>d.t),Nn.map(d=>d.e));
+  // naive curves: every time treated as an event
+  const kYn=kaplanMeier(Y.map(d=>d.t),Y.map(()=>1)),kNn=kaplanMeier(Nn.map(d=>d.t),Nn.map(()=>1));
+  const pY=km.append('path').attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',2.5),pN=km.append('path').attr('fill','none').attr('stroke',C.ink2).attr('stroke-width',2.5);
+  const kl=km.append('g').attr('transform',`translate(${xk(1550)},${yk(.97)})`);
+  [[C.pc2,'therapy'],[C.ink2,'no therapy']].forEach(([c,t],i)=>{kl.append('line').attr('x2',22).attr('y1',i*20).attr('y2',i*20).attr('stroke',c).attr('stroke-width',2.5);kl.append('text').attr('class','lbl').attr('x',28).attr('y',i*20+5).style('font-size','14px').text(t)});
+  const note=svg.append('text').attr('class','lbl pink').style('font-size','14px');note.attr('text-anchor','end');note.append('tspan').attr('x',xk(2650)).attr('y',yk(.8));note.append('tspan').attr('x',xk(2650)).attr('dy',18);
+  function view(k){const naive=k!=='logrank';
+    ends.transition().duration(500).attr('fill',d=>(naive||d.e)?C.sc1:'#fff');
+    pY.transition().duration(700).attr('d',step(naive?kYn:kY));pN.transition().duration(700).attr('d',step(naive?kNn:kN));
+    const last=(a)=>a[a.length-1][1];
+    const ts=note.selectAll('tspan').nodes();d3.select(ts[0]).text(naive?'as the t-test sees it:':'');d3.select(ts[1]).text(naive?'everyone "recurred" at last visit':'');
+    lg.selectAll('*').remove();
+    lg.append('circle').attr('cx',5).attr('cy',-14).attr('r',5).attr('fill',C.sc1).attr('stroke',C.sc1);lg.append('text').attr('class','lbl').attr('x',14).attr('y',-9).style('font-size','13px').text('recurrence');
+    if(!naive){lg.append('circle').attr('cx',105).attr('cy',-14).attr('r',5).attr('fill','#fff').attr('stroke',C.sc1).attr('stroke-width',2);lg.append('text').attr('class','lbl').attr('x',114).attr('y',-9).style('font-size','13px').text(`censored (${Math.round(cens*100)}% of all)`)}
+  }
+  view('logrank');
+  cardControls('c5',[
+    ['welch','Welch t-test',false,`Treats "last seen recurrence-free at day 1,500" as a recurrence at day 1,500. For the ${Math.round(cens*100)}% censored patients the true time is longer than recorded.`],
+    ['mw','Mann–Whitney',false,'Same problem: ranking the recorded times still pretends every patient recurred on their last visit.'],
+    ['logrank','Log-rank',true,'Uses each patient only while their status is known (Kaplan–Meier). The standard test for time-to-event data: Day 3.']],view);
+}};
+
+/* ---- 9 summary ---- */
+hooks['summary']={init(){
+  const rows=[
+    ['1 · Two groups',[['Welch',PV.c1.welch,1],['Mann–Whitney',PV.c1.mw,1],['Paired',null,0]]],
+    ['2 · Paired mice',[['Welch',PV.c2.welch,0],['Paired t',PV.c2.paired,1],['Wilcoxon SR',PV.c2.wilcoxon,1]]],
+    ['3 · 1/10 vs 6/10',[['Chi-square',PV.c3.chi,0],["Fisher's exact",PV.c3.fisher,1]]],
+    ['4 · IL-6',[['Welch',PV.c4.welch,0],['Mann–Whitney',PV.c4.mw,1],['Welch on log',PV.c4.log,1]]],
+    ['5 · Time to recurrence',[['Welch',PV.c5.welch,0],['Mann–Whitney',PV.c5.mw,0],['Log-rank',PV.c5.logrank,1]]]];
+  const tb=document.getElementById('sumTab');
+  tb.innerHTML='<tr><th>Card</th><th colspan="3">p-value by test (purple = fits the design)</th></tr>'+rows.map(([c,ts])=>`<tr><td>${c}</td>`+ts.map(([n,p,ok])=>`<td class="${ok?'right':'bad'}">${n}<br><span style="font-size:22px">${p==null?'n/a':fmtP(p)}</span></td>`).join('')+(ts.length<3?'<td></td>':'')+'</tr>').join('');
+}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>
