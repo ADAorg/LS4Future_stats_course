@@ -12,6 +12,8 @@ self-contained deck in `../dayN/` (one HTML file, works offline, safe to email o
 | `gbsg2.json` | `tsize`, `age`, `pnodes` from GBSG2 (lifelines) | `__DATA__` |
 | `lung.json` | NCCTG lung cancer data (lifelines): pat_karno, ecog, age, sex, wt_loss, time, status | `__JSON:lung__` |
 | `airway_mv.json` | Airway RNA-seq (GSE52778), control samples: per-gene mean and variance after library-size scaling, genes with mean ≥ 1 | `__JSON:airway_mv__` |
+| `airway_de.json` | PyDESeq2 0.6 results on airway, built in Python: paired (~celltype + dex) and unpaired (~dex) designs (log2FC, −log10 p, padj < 0.05), plus paired runs on each pair of cell lines for the winner's-curse slide | `__JSON:airway_de__` |
+| `airway_top.json` | Top 10 paired genes (index → Ensembl ID, symbol where known) | `__JSON:airway_top__` |
 | `d3.min.js` | d3 v7.9 (ISC licence) | `/*D3*/` |
 | `logo_neg.png`, `logo_pos.png` | Downsized copies of the official GIMM logos | `__LOGO_NEG__`, `__LOGO_POS__` |
 
