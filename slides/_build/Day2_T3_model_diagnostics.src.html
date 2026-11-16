@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 2 · Model diagnostics</title>
+<style>/*CSS*/</style>
+<style>
+.steps{display:flex;gap:8px;align-items:center;margin:4px 0 10px}
+.steps .dot{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--pc1);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--pc1);cursor:pointer}
+.steps .dot.on{background:var(--pc2);border-color:var(--pc2);color:#fff}
+.steps .dot.done{background:var(--line);border-color:var(--line)}
+.stepbox h3{font-weight:400;font-size:24px;margin:0 0 8px;color:var(--pc2)}
+.stepbox p{font-size:19px;line-height:1.5;margin:0 0 10px}
+.acards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+.acard{background:var(--wash);border-radius:14px;padding:14px 18px;position:relative}
+.acard .rank{position:absolute;right:16px;top:12px;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+.acard h3{font-weight:400;font-size:23px;margin:0 0 4px}
+.acard p{font-size:17px;line-height:1.45;margin:0;color:var(--ink2)}
+.ttab{border-collapse:collapse;font-size:17px;font-variant-numeric:tabular-nums;width:100%}
+.ttab th{font-weight:400;font-size:13px;letter-spacing:.06em;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
+.ttab td{padding:6px 8px;border-bottom:1px solid var(--line)}
+.ttab td.ch{color:var(--sc1)}
+.caption{font-size:18px;line-height:1.45;background:var(--wash);border-radius:12px;padding:12px 16px;border-left:3px solid var(--sc1)}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">Model <em>diagnostics</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:800px;margin:0">A model always gives you numbers. Four pictures tell you whether to believe them.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 2 · Topic 3 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">The model from this morning will fit any data, including data it describes badly. Diagnostics are how you check, and the main tool is looking at what the model got wrong: the residuals.</aside>
+</section>
+
+<!-- ============ 2 ASSUMPTIONS ============ -->
+<section class="slide" id="assumptions">
+  <h1>What the model <em>assumes</em>, most important first.</h1>
+  <div class="acards">
+    <div class="acard"><span class="rank" style="color:var(--sc1)">critical</span><h3>1 · Independent observations</h3><p>One row per independent unit. Repeated measures on the same mouse, or cells from one dish, break this. No plot catches it: it's about the <em>design</em>.</p></div>
+    <div class="acard"><span class="rank" style="color:var(--sc1)">critical</span><h3>2 · The right shape</h3><p>A straight line (or whatever form you wrote) describes the trend. If the truth curves, every estimate is off.</p></div>
+    <div class="acard"><span class="rank" style="color:var(--pc2)">important</span><h3>3 · Same spread everywhere</h3><p>The noise is as large for big fitted values as for small ones. If not, the standard errors, CIs and p-values are wrong.</p></div>
+    <div class="acard"><span class="rank" style="color:var(--muted)">least, with large n</span><h3>4 · Roughly normal noise</h3><p>Matters for small samples. With hundreds of observations, the central limit theorem (Day 1) covers most departures.</p></div>
+  </div>
+  <p class="small" style="margin-top:16px">And one practical check: <b>no single point is in charge</b>. If removing one observation changes your conclusion, you need to know.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture</span></div>
+  <aside class="notes">Note the order. People worry most about normality because it has a famous test, but it's the least important with decent n. Independence is the most important and no residual plot can show it; it's a design question (Day 3 touches on it, and the paired designs on Day 1 were an example). Shape and spread are what the plots are for.</aside>
+</section>
+
+<!-- ============ 3 RESIDUALS ============ -->
+<section class="slide" id="residuals">
+  <h1>Residuals: what the model <em>missed</em>.</h1>
+  <div class="steps" id="rsSteps"></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2"><svg id="rsSvg" width="760" height="430"></svg></div>
+    <div class="col" style="flex:1"><div class="stepbox" id="rsText"></div></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · the key idea</span></div>
+  <aside class="notes">Step through. A residual is the vertical distance from a point to the fitted line: observed minus predicted. Step 3 tips the plot over: x becomes the fitted value, y becomes the residual, and the fitted line becomes the horizontal line at zero. That is the residuals-vs-fitted plot, the single most useful diagnostic. A healthy one looks like a shapeless band around zero.</aside>
+</section>
+
+<!-- ============ 4 FOUR PLOTS ============ -->
+<section class="slide" id="four">
+  <h1>Four plots, four <em>questions</em>.</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2"><svg id="frSvg" width="760" height="450"></svg></div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <p class="small" style="margin-top:0">This is what <b>healthy</b> looks like: simulated data with a straight-line truth and well-behaved noise.</p>
+      <ul class="clean small" style="font-size:18px">
+        <li><b>Residuals vs fitted:</b> is the shape right? <em>Look for a curve.</em></li>
+        <li><b>Normal Q-Q:</b> is the noise roughly normal? <em>Look for points leaving the line.</em></li>
+        <li><b>Scale-location:</b> is the spread constant? <em>Look for a rising trend.</em></li>
+        <li><b>Cook's distance:</b> is one point in charge? <em>Look for a spike.</em></li>
+      </ul>
+      <p class="small">The red smooth lines help your eye; don't over-read small wiggles.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · the same four plots as the notebook</span></div>
+  <aside class="notes">Memorise the healthy versions; in the hands-on each pair gets a dataset with one planted problem, and their job is to find which plot gives it away. The dashed line in the Cook's plot is the common 4/n rule of thumb; it's a flag for "look at this row", not a rule for deletion.</aside>
+</section>
+
+<!-- ============ 5 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on 3: <em>find the problem</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day2_HO3_model_diagnostics.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTION A: YOUR PAIR'S PROBLEM</p>
+        <div style="display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap">
+          <span class="chip" style="border-color:#fff;color:#fff">none</span><span class="chip" style="border-color:#fff;color:#fff">curved</span><span class="chip" style="border-color:#fff;color:#fff">funnel</span><span class="chip" style="border-color:#fff;color:#fff">outlier</span><span class="chip" style="border-color:#fff;color:#fff">skewed</span>
+        </div>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">Which plot gives it away? You'll show it to the room.</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTION B</p>
+        <p style="margin:0 0 22px;font-size:22px;color:rgba(255,255,255,.85)">Check a real model on your dataset. If it looks wrong, try <code>transform = "log"</code>.</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTION C ⭐</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">Drop the most influential points. Do the conclusions change?</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
+  <aside class="notes">Spread the five problems across pairs. In the debrief each problem is shown by the pair that had it, using the gallery on the next slide. The AI prompt is a known failure point: "Shapiro p = 0.001, abandon regression".</aside>
+</section>
+
+<!-- ============ 6 GALLERY ============ -->
+<section class="slide" id="gallery">
+  <h1>The gallery: which plot <em>gives it away</em>?</h1>
+  <div class="controls"><div class="seg" id="glP"><span class="lab">Planted problem</span></div><span style="width:12px"></span><button class="btn" id="glReveal">Reveal</button></div>
+  <div class="row" style="gap:16px">
+    <div class="col" style="flex:0 0 400px">
+      <svg id="glData" width="400" height="300"></svg>
+      <div class="caption" id="glCap" style="margin-top:8px;opacity:0;transition:opacity .4s"></div>
+    </div>
+    <div class="col"><svg id="glSvg" width="720" height="440"></svg></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section A · concept check</span></div>
+  <aside class="notes">Pick a problem, let the pair that had it say which plot they'd point at, then "Reveal": the giveaway plot gets a pink frame and the caption gives the fix. Curved: the residual smooth makes a U. Funnel: scale-location rises. Skewed: Q-Q bends at one end, the mildest problem with large n. Outlier: one Cook's spike, and the fitted slope moves away from the true 1.5. For the outlier, the fix is to check that row first, never to delete it silently.</aside>
+</section>
+
+<!-- ============ 7 REAL ============ -->
+<section class="slide" id="real">
+  <h1>A real model: does a <em>log</em> help?</h1>
+  <div class="controls">
+    <div class="seg" id="rlDs"><span class="lab">Dataset</span></div><span style="width:12px"></span>
+    <div class="seg" id="rlT"><span class="lab">Outcome</span></div>
+  </div>
+  <div class="row" style="gap:16px">
+    <div class="col"><svg id="rlSvg" width="720" height="440"></svg></div>
+    <div class="col" style="flex:0 0 380px">
+      <p class="small" style="margin:0 0 6px" id="rlForm"></p>
+      <table class="ttab" id="rlTab"></table>
+      <p class="small" style="margin-top:10px" id="rlMsg"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section B</span></div>
+  <aside class="notes">GBSG2 tumour size: on the raw scale the Q-Q plot bends (right skew) and scale-location rises (bigger fitted sizes, bigger spread). On the log scale both improve visibly. Lung Karnofsky score is the opposite case: bounded at 100 and piled up near the top, so a log doesn't help; that's a hint that a different model would suit it better. Discussion question 3: a bent Q-Q plot with n = 686 is usually far less serious than a curve in the residuals.</aside>
+</section>
+
+<!-- ============ 8 LOG ============ -->
+<section class="slide" id="log">
+  <h1>On the log scale, effects become <em>ratios</em>.</h1>
+  <div class="row" style="gap:30px">
+    <div class="col" style="flex:1.1">
+      <div class="controls"><span class="seg"><span class="lab">Coefficient b</span></span><input type="range" id="lgB" min="-0.6" max="0.6" step="0.01" value="0.10" style="width:300px;accent-color:#9933ff"></div>
+      <div class="card" style="margin:6px 0 10px"><span style="font-size:26px" id="lgOut"></span></div>
+      <svg id="lgSvg" width="560" height="270"></svg>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 6px">GBSG2, <em>log(tumour size) ~ nodes + grade</em>, read as ratios:</p>
+      <table class="ttab" id="lgTab"></table>
+      <p class="small" style="margin-top:12px">Rule of thumb: for small b, the % change is roughly 100 × b. For larger b, use exp(b).</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section B concept check</span></div>
+  <aside class="notes">Concept check: a coefficient of 0.10 on log(outcome) means the outcome is multiplied by exp(0.10) ≈ 1.105, about 10% higher, per unit of the predictor. Drag the slider to show where the "100 × b" shortcut breaks down (the curve leaves the dashed line beyond about ±0.2). This is the same multiplicative reading you'll use for odds ratios and rate ratios this afternoon.</aside>
+</section>
+
+<!-- ============ 9 INFLUENCE ============ -->
+<section class="slide" id="influence">
+  <h1>Influential points: <em>check</em>, don't delete.</h1>
+  <div class="controls"><div class="seg" id="ifN"><span class="lab">Drop the most influential</span></div></div>
+  <div class="row" style="gap:20px">
+    <div class="col" style="flex:1.3"><svg id="ifSvg" width="620" height="260"></svg>
+      <p class="small" style="margin:8px 0 4px">The five most influential GBSG2 patients:</p>
+      <table class="ttab" id="ifRows"></table>
+    </div>
+    <div class="col">
+      <table class="ttab" id="ifTab"></table>
+      <p class="callout" style="margin-top:14px;font-size:18px">Check each flagged row against the source. Delete only if it is an <em>error</em>, and report what you did. Removing real patients until p &lt; 0.05 is p-hacking.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section C · discussion question 2</span></div>
+  <aside class="notes">Model: tumour size ~ nodes + grade on GBSG2. The flagged patients are real and clinically plausible: a 120 mm tumour, patients with 35+ positive nodes. Dropping them moves the node coefficient a little and leaves the overall picture intact. Discussion: a colleague removes three "outliers" to get p &lt; 0.05. Ask: what were the rows, was each one checked, and what do the results look like with them in? Report both.</aside>
+</section>
+
+<!-- ============ 10 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which statements are <em>correct</em>?</h1>
+  <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
+  <aside class="notes">Statement 1 is the AI failure point of this notebook. Statement 2 is discussion question 3.</aside>
+</section>
+
+<!-- ============ 11 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>"Shapiro p = 0.001": should you <em>abandon</em> the model?</h1>
+  <div class="row" style="gap:36px;margin-top:6px">
+    <div class="col">
+      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook, a known failure point:</p>
+      <div class="prompt">My linear regression has 686 observations. A Shapiro–Wilk test on the residuals gives p = 0.001. Should I abandon linear regression and use a non-parametric test instead?</div>
+      <p class="small" style="margin:14px 0 4px">A good answer says:</p>
+      <ul class="clean"><li style="font-size:18px">with large n, normality tests flag trivial departures: look at the plots</li><li style="font-size:18px">shape and spread matter more than normality</li><li style="font-size:18px">fix it (transform, robust SEs), don't throw the model away</li></ul>
+      <ul class="clean x"><li style="font-size:18px">"use Mann–Whitney / Kruskal–Wallis": loses the adjustment for other predictors</li></ul>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 6px">🧮 Calculator check: <em>"Refit with heteroscedasticity-robust standard errors (HC3)."</em> On GBSG2:</p>
+      <table class="ttab" id="hcTab"></table>
+      <p class="small" style="margin-top:10px">Estimates identical, standard errors (and so CIs and p-values) change. That's what robust SEs do: they fix the uncertainty, not the line.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure point</span></div>
+  <aside class="notes">Most AI answers are reasonable here but many still recommend switching to a rank test, which can't handle grade and nodes at the same time. The HC3 table is computed live: note the node coefficient's SE goes up by about half, because the spread grows with fitted size (the funnel we saw).</aside>
+</section>
+
+<!-- ============ 12 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:40px">
+    <h1 style="font-size:56px">Three things to <em>keep</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:26px 0 40px;max-width:1080px">
+      <li>Look at residuals, not just p-values: <em>four plots</em>, every model.</li>
+      <li>Shape and spread matter more than normality; <em>plots beat tests</em>.</li>
+      <li>Fix, don't discard: transform, robust SEs, check flagged rows, report what you did.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">This afternoon · <span style="color:var(--sc3)">Logistic regression</span>: when the outcome is yes or no, a straight line breaks.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home · end of the morning</span></div>
+  <aside class="notes">Bridge to Hands-on 4: try a straight line on a 0/1 outcome and it predicts probabilities above 1. The fix is a different model, not a transformation.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const LUNG = __JSON:lung__;
+const hooks = {};
+/* ---------- gallery data (the notebook's recipe) ---------- */
+function gallery(problem,seed=1){const r=mulberry32(seed);let x=[],y=[];
+  for(let i=0;i<100;i++){const xi=10*r(),e=2*randn(r);let yi;
+    if(problem==='curved')yi=2+.3*xi*xi+e;else if(problem==='funnel')yi=2+1.5*xi+e*(.1+.4*xi);else if(problem==='skewed')yi=2+1.5*xi+(-3*Math.log(1-r())-3);else yi=2+1.5*xi+e;x.push(xi);y.push(yi)}
+  if(problem==='outlier'){x.push(20);y.push(5)}return{x,y}}
+/* ---------- the four diagnostic panels ---------- */
+function diagPanels(svg,f,W,H,hl){svg.selectAll('*').remove();const pw=W/2,ph=H/2,m={l:44,r:10,t:26,b:30};
+  const n=f.fitted.length;const titles=['Residuals vs fitted · look for a curve','Normal Q-Q · look for points off the line','Scale-location · look for a rising trend',"Cook's distance · look for spikes"];
+  const P=[0,1,2,3].map(i=>svg.append('g').attr('transform',`translate(${(i%2)*pw},${Math.floor(i/2)*ph})`));
+  P.forEach((g,i)=>{g.append('rect').attr('class','frame').attr('x',2).attr('y',2).attr('width',pw-4).attr('height',ph-4).attr('rx',10).attr('fill','none').attr('stroke',hl===i?C.sc1:'none').attr('stroke-width',3);
+    g.append('text').attr('class','lbl').attr('x',m.l).attr('y',18).style('font-size','14px').style('fill',hl===i?C.sc1:C.pc1).text(titles[i])});
+  const ax=(g,x,y)=>{g.append('g').attr('transform',`translate(0,${ph-m.b})`).call(a=>a.call(d3.axisBottom(x).ticks(4).tickSize(3)).attr('class','axis').selectAll('text').style('font-size','11px'));
+    g.append('g').attr('transform',`translate(${m.l},0)`).call(a=>a.call(d3.axisLeft(y).ticks(4).tickSize(3)).attr('class','axis').selectAll('text').style('font-size','11px'))};
+  const dotR=n>200?1.8:2.6,op=n>200?.35:.55;
+  // 1 residuals vs fitted
+  {const g=P[0],x=d3.scaleLinear().domain(d3.extent(f.fitted)).nice().range([m.l,pw-m.r]),y=d3.scaleLinear().domain(d3.extent(f.resid)).nice().range([ph-m.b,m.t+6]);ax(g,x,y);
+    g.append('line').attr('x1',m.l).attr('x2',pw-m.r).attr('y1',y(0)).attr('y2',y(0)).attr('stroke',C.muted).attr('stroke-dasharray','4 3');
+    g.append('g').selectAll('circle').data(f.fitted).join('circle').attr('r',dotR).attr('fill',C.pc2).attr('opacity',op).attr('cx',d=>x(d)).attr('cy',(d,i)=>y(f.resid[i]));
+    g.append('path').attr('d',d3.line().x(d=>x(d[0])).y(d=>y(d[1]))(lowess(f.fitted,f.resid))).attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2.5)}
+  // 2 QQ
+  {const g=P[1],s=[...f.std].sort((a,b)=>a-b),q=s.map((_,i)=>normQuantile((i+.5)/n));const lim=d3.extent([...s,...q]);const x=d3.scaleLinear().domain(d3.extent(q)).nice().range([m.l,pw-m.r]),y=d3.scaleLinear().domain(lim).nice().range([ph-m.b,m.t+6]);ax(g,x,y);
+    g.append('line').attr('x1',x(x.domain()[0])).attr('y1',y(x.domain()[0])).attr('x2',x(x.domain()[1])).attr('y2',y(x.domain()[1])).attr('stroke',C.sc1).attr('stroke-width',2);
+    g.append('g').selectAll('circle').data(s).join('circle').attr('r',dotR).attr('fill',C.pc2).attr('opacity',op).attr('cx',(d,i)=>x(q[i])).attr('cy',d=>y(d))}
+  // 3 scale-location
+  {const g=P[2],sl=f.std.map(v=>Math.sqrt(Math.abs(v))),x=d3.scaleLinear().domain(d3.extent(f.fitted)).nice().range([m.l,pw-m.r]),y=d3.scaleLinear().domain([0,d3.max(sl)]).nice().range([ph-m.b,m.t+6]);ax(g,x,y);
+    g.append('g').selectAll('circle').data(f.fitted).join('circle').attr('r',dotR).attr('fill',C.pc2).attr('opacity',op).attr('cx',d=>x(d)).attr('cy',(d,i)=>y(sl[i]));
+    g.append('path').attr('d',d3.line().x(d=>x(d[0])).y(d=>y(d[1]))(lowess(f.fitted,sl))).attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2.5)}
+  // 4 Cook's
+  {const g=P[3],x=d3.scaleLinear().domain([0,n]).range([m.l,pw-m.r]),y=d3.scaleLinear().domain([0,Math.max(d3.max(f.cook),8/n)]).nice().range([ph-m.b,m.t+6]);ax(g,x,y);
+    g.append('g').selectAll('line').data(f.cook).join('line').attr('x1',(d,i)=>x(i)).attr('x2',(d,i)=>x(i)).attr('y1',y(0)).attr('y2',d=>y(d)).attr('stroke',d=>d>4/n?C.sc1:C.pc2).attr('stroke-width',n>200?1:1.5);
+    g.append('line').attr('x1',m.l).attr('x2',pw-m.r).attr('y1',y(4/n)).attr('y2',y(4/n)).attr('stroke',C.sc1).attr('stroke-dasharray','4 3');
+    g.append('text').attr('class','lbl pink').attr('x',pw-m.r).attr('y',y(4/n)-4).attr('text-anchor','end').style('font-size','11px').text('4/n')}
+  return P}
+function stepper(id,n,onStep){const el=document.getElementById(id);let cur=0;const dots=[];
+  const prev=document.createElement('button');prev.className='btn';prev.textContent='‹ Back';const next=document.createElement('button');next.className='btn primary';next.textContent='Next step ›';
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='dot';d.textContent=i+1;d.onclick=()=>go(i);el.appendChild(d);dots.push(d)}
+  el.appendChild(prev);el.appendChild(next);
+  function go(i){cur=Math.max(0,Math.min(n-1,i));dots.forEach((d,k)=>{d.className='dot'+(k===cur?' on':(k<cur?' done':''))});prev.disabled=cur===0;next.disabled=cur===n-1;onStep(cur)}
+  prev.onclick=()=>go(cur-1);next.onclick=()=>go(cur+1);return{go}}
+
+/* ---- 3 residuals ---- */
+hooks['residuals']={init(){
+  const {x:X,y:Y}=gallery('none',3),W=760,H=430,m={l:56,r:20,t:20,b:50};const f=ols(X.map(v=>[1,v]),Y);
+  const svg=d3.select('#rsSvg');
+  const xs=d3.scaleLinear().domain([0,10]).range([m.l,W-m.r]),ys=d3.scaleLinear().domain(d3.extent(Y)).nice().range([H-m.b,m.t]);
+  const xf=d3.scaleLinear().domain(d3.extent(f.fitted)).nice().range([m.l,W-m.r]),yr=d3.scaleLinear().domain([-7,7]).range([H-m.b,m.t]);
+  const axA=svg.append('g'),axB=svg.append('g').attr('opacity',0);
+  axA.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,xs,10));axA.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,ys,6,W-m.l-m.r));
+  axA.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('x');axA.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('y');
+  axB.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,xf,8));axB.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,yr,7,W-m.l-m.r));
+  axB.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('fitted value (what the model predicted)');axB.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('residual (observed − predicted)');
+  const b0=f.coef[0].est,b1=f.coef[1].est;
+  const line=svg.append('line').attr('stroke',C.sc1).attr('stroke-width',3);
+  const sticks=svg.append('g').selectAll('line').data(X).join('line').attr('stroke',C.sc1).attr('stroke-width',1.3).attr('opacity',0);
+  const dots=svg.append('g').selectAll('circle').data(X).join('circle').attr('r',4).attr('fill',C.pc2).attr('opacity',.7);
+  const T=[['1 · Data and the fitted line','<p>The model draws the best straight line through the cloud.</p><p>For every point it has a <b>prediction</b>: the height of the line at that x.</p>'],
+    ['2 · The residuals','<p>Each pink stick is a <b>residual</b>: observed minus predicted.</p><p>Above the line: positive. Below: negative. They are what the model could not explain.</p>'],
+    ['3 · Tip the plot over','<p>Now plot each point at (its <b>prediction</b>, its <b>residual</b>). The fitted line becomes the flat line at zero.</p><p>If the model is right, this is a shapeless band: <em>no pattern left to explain</em>.</p>']];
+  this.st=stepper('rsSteps',3,s=>{
+    document.getElementById('rsText').innerHTML=`<div class="stepbox"><h3>${T[s][0]}</h3>${T[s][1]}</div>`;
+    const tipped=s===2;axA.transition().duration(600).attr('opacity',tipped?0:1);axB.transition().duration(600).attr('opacity',tipped?1:0);
+    dots.transition().duration(900).attr('cx',(d,i)=>tipped?xf(f.fitted[i]):xs(X[i])).attr('cy',(d,i)=>tipped?yr(f.resid[i]):ys(Y[i]));
+    sticks.transition().duration(900).attr('opacity',s>=1?.8:0).attr('x1',(d,i)=>tipped?xf(f.fitted[i]):xs(X[i])).attr('x2',(d,i)=>tipped?xf(f.fitted[i]):xs(X[i]))
+      .attr('y1',(d,i)=>tipped?yr(0):ys(f.fitted[i])).attr('y2',(d,i)=>tipped?yr(f.resid[i]):ys(Y[i]));
+    line.transition().duration(900).attr('x1',m.l).attr('x2',W-m.r).attr('y1',tipped?yr(0):ys(b0+b1*0)).attr('y2',tipped?yr(0):ys(b0+b1*10));
+  });this.st.go(0);
+},enter(){this.st&&this.st.go(0)}};
+
+/* ---- 4 four plots ---- */
+hooks['four']={init(){const {x,y}=gallery('none');diagPanels(d3.select('#frSvg'),olsDiag(x.map(v=>[1,v]),y),760,450,-1)}};
+
+/* ---- 6 gallery ---- */
+hooks['gallery']={init(){
+  let p='none';const W=400,H=300,m={l:44,r:12,t:28,b:34};const ds=d3.select('#glData');const svg=d3.select('#glSvg');const cap=document.getElementById('glCap');
+  const info={none:[-1,'Nothing planted: all four plots look healthy. Good to know what "normal" looks like.'],
+    curved:[0,'<b>Residuals vs fitted</b> makes a U: the straight line misses the curve. Fix: add a curve term, transform, or use another model.'],
+    funnel:[2,'<b>Scale-location</b> rises: spread grows with the fitted value. Fix: transform the outcome or use robust standard errors.'],
+    outlier:[3,"<b>Cook's distance</b> has one huge spike, and the slope is pulled away from 1.5. Fix: <em>check that row first</em>; never delete silently."],
+    skewed:[1,'<b>Q-Q plot</b> bends at one end: the noise is skewed. With large samples this matters least of the four.']};
+  function draw(reveal){
+    const {x,y}=gallery(p);const f=olsDiag(x.map(v=>[1,v]),y);ds.selectAll('*').remove();
+    const xs=d3.scaleLinear().domain(d3.extent(x)).nice().range([m.l,W-m.r]),ys=d3.scaleLinear().domain(d3.extent(y)).nice().range([H-m.b,m.t]);
+    ds.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,xs,6));ds.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,ys,5,W-m.l-m.r));
+    ds.append('g').selectAll('circle').data(x).join('circle').attr('r',3.2).attr('fill',C.pc2).attr('opacity',.6).attr('cx',d=>xs(d)).attr('cy',(d,i)=>ys(y[i]));
+    const [a,b]=xs.domain();ds.append('line').attr('x1',xs(a)).attr('x2',xs(b)).attr('y1',ys(f.coef[0].est+f.coef[1].est*a)).attr('y2',ys(f.coef[0].est+f.coef[1].est*b)).attr('stroke',C.sc1).attr('stroke-width',2.5);
+    ds.append('text').attr('class','lbl').attr('x',m.l).attr('y',16).style('font-size','15px').text(`Data · true slope 1.5, fitted ${fmt2(f.coef[1].est)}`);
+    diagPanels(svg,f,720,440,reveal?info[p][0]:-1);
+    cap.innerHTML=info[p][1];cap.style.opacity=reveal?1:0;
+  }
+  segButtons('glP',['none','curved','funnel','outlier','skewed'].map(v=>[v,v]),p,v=>{p=v;draw(false)});
+  document.getElementById('glReveal').onclick=()=>draw(true);draw(false);
+}};
+
+/* ---- 7 real ---- */
+const REAL={
+  gbsg2:{y:DATA.tsize,X:DATA.tsize.map((_,i)=>[1,DATA.pnodes[i],DATA.tgrade[i]===2?1:0,DATA.tgrade[i]===3?1:0]),names:['Intercept','positive nodes','grade II vs I','grade III vs I'],form:'tumour size ~ positive nodes + grade'},
+  lung:(()=>{const idx=LUNG.age.map((_,i)=>i).filter(i=>LUNG.pat_karno[i]!=null);return{y:idx.map(i=>LUNG.pat_karno[i]),X:idx.map(i=>[1,LUNG.age[i],LUNG.ecog[i]===1?1:0,LUNG.ecog[i]>=2?1:0]),names:['Intercept','age','ECOG 1 vs 0','ECOG 2+ vs 0'],form:'Karnofsky score ~ age + ECOG'}})()};
+hooks['real']={init(){
+  let k='gbsg2',t='none';const svg=d3.select('#rlSvg');
+  function draw(){const R=REAL[k],tf={none:v=>v,log:Math.log,sqrt:Math.sqrt}[t],y=R.y.map(tf);const f=olsDiag(R.X,y);diagPanels(svg,f,720,440,-1);
+    const lhs={none:'',log:'log ',sqrt:'√ '}[t];document.getElementById('rlForm').innerHTML=`<em>${lhs}${R.form}</em>`;
+    document.getElementById('rlTab').innerHTML='<tr><th>term</th><th>estimate</th><th>95% CI</th></tr>'+f.coef.map((c,i)=>`<tr><td>${R.names[i]}</td><td>${d3.format('.3f')(c.est)}</td><td>[${d3.format('.3f')(c.lo)}, ${d3.format('.3f')(c.hi)}]</td></tr>`).join('');
+    const sk=skew(f.resid);document.getElementById('rlMsg').innerHTML=`Residual skewness: <b>${fmt2(sk)}</b> (0 = symmetric).`+(t==='log'?' Coefficients are now on the log scale: read them as ratios (next slide).':'');}
+  segButtons('rlDs',[['gbsg2','GBSG2'],['lung','Lung']],k,v=>{k=v;draw()});segButtons('rlT',[['none','as is'],['log','log'],['sqrt','square root']],t,v=>{t=v;draw()});draw();
+}};
+
+/* ---- 8 log ---- */
+hooks['log']={init(){
+  const W=560,H=270,m={l:56,r:20,t:16,b:44};const svg=d3.select('#lgSvg');
+  const x=d3.scaleLinear().domain([-.6,.6]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([-50,85]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,6));svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>d+'%'));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-6).attr('text-anchor','middle').text('coefficient b on the log scale');
+  const xs=d3.range(-.6,.601,.01);
+  svg.append('path').attr('d',d3.line().x(b=>x(b)).y(b=>y(100*b))(xs)).attr('fill','none').attr('stroke',C.muted).attr('stroke-dasharray','5 4').attr('stroke-width',1.5);
+  svg.append('path').attr('d',d3.line().x(b=>x(b)).y(b=>y(100*(Math.exp(b)-1)))(xs)).attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',2.5);
+  svg.append('text').attr('class','lbl purple').attr('x',x(.4)).attr('y',y(100*(Math.exp(.4)-1))-10).attr('text-anchor','end').style('font-size','14px').text('exact: exp(b) − 1');
+  svg.append('text').attr('class','lbl').attr('x',x(.58)).attr('y',y(58)+34).attr('text-anchor','end').style('font-size','14px').style('fill',C.muted).text('shortcut: 100 × b');
+  const dot=svg.append('circle').attr('r',7).attr('fill',C.sc1).attr('stroke','#fff').attr('stroke-width',2);
+  const sl=document.getElementById('lgB');
+  function upd(){const b=+sl.value,r=Math.exp(b);dot.attr('cx',x(b)).attr('cy',y(100*(r-1)));
+    document.getElementById('lgOut').innerHTML=`b = ${fmt2(b)} → outcome × <b style="color:var(--pc2)">${d3.format('.3f')(r)}</b> per unit: <b>${r>=1?'+':''}${fmt1(100*(r-1))}%</b>`}
+  sl.oninput=upd;upd();
+  const R=REAL.gbsg2,f=ols(R.X,R.y.map(Math.log));
+  document.getElementById('lgTab').innerHTML='<tr><th>term</th><th>b (log)</th><th>exp(b)</th><th>reading</th></tr>'+f.coef.slice(1).map((c,i)=>{const r=Math.exp(c.est);return`<tr><td>${R.names[i+1]}</td><td>${d3.format('.4f')(c.est)}</td><td>${d3.format('.3f')(r)}</td><td>${r>=1?'+':''}${fmt1(100*(r-1))}% ${i===0?'per node':'vs grade I'}</td></tr>`}).join('');
+}};
+
+/* ---- 9 influence ---- */
+hooks['influence']={init(){
+  const R=REAL.gbsg2,full=olsDiag(R.X,R.y),n=R.y.length;const order=d3.range(n).sort((a,b)=>full.cook[b]-full.cook[a]);
+  const W=620,H=260,m={l:50,r:14,t:16,b:36};const svg=d3.select('#ifSvg');
+  const x=d3.scaleLinear().domain([0,n]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,d3.max(full.cook)]).nice().range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,8));svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,4,W-m.l-m.r));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-4).attr('text-anchor','middle').text("patient (row) · Cook's distance");
+  const st=svg.append('g').selectAll('line').data(full.cook).join('line').attr('x1',(d,i)=>x(i)).attr('x2',(d,i)=>x(i)).attr('y1',y(0)).attr('y2',d=>y(d)).attr('stroke-width',1.3)
+    .on('mousemove',(ev,d)=>{const i=full.cook.indexOf(d);showTip(ev,`row ${i}: ${DATA.tsize[i]} mm, ${DATA.pnodes[i]} nodes, grade ${['I','II','III'][DATA.tgrade[i]-1]} · D = ${d3.format('.3f')(d)}`)}).on('mouseleave',hideTip);
+  document.getElementById('ifRows').innerHTML='<tr><th>row</th><th>tumour</th><th>nodes</th><th>grade</th><th>Cook\'s D</th></tr>'+order.slice(0,5).map(i=>`<tr><td>${i}</td><td>${DATA.tsize[i]} mm</td><td>${DATA.pnodes[i]}</td><td>${['I','II','III'][DATA.tgrade[i]-1]}</td><td>${d3.format('.3f')(full.cook[i])}</td></tr>`).join('');
+  function draw(k){const drop=new Set(order.slice(0,k));st.attr('stroke',(d,i)=>drop.has(i)?C.sc1:C.pc2).attr('opacity',(d,i)=>drop.has(i)?1:.6);
+    const keep=d3.range(n).filter(i=>!drop.has(i)),f=ols(keep.map(i=>R.X[i]),keep.map(i=>R.y[i]));
+    document.getElementById('ifTab').innerHTML=`<tr><th>term</th><th>all ${n}</th><th>without top ${k}</th></tr>`+full.coef.map((c,i)=>{const d=f.coef[i];const big=Math.abs(d.est-c.est)>0.15*Math.abs(c.est)||((c.p<.05)!==(d.p<.05));
+      return`<tr><td>${R.names[i]}</td><td>${fmt2(c.est)} <small>(p ${fmtP(c.p)})</small></td><td class="${k&&big?'ch':''}">${fmt2(d.est)} <small>(p ${fmtP(d.p)})</small></td></tr>`}).join('')}
+  segButtons('ifN',[[0,'none'],[5,'5'],[10,'10'],[20,'20']],5,draw);draw(5);
+}};
+
+/* ---- 10 statements ---- */
+hooks['statements']={init(){qcards('qcards',[
+  [false,'With 686 observations, a Shapiro–Wilk p = 0.001 on the residuals means the regression is invalid.','With large samples, normality tests flag trivial departures. Look at the Q-Q plot; and normality is the least important assumption with large n.'],
+  [true,'A U-shaped curve in residuals vs fitted is more serious than a slightly bent Q-Q plot.','Correct. A curve means the model has the wrong shape, so the estimates themselves are off; mild non-normality mostly affects small samples.'],
+  [true,'After log-transforming the outcome, a coefficient of 0.10 means about 10% higher outcome per unit of the predictor.','Correct: exp(0.10) ≈ 1.105.'],
+  [false,'If removing one data point changes your conclusion, delete it and report the cleaner result.','Check the point: delete only errors, and report results with and without it. A conclusion that depends on one patient is fragile either way.']])}};
+
+/* ---- 11 AI / HC3 ---- */
+hooks['ai-tutor']={init(){const R=REAL.gbsg2,f=olsDiag(R.X,R.y);
+  document.getElementById('hcTab').innerHTML='<tr><th>term</th><th>estimate</th><th>classic SE</th><th>HC3 SE</th></tr>'+f.coef.map((c,i)=>`<tr><td>${R.names[i]}</td><td>${d3.format('.3f')(c.est)}</td><td>${d3.format('.3f')(c.se)}</td><td class="${Math.abs(f.seHC3[i]/c.se-1)>.15?'ch':''}">${d3.format('.3f')(f.seHC3[i])}</td></tr>`).join('')}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>
