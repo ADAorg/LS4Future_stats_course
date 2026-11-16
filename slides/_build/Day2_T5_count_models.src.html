@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 2 · Count models</title>
+<style>/*CSS*/</style>
+<style>
+.ttab{border-collapse:collapse;font-size:17px;font-variant-numeric:tabular-nums;width:100%}
+.ttab th{font-weight:400;font-size:13px;letter-spacing:.06em;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
+.ttab td{padding:7px 8px;border-bottom:1px solid var(--line)}
+.ttab td.hi{color:var(--sc1)} .ttab td.pu{color:var(--pc2)}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+.cmp .card h3{font-weight:400;font-size:21px;margin:0 0 4px}
+.cmp .card p{font-size:17px;line-height:1.45;margin:0;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">Counting <em>things</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:800px;margin:0">Nodes, lesions, colonies, reads. Poisson, its overdispersed cousin, and the road to RNA-seq.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 2 · Topic 5 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">Counts are everywhere in the lab: cells per field, colonies per plate, lesions per animal, reads per gene. They're whole numbers, never negative, and their spread grows with their size. One new idea today: overdispersion, extra variation beyond pure counting noise. It's the reason RNA-seq tools use the negative binomial.</aside>
+</section>
+
+<!-- ============ 2 POISSON ============ -->
+<section class="slide" id="poisson">
+  <h1>Pure counting noise: the <em>Poisson</em>.</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2">
+      <div class="controls"><span class="seg"><span class="lab">Average count μ</span></span><input type="range" id="poMu" min="0.5" max="20" step="0.5" value="4" style="width:180px;accent-color:#9933ff"><span class="num" id="poMuV" style="font-size:20px;min-width:50px"></span>
+        <span class="seg" style="margin-left:14px"><span class="lab">Extra variation α</span></span><input type="range" id="poA" min="0" max="1.5" step="0.05" value="0" style="width:160px;accent-color:#ff0066"><span class="num" id="poAV" style="font-size:20px;min-width:50px"></span></div>
+      <svg id="poSvg" width="780" height="400"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:44px">
+      <div class="stat"><span class="k">MEAN</span><span class="v num" id="poMean"></span></div>
+      <div class="stat"><span class="k">VARIANCE</span><span class="v num" id="poVar"></span></div>
+      <div class="stat"><span class="k">P(ZERO)</span><span class="v num" id="poZero"></span></div>
+      <p class="small" id="poMsg" style="margin-top:8px"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture</span></div>
+  <aside class="notes">Start with α at 0: a Poisson distribution, the counts you'd get if every subject had exactly the same true rate and only random sampling varied. Its variance equals its mean. Move μ: the spread grows with the average. Then move α up: the negative binomial. Same mean, but more zeros, a longer tail, and variance = μ + αμ². That α is overdispersion. Next slide shows where it comes from.</aside>
+</section>
+
+<!-- ============ 3 MIXTURE ============ -->
+<section class="slide" id="mixture">
+  <h1>Where overdispersion <em>comes from</em>.</h1>
+  <div class="steps" id="mxSteps"></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.1"><svg id="mxSvg" width="790" height="430"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stepbox" id="mxText"></div>
+      <div class="stat"><span class="k">VARIANCE / MEAN OF THE COUNTS</span><span class="v num" id="mxRatio"></span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · the biology behind α</span></div>
+  <aside class="notes">Step 1: 300 mice, all with exactly the same true rate (5 lesions on average). Their counts still differ, by chance alone: that's Poisson noise, variance/mean ≈ 1. Step 2: realistic mice differ in their true rate (genetics, age, cage). The top strip shows their rates spreading out. Step 3: the counts now spread much more than Poisson predicts: variance/mean well above 1. The negative binomial is exactly this: Poisson counting on top of subject-to-subject variation in the rate.</aside>
+</section>
+
+<!-- ============ 4 RATE RATIO ============ -->
+<section class="slide" id="rateratio">
+  <h1>Same recipe, log scale: <em>rate ratios</em>.</h1>
+  <div class="row" style="gap:28px">
+    <div class="col" style="flex:1.05">
+      <div class="eq2" style="font-size:26px;line-height:1.6;margin:4px 0 14px">log( expected count ) = <span style="color:var(--pc2)">b₀</span> + <span style="color:var(--pc2)">b₁</span>·x + …</div>
+      <div class="cmp">
+        <div class="card"><h3 style="color:var(--pc2)">Count models</h3><p>exp(b) is a <b>rate ratio</b>: the expected count is multiplied by it. "1.7 times as many nodes" <em>is</em> what it means.</p></div>
+        <div class="card"><h3 style="color:var(--sc1)">Logistic (this afternoon)</h3><p>exp(b) is an <b>odds ratio</b>. "Times as likely" is only right for rare outcomes.</p></div>
+      </div>
+      <p class="small" style="margin-top:16px">Poisson and negative binomial give almost the same rate ratios. They differ in how <em>uncertain</em> they say those ratios are.</p>
+    </div>
+    <div class="col"><svg id="rrSvg" width="520" height="380"></svg></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture</span></div>
+  <aside class="notes">Same structure as logistic regression: a straight line on a log scale, exponentiated coefficients as ratios. On the right, GBSG2 expected positive nodes by tumour size for each grade: curves on the count scale, but each grade's curve is a constant multiple of grade I's. The real choice between Poisson and NB is about the standard errors.</aside>
+</section>
+
+<!-- ============ 5 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on 5: <em>count models</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day2_HO5_count_models.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">DATASET</p>
+        <p style="margin:0 0 22px;font-size:22px;color:rgba(255,255,255,.85)"><b>gbsg2</b> (positive nodes) or <b>simulated</b> (lesions). <b>lung</b> has no count: switch.</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTION D</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">The bridge to RNA-seq: every gene is a count.</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">For your count: will the variance be close to the mean, or much larger?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">IN SECTION C, ASK</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">How many zeros does each model predict, and how many are there?</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 25 minutes · in pairs</span></div>
+  <aside class="notes">Lung pairs need to switch dataset: it has no count outcome. Section D takes a few seconds to download the airway data.</aside>
+</section>
+
+<!-- ============ 6 SHAPE ============ -->
+<section class="slide" id="shape">
+  <h1>What do <em>your</em> counts look like?</h1>
+  <div class="controls"><div class="seg" id="shDs"><span class="lab">Dataset</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.1"><svg id="shSvg" width="790" height="410"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stat"><span class="k">MEAN</span><span class="v num" id="shMean"></span></div>
+      <div class="stat"><span class="k">VARIANCE</span><span class="v num" id="shVar"></span></div>
+      <div class="stat"><span class="k" style="color:var(--sc1)">VARIANCE / MEAN</span><span class="v num" id="shRatio"></span></div>
+      <div class="stat"><span class="k">ZEROS</span><span class="v num" id="shZero"></span></div>
+      <p class="small" id="shMsg" style="margin-top:6px"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section A</span></div>
+  <aside class="notes">Both datasets are clearly overdispersed: variance several times the mean. The GBSG2 histogram has a striking feature: the bar at zero is empty. Ask why before the answer: GBSG2 enrolled node-positive patients only. Zero was impossible by design. Neither Poisson nor NB knows that, which matters in section C.</aside>
+</section>
+
+<!-- ============ 7 POIS vs NB ============ -->
+<section class="slide" id="poisnb">
+  <h1>Same rate ratios, <em>different</em> confidence.</h1>
+  <div class="controls"><div class="seg" id="pnDs"><span class="lab">Dataset</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.9"><svg id="pnSvg" width="740" height="390"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stat"><span class="k">POISSON DISPERSION CHECK (PEARSON χ² / df)</span><span class="v num" id="pnPear"></span></div>
+      <div class="stat"><span class="k">NB DISPERSION α</span><span class="v num" id="pnAlpha"></span></div>
+      <div class="stat"><span class="k">NB CIs ARE WIDER BY</span><span class="v num" id="pnWide"></span></div>
+      <p class="small" style="margin-top:8px">With overdispersed data, Poisson assumes less noise than there is: CIs too narrow, p-values too small, <b>false positives</b>.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section B · concept check</span></div>
+  <aside class="notes">Purple: Poisson; pink: negative binomial. The point estimates almost coincide; the intervals don't. The Pearson statistic should be about 1 if Poisson fits; here it's around 5 for GBSG2, meaning the true variance is about five times what Poisson assumes, so Poisson's standard errors are about √5 ≈ 2.2 times too small. That's the concept check. On simulated data, the pink truth ticks show the NB intervals catching the built-in rate ratios.</aside>
+</section>
+
+<!-- ============ 8 REPRODUCE ============ -->
+<section class="slide" id="reproduce">
+  <h1>Which model reproduces the <em>data</em>?</h1>
+  <div class="controls"><div class="seg" id="rpDs"><span class="lab">Dataset</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.9"><svg id="rpSvg" width="740" height="400"></svg></div>
+    <div class="col" style="flex:1"><table class="ttab" id="rpTab"></table><p class="small" id="rpMsg" style="margin-top:10px"></p></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section C</span></div>
+  <aside class="notes">Bars: observed counts. Lines: the distribution each fitted model predicts (averaged over all subjects). Poisson is too narrow: too few large counts. NB matches the spread and the tail. On GBSG2, both predict some zeros although there are none: a reminder that a model only knows what you tell it; how the data were collected (only node-positive patients) is outside it. A zero-truncated model would be the principled fix.</aside>
+</section>
+
+<!-- ============ 9 RNA-SEQ ============ -->
+<section class="slide" id="rnaseq">
+  <h1>Every gene is a count: <em>RNA-seq</em>.</h1>
+  <div class="controls"><label class="small"><input type="checkbox" id="rsLines" checked> show Poisson and NB lines</label></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.8;position:relative">
+      <canvas id="rsCan" width="1480" height="840" style="width:740px;height:420px;position:absolute;left:0;top:0"></canvas>
+      <svg id="rsSvg" width="740" height="420" style="position:relative"></svg>
+    </div>
+    <div class="col" style="flex:1">
+      <p class="small" style="margin-top:0">Airway smooth-muscle cells (GSE52778), the 4 <b>control</b> samples. Each dot is one gene: its mean and variance across replicates.</p>
+      <div class="stat"><span class="k">GENES (MEAN ≥ 1)</span><span class="v num" id="rsN"></span></div>
+      <div class="stat"><span class="k" style="color:var(--sc1)">TYPICAL α (GENES WITH MEAN &gt; 100)</span><span class="v num" id="rsA"></span></div>
+      <p class="small" style="margin-top:8px">Low counts sit near the Poisson line: counting noise dominates. High counts rise above it: <em>biological</em> variation between replicates dominates.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section D · discussion question 2</span></div>
+  <aside class="notes">This is the bridge to the last hands-on. Both axes are logarithmic. The dashed line is variance = mean (Poisson). At low expression, genes follow it: with a handful of reads, sampling noise is all you see. At high expression, they climb above it, following variance = mean + α·mean²: replicate cell lines genuinely differ. That's why DESeq2 and edgeR use the negative binomial, and why they estimate α per gene while borrowing strength across genes: with 4 replicates, one gene alone can't pin down its own dispersion.</aside>
+</section>
+
+<!-- ============ 10 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which statements are <em>correct</em>?</h1>
+  <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check · discussion question 3</span></div>
+  <aside class="notes">Statement 4 is discussion question 3: log-transforming counts and using a linear model is often acceptable when counts are large and there are no zeros; it struggles with small counts and zeros (log of 0), which is exactly where count models shine.</aside>
+</section>
+
+<!-- ============ 11 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>Why does DESeq2 use the <em>negative binomial</em>?</h1>
+  <div class="row" style="gap:36px;margin-top:6px">
+    <div class="col">
+      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook:</p>
+      <div class="prompt">Why does DESeq2 use a negative binomial model rather than a Poisson model or a t-test for RNA-seq counts?</div>
+      <p class="small" style="margin:14px 0 4px">A good answer mentions:</p>
+      <ul class="clean"><li style="font-size:18px">biological variation between replicates: overdispersion (you just saw it)</li><li style="font-size:18px">the variance depends on the mean</li><li style="font-size:18px">dispersion is <em>shared across genes</em> to cope with few replicates</li></ul>
+      <ul class="clean x"><li style="font-size:18px">"because counts aren't normal", and nothing more (not <em>specific</em>)</li></ul>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 6px">🧮 Calculator check: <em>"Fit both models and show their rate ratios and CIs side by side."</em> On GBSG2:</p>
+      <table class="ttab" id="aiTab"></table>
+      <p class="small" style="margin-top:10px">Rate ratios nearly identical; NB intervals roughly twice as wide.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
+  <aside class="notes">This prompt usually gets a decent answer; the scoring is about completeness. "Shares information across genes" is the point most answers miss, and it's the one that matters for the next hands-on.</aside>
+</section>
+
+<!-- ============ 12 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:30px">
+    <h1 style="font-size:56px">Four things to <em>keep</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:22px 0 34px;max-width:1080px">
+      <li style="font-size:27px">Counts: model the log of the expected count; exp(b) is a <em>rate ratio</em>.</li>
+      <li style="font-size:27px">Biological counts are <em>overdispersed</em>: variance much larger than the mean.</li>
+      <li style="font-size:27px">Poisson on overdispersed data gives CIs that are too narrow: use the <em>negative binomial</em>.</li>
+      <li style="font-size:27px">Check what a model predicts against the data, and how the data were <em>collected</em>.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">20,000 genes at once</span>: differential expression and the false discovery rate.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
+  <aside class="notes">Bridge to Hands-on 6: one NB model per gene, 20,000 p-values, and Day 1's false positives at industrial scale.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const AIR = __JSON:airway_mv__;
+const hooks = {};
+/* ---------- count datasets (roles as in the notebook) ---------- */
+function simCounts(seed=2026,n=300){const r=mulberry32(seed),rows=[];for(let i=0;i<n;i++){const u=r(),g=u<.4?'AA':(u<.8?'AB':'BB');r();const age=30+50*r()+(g==='BB'?8:0);
+  const mu=Math.exp(.5+.02*(age-50)+{AA:0,AB:.3,BB:.7}[g]);rows.push({y:rnb(mu,.8,r),x:age,g})}return rows}
+const CD={
+  gbsg2:{label:'GBSG2',rows:DATA.pnodes.map((v,i)=>({y:v,x:DATA.tsize[i],g:['I','II','III'][DATA.tgrade[i]-1]})),yl:'Positive lymph nodes',xs:'tumour size',xu:'mm',gl:'grade',levels:['I','II','III']},
+  sim:{label:'Simulated',rows:simCounts(),yl:'Number of lesions',xs:'age',xu:'year',gl:'genotype',levels:['AA','AB','BB'],truth:{x:1.02,AB:1.35,BB:2.01},alpha:.8}};
+const design=ds=>ds.rows.map(r=>[1,r.x,...ds.levels.slice(1).map(l=>r.g===l?1:0)]);
+const FITS={};function fits(k){if(!FITS[k]){const ds=CD[k],X=design(ds),y=ds.rows.map(r=>r.y);FITS[k]={p:poisFit(X,y),n:nbFit(X,y)}}return FITS[k]}
+
+/* ---- 2 poisson ---- */
+hooks['poisson']={init(){
+  const W=780,H=400,m={l:56,r:20,t:20,b:50};const svg=d3.select('#poSvg');
+  const x=d3.scaleBand().range([m.l,W-m.r]).padding(.15),y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gx=svg.append('g').attr('transform',`translate(0,${H-m.b})`),gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('count');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('probability');
+  const bars=svg.append('g'),pl=svg.append('path').attr('fill','none').attr('stroke',C.pc1).attr('stroke-width',2).attr('stroke-dasharray','5 4');
+  const lg=svg.append('g').attr('transform',`translate(${W-m.r-260},${m.t+6})`);
+  const smu=document.getElementById('poMu'),sa=document.getElementById('poA');
+  function draw(){const mu=+smu.value,a=+sa.value,K=Math.max(15,Math.ceil(mu+5*Math.sqrt(mu+a*mu*mu)));const ks=d3.range(Math.min(K,60)+1);
+    x.domain(ks);const pn=ks.map(k=>countPMF(k,mu,a)),pp=ks.map(k=>poisPMF(k,mu));y.domain([0,Math.max(d3.max(pn),d3.max(pp))*1.1]);
+    gx.call(g=>g.call(d3.axisBottom(x).tickValues(ks.filter(k=>k%(ks.length>30?5:(ks.length>16?2:1))===0)).tickSize(4)).attr('class','axis'));gy.call(g=>axisL(g,y,5,W-m.l-m.r));
+    bars.selectAll('path').data(pn).join('path').attr('fill',a>0?C.sc1:C.pc2).attr('opacity',.85).attr('d',(p,k)=>barPath(x(k),x(k)+x.bandwidth(),y(0),y(p),3))
+      .on('mousemove',(ev,p)=>showTip(ev,`P(${pn.indexOf(p)}) = ${d3.format('.3f')(p)}`)).on('mouseleave',hideTip);
+    pl.attr('opacity',a>0?1:0).attr('d',d3.line().x((p,k)=>x(k)+x.bandwidth()/2).y(p=>y(p)).curve(d3.curveStep)(pp));
+    lg.selectAll('*').remove();lg.append('rect').attr('width',14).attr('height',12).attr('rx',2).attr('fill',a>0?C.sc1:C.pc2);lg.append('text').attr('class','lbl').attr('x',20).attr('y',11).text(a>0?'negative binomial':'Poisson');
+    if(a>0){lg.append('line').attr('y1',28).attr('y2',28).attr('x2',14).attr('stroke',C.pc1).attr('stroke-dasharray','5 4').attr('stroke-width',2);lg.append('text').attr('class','lbl').attr('x',20).attr('y',32).text('Poisson with the same mean')}
+    const v=mu+a*mu*mu;document.getElementById('poMuV').textContent=mu;document.getElementById('poAV').textContent=a.toFixed(2);
+    document.getElementById('poMean').textContent=fmt1(mu);document.getElementById('poVar').innerHTML=`${fmt1(v)} <small>${a>0?`= μ + αμ²`:'= μ'}</small>`;
+    document.getElementById('poZero').innerHTML=`${d3.format('.1%')(countPMF(0,mu,a))}${a>0?` <small>(Poisson ${d3.format('.1%')(poisPMF(0,mu))})</small>`:''}`;
+    document.getElementById('poMsg').innerHTML=a>0?`Variance is <b>${fmt1(v/mu)}×</b> the mean: <b>overdispersed</b>.`:'Poisson: <b>variance = mean</b>, always.'}
+  smu.oninput=draw;sa.oninput=draw;draw();
+}};
+
+/* ---- 3 mixture ---- */
+hooks['mixture']={init(){
+  const N=300,mu=5,a=.8,W=790,H=430;const svg=d3.select('#mxSvg');const r=mulberry32(31);
+  const lamHet=d3.range(N).map(()=>rgamma(1/a,a*mu,r)),uni=d3.range(N).map(()=>r());
+  const cntSame=lamHet.map(()=>rpois(mu,r)),cntHet=lamHet.map(l=>rpois(l,r));
+  // top: rates strip
+  const xr=d3.scaleLinear().domain([0,25]).range([60,W-20]);
+  svg.append('text').attr('class','lbl').attr('x',60).attr('y',16).text('each mouse\'s true rate');
+  svg.append('g').attr('transform','translate(0,110)').call(g=>axisB(g,xr,10));
+  const rates=svg.append('g').selectAll('circle').data(lamHet).join('circle').attr('r',3).attr('fill',C.pc2).attr('opacity',.5);
+  // bottom: count histogram
+  const top=170,bot=390;const xc=d3.scaleBand().domain(d3.range(26)).range([60,W-20]).padding(.15),yc=d3.scaleLinear().range([bot,top]);
+  svg.append('g').attr('transform',`translate(0,${bot})`).call(g=>g.call(d3.axisBottom(xc).tickValues(d3.range(0,26,5)).tickSize(4)).attr('class','axis'));
+  svg.append('text').attr('class','axlab').attr('x',(W+60)/2).attr('y',bot+36).attr('text-anchor','middle').text('lesions counted per mouse');
+  const gy=svg.append('g').attr('transform','translate(60,0)');const bars=svg.append('g');
+  const pl=svg.append('path').attr('fill','none').attr('stroke',C.pc1).attr('stroke-width',2).attr('stroke-dasharray','5 4');
+  const lab=svg.append('text').attr('class','lbl').attr('x',W-20).attr('y',top+10).attr('text-anchor','end').style('font-size','14px');
+  const T=[['1 · Identical mice','<p>300 mice, <b>all with the same true rate</b> of 5 lesions. The counts still vary, by chance alone.</p><p>That is Poisson noise: variance ≈ mean.</p>'],
+    ['2 · Real mice differ','<p>Genetics, age, cage, diet: each mouse has its <b>own</b> true rate. The strip at the top spreads out.</p><p>The average is still 5.</p>'],
+    ['3 · Counts spread more','<p>Each mouse\'s count is Poisson noise <em>on top of</em> its own rate. The histogram is much wider than Poisson (dashed).</p><p>That extra spread is <b>overdispersion</b>: the negative binomial.</p>']];
+  this.st=stepper('mxSteps',3,s=>{const het=s>=1,cnt=s===2?cntHet:cntSame;document.getElementById('mxText').innerHTML=`<div class="stepbox"><h3>${T[s][0]}</h3>${T[s][1]}</div>`;
+    rates.transition().duration(800).attr('cx',(l,i)=>xr(Math.min(25,het?l:mu))).attr('cy',(l,i)=>30+uni[i]*60);
+    const h=d3.range(26).map(k=>cnt.filter(c=>Math.min(c,25)===k).length);yc.domain([0,Math.max(60,d3.max(h))]);gy.call(g=>axisL(g,yc,4,W-80));
+    bars.selectAll('path').data(h).join('path').attr('fill',s===2?C.sc1:C.pc2).transition().duration(700).attr('d',(v,k)=>barPath(xc(k),xc(k)+xc.bandwidth(),yc(0),yc(v),3));
+    pl.transition().duration(700).attr('opacity',s===2?1:0).attr('d',d3.line().x((v,k)=>xc(k)+xc.bandwidth()/2).y(v=>yc(v)).curve(d3.curveStep)(d3.range(26).map(k=>N*poisPMF(k,mu))));
+    lab.text(s===2?'dashed: what Poisson predicts':'');
+    const vm=varS(cnt)/mean(cnt);document.getElementById('mxRatio').innerHTML=`${fmt2(vm)} <small>${vm<1.5?'≈ 1: Poisson':'≫ 1: overdispersed'}</small>`});
+  this.st.go(0);
+},enter(){this.st&&this.st.go(0)}};
+
+/* ---- 4 rate ratio ---- */
+hooks['rateratio']={init(){
+  const W=520,H=380,m={l:50,r:80,t:20,b:50};const svg=d3.select('#rrSvg');const f=fits('gbsg2').n;
+  const x=d3.scaleLinear().domain([0,100]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,24]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,5));svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,6,W-m.l-m.r));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Tumour size (mm)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('expected positive nodes');
+  const cols=[C.ink2,C.pc2,C.sc1];['I','II','III'].forEach((g,j)=>{const ex=v=>Math.exp(f.b[0]+f.b[1]*v+(j?f.b[j+1]:0));
+    svg.append('path').attr('d',d3.line().x(v=>x(v)).y(v=>y(ex(v)))(d3.range(0,101,1))).attr('fill','none').attr('stroke',cols[j]).attr('stroke-width',3);
+    svg.append('text').attr('class','lbl').style('fill',cols[j]).attr('x',x(100)+6).attr('y',y(ex(100))+5).text(`grade ${g}`)});
+  svg.append('text').attr('class','lbl').attr('x',m.l+8).attr('y',m.t+12).style('font-size','14px').text(`NB: grade III × ${fmt2(f.coef[3].rr)}, × ${fmt2(Math.exp(10*f.b[1]))} per 10 mm`);
+}};
+
+/* ---- 6 shape ---- */
+hooks['shape']={init(){
+  const W=790,H=410,m={l:56,r:20,t:20,b:50};const svg=d3.select('#shSvg');const g=svg.append('g');
+  function draw(k){const ds=CD[k],y=ds.rows.map(r=>r.y);g.selectAll('*').remove();const K=Math.min(d3.max(y),k==='gbsg2'?40:30);
+    const h=d3.range(K+1).map(v=>y.filter(c=>Math.min(c,K)===v).length);
+    const x=d3.scaleBand().domain(d3.range(K+1)).range([m.l,W-m.r]).padding(.12),yy=d3.scaleLinear().domain([0,d3.max(h)]).nice().range([H-m.b,m.t]);
+    g.append('g').attr('transform',`translate(0,${H-m.b})`).call(a=>a.call(d3.axisBottom(x).tickValues(d3.range(0,K+1,5)).tickFormat(v=>v===K?`${K}+`:v).tickSize(4)).attr('class','axis'));
+    g.append('g').attr('transform',`translate(${m.l},0)`).call(a=>axisL(a,yy,5,W-m.l-m.r));
+    g.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text(ds.yl);
+    g.append('g').selectAll('path').data(h).join('path').attr('fill',C.pc2).attr('d',(v,i)=>barPath(x(i),x(i)+x.bandwidth(),yy(0),yy(v),3)).on('mousemove',(ev,v)=>showTip(ev,`${h.indexOf(v)}: <b>${v}</b>`)).on('mouseleave',hideTip);
+    if(h[0]===0){g.append('rect').attr('x',x(0)-2).attr('width',x.bandwidth()+4).attr('y',m.t+30).attr('height',H-m.b-m.t-30).attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2).attr('stroke-dasharray','5 4').attr('rx',4);
+      g.append('text').attr('class','lbl pink').attr('x',x(3)).attr('y',m.t+10).text('← no zeros at all: why?')}
+    const mu=mean(y),v=varS(y),z=y.filter(c=>c===0).length/y.length;
+    document.getElementById('shMean').textContent=fmt2(mu);document.getElementById('shVar').textContent=fmt2(v);document.getElementById('shRatio').textContent=fmt1(v/mu);document.getElementById('shZero').textContent=d3.format('.1%')(z);
+    document.getElementById('shMsg').innerHTML=k==='gbsg2'?'GBSG2 enrolled <b>node-positive</b> patients only: zero was impossible by design.':`Simulated with α = 0.8: overdispersed by construction.`}
+  segButtons('shDs',[['gbsg2','GBSG2 · positive nodes'],['sim','Simulated · lesions']],'gbsg2',draw);draw('gbsg2');
+}};
+
+/* ---- 7 Poisson vs NB ---- */
+hooks['poisnb']={init(){
+  const W=740,H=390,m={l:220,r:30,t:30,b:50};const svg=d3.select('#pnSvg');const g=svg.append('g');
+  function draw(k){const ds=CD[k],F=fits(k),lev=ds.levels;g.selectAll('*').remove();
+    const names=[`${ds.xs} (per ${ds.xu})`,...lev.slice(1).map(l=>`${ds.gl} ${l} vs ${lev[0]}`)],tr=ds.truth?[ds.truth.x,...lev.slice(1).map(l=>ds.truth[l])]:null;
+    const items=names.map((n,i)=>({n,p:F.p.coef[i+1],b:F.n.coef[i+1],t:tr?tr[i]:null}));
+    const x=d3.scaleLog().domain([Math.min(.8,...items.map(d=>d.b.lo))*.95,Math.max(2.5,...items.map(d=>d.b.hi))*1.05]).range([m.l,W-m.r]),y=d3.scaleBand().domain(names).range([m.t,H-m.b]).padding(.3);
+    g.append('g').attr('transform',`translate(0,${H-m.b})`).call(a=>a.call(d3.axisBottom(x).tickValues([.8,1,1.25,1.5,2,2.5,3].filter(v=>v>=x.domain()[0]&&v<=x.domain()[1])).tickFormat(d3.format('~g')).tickSize(5)).attr('class','axis'));
+    g.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('rate ratio (log scale), 95% CI');
+    g.append('line').attr('x1',x(1)).attr('x2',x(1)).attr('y1',m.t-10).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-dasharray','5 4');
+    const lg=g.append('g').attr('transform',`translate(${m.l},${m.t-16})`);[[C.pc2,'Poisson'],[C.sc1,'negative binomial']].forEach(([c,t],i)=>{lg.append('line').attr('x1',i*120).attr('x2',i*120+20).attr('stroke',c).attr('stroke-width',3);lg.append('text').attr('class','lbl').attr('x',i*120+26).attr('y',5).style('font-size','14px').text(t)});
+    const r=g.append('g').selectAll('g').data(items).join('g').attr('transform',d=>`translate(0,${y(d.n)})`);
+    r.append('text').attr('class','lbl').attr('x',0).attr('y',y.bandwidth()/2+5).text(d=>d.n);
+    [['p',C.pc2,.3],['b',C.sc1,.7]].forEach(([key,c,f])=>{r.append('line').attr('x1',d=>x(d[key].lo)).attr('x2',d=>x(d[key].hi)).attr('y1',y.bandwidth()*f).attr('y2',y.bandwidth()*f).attr('stroke',c).attr('stroke-width',3);
+      r.append('circle').attr('cx',d=>x(d[key].rr)).attr('cy',y.bandwidth()*f).attr('r',6).attr('fill',c).attr('stroke','#fff').attr('stroke-width',1.5)
+       .on('mousemove',(ev,d)=>showTip(ev,`${key==='p'?'Poisson':'NB'}: ${d3.format('.3f')(d[key].rr)} [${d3.format('.3f')(d[key].lo)}, ${d3.format('.3f')(d[key].hi)}]`)).on('mouseleave',hideTip)});
+    r.filter(d=>d.t).append('path').attr('d',d=>`M${x(d.t)},0v${y.bandwidth()}`).attr('stroke',C.pc1).attr('stroke-width',2);
+    r.filter(d=>d.t).append('text').attr('class','lbl').attr('x',d=>x(d.t)+4).attr('y',-2).style('font-size','12px').text(d=>`truth ${d.t}`);
+    document.getElementById('pnPear').innerHTML=`${fmt1(F.p.pearson)} <small>(≈ 1 if Poisson fits)</small>`;document.getElementById('pnAlpha').textContent=fmt2(F.n.alpha)+(ds.alpha?` (truth ${ds.alpha})`:'');
+    const wr=d3.mean(items,d=>(Math.log(d.b.hi)-Math.log(d.b.lo))/(Math.log(d.p.hi)-Math.log(d.p.lo)));document.getElementById('pnWide').innerHTML=`${fmt1(wr)}× <small>on average</small>`}
+  segButtons('pnDs',[['gbsg2','GBSG2'],['sim','Simulated']],'gbsg2',draw);draw('gbsg2');
+}};
+
+/* ---- 8 reproduce ---- */
+hooks['reproduce']={init(){
+  const W=740,H=400,m={l:56,r:20,t:30,b:50};const svg=d3.select('#rpSvg');const g=svg.append('g');
+  function draw(k){const ds=CD[k],F=fits(k),y=ds.rows.map(r=>r.y),n=y.length;g.selectAll('*').remove();const K=k==='gbsg2'?30:20,large=15;
+    const obs=d3.range(K+1).map(v=>y.filter(c=>c===v).length/n);
+    const pr=f=>d3.range(K+1).map(v=>mean(f.mu.map(mu=>countPMF(v,mu,f.alpha))));const pp=pr(F.p),pn=pr(F.n);
+    const x=d3.scaleBand().domain(d3.range(K+1)).range([m.l,W-m.r]).padding(.12),yy=d3.scaleLinear().domain([0,Math.max(d3.max(obs),d3.max(pp),d3.max(pn))*1.08]).range([H-m.b,m.t]);
+    g.append('g').attr('transform',`translate(0,${H-m.b})`).call(a=>a.call(d3.axisBottom(x).tickValues(d3.range(0,K+1,5)).tickSize(4)).attr('class','axis'));
+    g.append('g').attr('transform',`translate(${m.l},0)`).call(a=>axisL(a,yy,5,W-m.l-m.r)).call(a=>a.selectAll('.tick text').text(d=>d3.format('.0%')(d)));
+    g.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text(ds.yl);
+    g.append('g').selectAll('path').data(obs).join('path').attr('fill',C.popL).attr('d',(v,i)=>barPath(x(i),x(i)+x.bandwidth(),yy(0),yy(v),3));
+    const ln=(d,c)=>{g.append('path').attr('d',d3.line().x((v,i)=>x(i)+x.bandwidth()/2).y(v=>yy(v))(d)).attr('fill','none').attr('stroke',c).attr('stroke-width',2.5);
+      g.append('g').selectAll('circle').data(d).join('circle').attr('r',3.5).attr('fill',c).attr('cx',(v,i)=>x(i)+x.bandwidth()/2).attr('cy',v=>yy(v))};ln(pp,C.pc2);ln(pn,C.sc1);
+    const lg=g.append('g').attr('transform',`translate(${W-m.r-230},${m.t})`);[[C.popL,'observed','r'],[C.pc2,'Poisson predicts','l'],[C.sc1,'NB predicts','l']].forEach(([c,t,s],i)=>{if(s==='r')lg.append('rect').attr('y',i*20-8).attr('width',16).attr('height',12).attr('fill',c);else lg.append('line').attr('x2',16).attr('y1',i*20-2).attr('y2',i*20-2).attr('stroke',c).attr('stroke-width',3);lg.append('text').attr('class','lbl').attr('x',22).attr('y',i*20+3).style('font-size','14px').text(t)});
+    const z=f=>mean(f.mu.map(mu=>countPMF(0,mu,f.alpha))),big=f=>mean(f.mu.map(mu=>1-d3.sum(d3.range(large),v=>countPMF(v,mu,f.alpha))));
+    document.getElementById('rpTab').innerHTML=`<tr><th></th><th>observed</th><th>Poisson</th><th>NB</th></tr>
+      <tr><td>zeros</td><td>${d3.format('.1%')(obs[0])}</td><td class="pu">${d3.format('.1%')(z(F.p))}</td><td class="hi">${d3.format('.1%')(z(F.n))}</td></tr>
+      <tr><td>≥ ${large}</td><td>${d3.format('.1%')(y.filter(c=>c>=large).length/n)}</td><td class="pu">${d3.format('.1%')(big(F.p))}</td><td class="hi">${d3.format('.1%')(big(F.n))}</td></tr>`;
+    document.getElementById('rpMsg').innerHTML=k==='gbsg2'?'Poisson misses the long tail. Both models predict zeros the trial design ruled out: <b>neither knows how patients were selected</b>.':'Poisson predicts far too few zeros and too few large counts; NB gets both close.'}
+  segButtons('rpDs',[['gbsg2','GBSG2'],['sim','Simulated']],'gbsg2',draw);draw('gbsg2');
+}};
+
+/* ---- 9 RNA-seq ---- */
+hooks['rnaseq']={init(){
+  const W=740,H=420,m={l:64,r:20,t:20,b:50};const svg=d3.select('#rsSvg'),cv=document.getElementById('rsCan'),ctx=cv.getContext('2d');ctx.scale(2,2);
+  const x=d3.scaleLog().domain([1,3e5]).range([m.l,W-m.r]).clamp(true),y=d3.scaleLog().domain([.1,1e10]).range([H-m.b,m.t]).clamp(true);
+  ctx.fillStyle='rgba(153,51,255,0.18)';AIR.m.forEach((mu,i)=>{const v=AIR.v[i];if(v>0){ctx.beginPath();ctx.arc(x(mu),y(v),1.4,0,2*Math.PI);ctx.fill()}});
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>g.call(d3.axisBottom(x).ticks(6,'~s').tickSize(5)).attr('class','axis'));
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>g.call(d3.axisLeft(y).tickValues([1e0,1e2,1e4,1e6,1e8,1e10]).tickFormat(d=>'10'+String(Math.log10(d)).replace(/\d/g,c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c])).tickSize(5)).attr('class','axis'));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('mean count across control replicates (log)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('variance (log)');
+  const al=d3.median(AIR.m.map((mu,i)=>mu>100?(AIR.v[i]-mu)/(mu*mu):null).filter(v=>v!=null));const xs=d3.range(0,5.48,.02).map(e=>10**e);
+  const L=svg.append('g');L.append('path').attr('d',d3.line().x(v=>x(v)).y(v=>y(v))(xs)).attr('fill','none').attr('stroke',C.pc1).attr('stroke-width',2.5).attr('stroke-dasharray','6 4');
+  L.append('path').attr('d',d3.line().x(v=>x(v)).y(v=>y(v+al*v*v))(xs)).attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',3);
+  L.append('text').attr('class','lbl').attr('x',x(2e4)).attr('y',y(2e4)+20).style('font-size','14px').text('Poisson: variance = mean');
+  L.append('text').attr('class','lbl pink').attr('x',x(300)).attr('y',y(300+al*9e4)-14).attr('text-anchor','end').style('font-size','14px').text(`NB: mean + ${d3.format('.3f')(al)}·mean²`);
+  document.getElementById('rsLines').onchange=e=>L.attr('opacity',e.target.checked?1:0);
+  document.getElementById('rsN').textContent=d3.format(',')(AIR.m.length);document.getElementById('rsA').textContent=d3.format('.3f')(al);
+}};
+
+/* ---- 10 statements ---- */
+hooks['statements']={init(){qcards('qcards',[
+  [true,'A rate ratio of 1.7 for grade III means grade III patients have, on average, 1.7 times as many positive nodes.','Correct: unlike odds ratios, rate ratios read directly as "times as many".'],
+  [false,'Poisson and negative binomial give similar rate ratios, so it doesn\'t matter which you use.','The estimates are similar, but with overdispersion Poisson\'s CIs are far too narrow and its p-values too small: false positives.'],
+  [true,'A Pearson dispersion statistic of 4.8 suggests the variance is about five times what Poisson assumes.','Correct. About 1 means Poisson fits; much larger means overdispersed.'],
+  [false,'Log-transforming counts and using a linear model is always wrong.','Often acceptable when counts are large and never zero. It breaks down with small counts and zeros (log 0), where count models shine.']])}};
+
+/* ---- 11 AI ---- */
+hooks['ai-tutor']={init(){const F=fits('gbsg2'),nm=['tumour size (per mm)','grade II vs I','grade III vs I'];
+  document.getElementById('aiTab').innerHTML='<tr><th>term</th><th>Poisson RR [95% CI]</th><th>NB RR [95% CI]</th></tr>'+nm.map((n,i)=>{const p=F.p.coef[i+1],b=F.n.coef[i+1];return`<tr><td>${n}</td><td class="pu">${d3.format('.3f')(p.rr)} [${d3.format('.3f')(p.lo)}, ${d3.format('.3f')(p.hi)}]</td><td class="hi">${d3.format('.3f')(b.rr)} [${d3.format('.3f')(b.lo)}, ${d3.format('.3f')(b.hi)}]</td></tr>`}).join('')}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>
