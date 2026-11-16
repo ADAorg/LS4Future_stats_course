@@ -4,91 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Day 1 · Sampling variability</title>
-<style>
-:root{
-  --pc1:#240046; --pc2:#9933ff; --sc1:#ff0066; --sc3:#ff99cc;
-  --ink:#240046; --ink2:#5b4b6e; --muted:#8a7d99; --line:#e6e1ec; --pop:#a799b5; --paper:#ffffff; --wash:#f6f3f9;
-  --serif:"Freight Big Pro","Freight Big","Times New Roman",Times,serif;
-}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;background:#120024;overflow:hidden;font-family:var(--serif);color:var(--ink)}
-#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-#stage{width:1280px;height:720px;position:relative;transform-origin:center center;background:var(--paper);box-shadow:0 10px 60px rgba(0,0,0,.4);overflow:hidden}
-.slide{position:absolute;inset:0;padding:48px 64px 64px;opacity:0;pointer-events:none;transition:opacity .45s ease;background:var(--paper)}
-.slide.active{opacity:1;pointer-events:auto}
-.slide.dark{background:var(--pc1);color:#fff}
-.kicker{font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--pc2);margin-bottom:10px}
-.dark .kicker{color:var(--sc3)}
-h1{font-weight:400;font-size:50px;line-height:1.08;margin:0 0 18px}
-h1 em{font-style:italic;color:var(--pc2)}
-.dark h1 em{color:var(--sc3)}
-p,li{font-size:22px;line-height:1.4}
-.lead{font-size:24px;color:var(--ink2);max-width:980px;margin:0 0 14px}
-.small{font-size:17px;color:var(--ink2);line-height:1.4}
-.tiny{font-size:14px;color:var(--muted)}
-em{font-style:italic}
-.row{display:flex;gap:36px;align-items:flex-start}
-.col{flex:1}
-.footer{position:absolute;left:64px;right:64px;bottom:18px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
-.footer img{height:52px;margin-left:-10px}
-.dark .footer{color:rgba(255,255,255,.55)}
-/* controls */
-.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 8px}
-.btn{font-family:var(--serif);font-size:17px;padding:7px 16px;border-radius:999px;border:1.5px solid var(--pc1);background:#fff;color:var(--pc1);cursor:pointer;transition:all .15s}
-.btn:hover{background:var(--wash)}
-.btn.primary{background:var(--pc1);color:#fff}
-.btn.primary:hover{background:#3a0a6b}
-.btn.on{background:var(--pc2);border-color:var(--pc2);color:#fff}
-.btn:disabled{opacity:.4;cursor:default}
-.seg{display:inline-flex;gap:6px;align-items:center}
-.seg .lab{font-size:15px;color:var(--muted);margin-right:4px}
-/* readouts */
-.stat{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-top:1px solid var(--line)}
-.stat .k{font-size:14px;color:var(--muted);letter-spacing:.04em}
-.stat .v{font-size:30px;font-variant-numeric:tabular-nums}
-.stat .v small{font-size:16px;color:var(--ink2)}
-.card{background:var(--wash);border-radius:14px;padding:16px 20px}
-.callout{border-left:3px solid var(--sc1);padding:4px 0 4px 16px;font-size:20px;line-height:1.4;color:var(--ink)}
-/* svg */
-svg{display:block;overflow:visible}
-.axis text{font-family:var(--serif);font-size:14px;fill:var(--ink2)}
-.axis path,.axis line{stroke:#c9c1d3}
-.axlab{font-family:var(--serif);font-size:15px;fill:var(--ink2)}
-.grid line{stroke:var(--line)}
-.grid path{display:none}
-.lbl{font-family:var(--serif);font-size:15px;fill:var(--ink)}
-.lbl.pink{fill:var(--sc1)}
-.lbl.purple{fill:var(--pc2)}
-/* tooltip */
-#tip{position:fixed;pointer-events:none;background:var(--pc1);color:#fff;font-family:var(--serif);font-size:14px;padding:6px 10px;border-radius:8px;opacity:0;transition:opacity .12s;z-index:50;white-space:nowrap}
-/* crescents */
-.crescents{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.85}
-/* nav + notes */
-#nav{position:absolute;right:20px;bottom:14px;display:flex;gap:6px;z-index:20}
-#nav button{width:34px;height:34px;border-radius:50%;border:1px solid rgba(36,0,70,.25);background:rgba(255,255,255,.85);color:var(--pc1);font-size:16px;cursor:pointer;font-family:var(--serif)}
-#progress{position:absolute;left:0;bottom:0;height:4px;background:var(--pc2);transition:width .4s;z-index:20}
-#counter{position:absolute;right:104px;bottom:22px;font-size:13px;color:var(--muted);z-index:20}
-#notes{position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;background:rgba(18,0,36,.96);color:#eee;font-family:var(--serif);font-size:17px;line-height:1.5;padding:16px 28px;transform:translateY(100%);transition:transform .25s;z-index:40}
-#notes.show{transform:none}
-#notes h4{margin:0 0 6px;font-weight:400;color:var(--sc3);font-size:14px;letter-spacing:.12em;text-transform:uppercase}
-aside.notes{display:none}
-#help{position:fixed;left:14px;bottom:10px;color:rgba(255,255,255,.4);font-size:12px;font-family:var(--serif);z-index:30}
-/* tables */
-table.room{border-collapse:collapse;font-size:18px}
-table.room th{font-weight:400;color:var(--muted);font-size:14px;letter-spacing:.04em;text-align:left;padding:4px 10px;border-bottom:1px solid var(--line)}
-table.room td{padding:3px 10px;border-bottom:1px solid var(--line)}
-table.room input{width:74px;font-family:var(--serif);font-size:18px;border:1px solid var(--line);border-radius:6px;padding:3px 6px;color:var(--ink)}
-.prompt{background:var(--wash);border-radius:12px;padding:14px 18px;font-size:19px;line-height:1.45;font-style:italic}
-.chips{display:flex;gap:10px;flex-wrap:wrap}
-.chip{border:1.5px solid var(--pc2);color:var(--pc2);border-radius:999px;padding:4px 14px;font-size:18px}
-.big li{font-size:30px;line-height:1.55;margin-bottom:8px}
-ul.clean{list-style:none;padding:0;margin:0}
-ul.clean li{padding:6px 0 6px 26px;position:relative}
-ul.clean li::before{content:"";position:absolute;left:4px;top:17px;width:9px;height:9px;border-radius:50%;background:var(--pc2)}
-ul.clean.x li::before{background:var(--sc1);border-radius:2px;transform:rotate(45deg)}
-.num{font-variant-numeric:tabular-nums}
-</style>
+<style>/*CSS*/</style>
 </head>
 <body>
 <div id="viewport"><div id="stage">
@@ -401,59 +317,12 @@ ul.clean.x li::before{background:var(--sc1);border-radius:2px;transform:rotate(4
   <aside class="notes">Bridge to Hands-on 2: on slide 5, the middle 95% of study means was roughly the true mean ± 2 spreads. Flip it round: if each study draws ± 2 SE around its own mean, most of those intervals will contain the truth. That's a confidence interval.</aside>
 </section>
 
-<div id="progress"></div>
-<div id="counter"></div>
-<div id="nav"><button id="prevBtn" aria-label="Previous">‹</button><button id="nextBtn" aria-label="Next">›</button></div>
 </div></div>
-<div id="tip"></div>
-<div id="notes"><h4>Speaker notes</h4><div id="notesBody"></div></div>
-<div id="help">← → navigate · N notes · F fullscreen</div>
 
 <script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
 <script>
-const DATA = __DATA__;
-const C = {pc1:'#240046', pc2:'#9933ff', sc1:'#ff0066', sc3:'#ff99cc', pop:'#a799b5', popL:'#d3cce0', ink2:'#5b4b6e', line:'#e6e1ec'};
-const VARS = {
-  tsize:{label:'Tumour size', unit:'mm', bw:5, dom:[0,120]},
-  age:{label:'Age', unit:'years', bw:2, dom:[20,82]},
-  pnodes:{label:'Positive lymph nodes', unit:'nodes', bw:1, dom:[0,52]}
-};
-/* ---------- maths ---------- */
-function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-let R = mulberry32((Date.now()%1e9)|0);
-const mean = a => {let s=0;for(const v of a)s+=v;return s/a.length};
-const sdP = a => {const m=mean(a);let s=0;for(const v of a)s+=(v-m)*(v-m);return Math.sqrt(s/a.length)};
-const sdS = a => {const m=mean(a);let s=0;for(const v of a)s+=(v-m)*(v-m);return Math.sqrt(s/(a.length-1))};
-const skew = a => {const m=mean(a),s=sdP(a);let t=0;for(const v of a)t+=((v-m)/s)**3;return t/a.length};
-function sampleIdx(N,n,r=R){const o=new Array(n);for(let i=0;i<n;i++)o[i]=Math.floor(r()*N);return o}
-function studyMeans(pop,n,k,r=R,cum=null){
-  const N=pop.length,out=new Float64Array(k);
-  for(let j=0;j<k;j++){let s=0;for(let i=0;i<n;i++){let idx;
-    if(cum){const u=r()*cum[N-1];let lo=0,hi=N-1;while(lo<hi){const mid=(lo+hi)>>1;if(cum[mid]<u)lo=mid+1;else hi=mid}idx=lo}else idx=Math.floor(r()*N);
-    s+=pop[idx]}out[j]=s/n}
-  return out;
-}
-const fmt1 = d3.format('.1f'), fmt2=d3.format('.2f');
-const POP = {}; for(const k in VARS){const a=DATA[k];POP[k]={mu:mean(a),sd:sdP(a),med:d3.median(a),skew:skew(a),min:d3.min(a),max:d3.max(a)}}
-
-/* ---------- tooltip ---------- */
-const tip=document.getElementById('tip');
-function showTip(ev,html){tip.innerHTML=html;tip.style.opacity=1;let x=ev.clientX+14,y=ev.clientY-12;if(x>innerWidth-220)x=ev.clientX-200;tip.style.left=x+'px';tip.style.top=y+'px'}
-function hideTip(){tip.style.opacity=0}
-
-/* ---------- small helpers ---------- */
-function axisB(g,x,ticks,fmt){g.call(d3.axisBottom(x).ticks(ticks).tickSize(5).tickFormat(fmt||null)).attr('class','axis')}
-function axisL(g,y,ticks,w){g.call(d3.axisLeft(y).ticks(ticks).tickSize(-w).tickPadding(8)).attr('class','axis grid').call(s=>s.selectAll('.tick line').attr('stroke',C.line)).call(s=>s.select('.domain').remove())}
-function segButtons(container,items,init,onPick){
-  const el=document.getElementById(container);const btns={};
-  items.forEach(([val,label])=>{const b=document.createElement('button');b.className='btn'+(val===init?' on':'');b.textContent=label;b.onclick=()=>{Object.values(btns).forEach(x=>x.classList.remove('on'));b.classList.add('on');onPick(val)};el.appendChild(b);btns[val]=b});
-}
-function barPath(x0,x1,y0,yTop,r){ // bar with rounded top corners anchored at baseline y0
-  const w=x1-x0,h=y0-yTop; if(h<=0.5||w<=0)return `M${x0},${y0}h${Math.max(w,0)}`;
-  r=Math.min(r,w/2,h);return `M${x0},${y0}V${yTop+r}Q${x0},${yTop} ${x0+r},${yTop}H${x1-r}Q${x1},${yTop} ${x1},${yTop+r}V${y0}Z`;
-}
-
-/* =================================================================== */
 const hooks = {};
 
 /* ---- 2 estimate: population cloud & sample ---- */
@@ -819,37 +688,7 @@ hooks['bias']={init(){
   draw();
 }};
 
-/* =================== deck engine =================== */
-const slides=[...document.querySelectorAll('.slide')];
-const stage=document.getElementById('stage');
-let cur=-1;const inited=new Set();
-function fit(){const s=Math.min(innerWidth/1280,innerHeight/720);stage.style.transform=`scale(${s})`}
-addEventListener('resize',fit);fit();
-const notesEl=document.getElementById('notes'),notesBody=document.getElementById('notesBody');
-function go(i,push=true){
-  i=Math.max(0,Math.min(slides.length-1,i));if(i===cur)return;
-  if(cur>=0){slides[cur].classList.remove('active');const h=hooks[slides[cur].id];h&&h.leave&&h.leave()}
-  cur=i;const s=slides[i];s.classList.add('active');hideTip();
-  const h=hooks[s.id];
-  if(h){if(!inited.has(s.id)){inited.add(s.id);try{h.init()}catch(e){console.error(e)}}else if(h.enter)h.enter()}
-  document.getElementById('progress').style.width=((i+1)/slides.length*100)+'%';
-  document.getElementById('counter').textContent=`${i+1} / ${slides.length}`;
-  const n=s.querySelector('aside.notes');notesBody.textContent=n?n.textContent.trim():'';
-  if(push){try{history.replaceState(null,'','#'+s.id)}catch(e){location.hash=s.id}}
-}
-function fromHash(){const id=location.hash.slice(1);const i=slides.findIndex(s=>s.id===id);go(i>=0?i:0,false)}
-addEventListener('hashchange',fromHash);
-document.getElementById('prevBtn').onclick=()=>go(cur-1);
-document.getElementById('nextBtn').onclick=()=>go(cur+1);
-addEventListener('keydown',e=>{
-  if(e.target.tagName==='INPUT')return;
-  if(['ArrowRight','PageDown'].includes(e.key)||(e.key===' '&&e.target.tagName!=='BUTTON')){e.preventDefault();go(cur+1)}
-  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(cur-1)}
-  else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);
-  else if(e.key==='n'||e.key==='N')notesEl.classList.toggle('show');
-  else if(e.key==='f'||e.key==='F'){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(err){}}
-});
-fromHash();
+startDeck(hooks);
 </script>
 </body>
 </html>
