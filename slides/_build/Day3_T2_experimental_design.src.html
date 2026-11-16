@@ -90,6 +90,18 @@
   <aside class="notes">12 samples, 6 per run; run B reads 1.5 units higher; the treatment does nothing. Confounded: controls in run A, treated in run B. Look at the design matrix: the treatment column and the batch column are identical, so no model can tell them apart. The false-positive rate is about 64%, and adding batch to the model is impossible: the software will drop a column or refuse. Balanced: every run has 3 of each; batch no longer biases anything, and including it in the model removes its noise and increases power.</aside>
 </section>
 
+<!-- ============ 6a WHAT IS A BLOCK ============ -->
+<section class="slide" id="block-intro">
+  <h1>What is a <em>block</em>?</h1>
+  <div class="steps" id="biSteps"></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2"><svg id="biSvg" width="760" height="440"></svg></div>
+    <div class="col" style="flex:1"><div class="stepbox" id="biText"></div></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section C</span></div>
+  <aside class="notes">Set up the experiment before showing power. Step 1: six donors, each donor's cells split into two dishes; a coin flip decides which dish gets the drug. Step 2: donors differ a lot from each other (genetics, age, how the cells were handled), much more than two dishes from the same donor. Step 3: an unpaired test pools all controls and all treated dishes; the donor-to-donor spread lands in the noise and the clouds overlap. Step 4: compare each donor with itself: every difference is positive and close to the true +1, because the donor's own level cancels. Step 5: the definition, and the two rules: randomise within blocks, and keep the block in the analysis.</aside>
+</section>
+
 <!-- ============ 6 BLOCKING ============ -->
 <section class="slide" id="block">
   <h1>Blocking: compare <em>like with like</em>.</h1>
@@ -99,7 +111,7 @@
     <div class="col" style="flex:1.35"><svg id="blPow" width="520" height="320"></svg><p class="small" id="blMsg" style="margin-top:4px"></p></div>
   </div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section C</span></div>
-  <aside class="notes">Six donors, each giving one control and one treated dish; the true effect is +1. Every line rises: within a donor the treatment effect is obvious. But donors differ, so the clouds of control and treated values overlap, and an unpaired test sees mostly donor noise. The paired test (or a model with + donor) compares each donor with itself: its power doesn't depend on donor variation at all. You saw the same thing with real data on Day 2: airway with cell line as the block gave about 40% more significant genes.</aside>
+  <aside class="notes">Same experiment as the previous slide, now repeated thousands of times. Every line rises: within a donor the treatment effect is obvious. But donors differ, so the clouds of control and treated values overlap, and an unpaired test sees mostly donor noise. The paired test (or a model with + donor) compares each donor with itself: its power doesn't depend on donor variation at all. You saw the same thing with real data on Day 2: airway with cell line as the block gave about 40% more significant genes.</aside>
 </section>
 
 <!-- ============ 7 RANDOMISATION ============ -->
@@ -329,6 +341,47 @@ hooks['batch']={init(){
   segButtons('baD',[['confounded','confounded'],['balanced','balanced']],des,v=>{des=v;draw()});
   document.getElementById('baNew').onclick=()=>{seed++;draw()};draw();
 }};
+
+/* ---- 6a what is a block ---- */
+hooks['block-intro']={init(){
+  const r=mulberry32(8),D=[];for(let i=0;i<6;i++){const v=randn(r);D.push({i,lvl:v,c:v+.5*randn(r),t:v+1+.5*randn(r)})}
+  const W=760,H=440,m={l:50,r:20,t:92,b:30},svg=d3.select('#biSvg');
+  const xd=d3.scaleBand().domain(d3.range(6)).range([m.l+10,560]).padding(.2),y=d3.scaleLinear().domain([-4,4.5]).range([H-m.b,m.t]);
+  const xp={c:m.l+130,t:m.l+330},xdiff=680;
+  const ax=svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,6,W-m.l-m.r)).attr('opacity',0);
+  const donors=svg.append('g').selectAll('g').data(D).join('g').attr('transform',d=>`translate(${xd(d.i)+xd.bandwidth()/2},34)`);
+  donors.append('circle').attr('cy',-10).attr('r',10).attr('fill',C.pop);donors.append('path').attr('d','M-16,22 Q-16,4 0,4 Q16,4 16,22 Z').attr('fill',C.pop);
+  donors.append('text').attr('class','lbl').attr('y',42).attr('text-anchor','middle').style('font-size','14px').text(d=>`donor ${d.i+1}`);
+  const band=svg.append('g').selectAll('line').data(D).join('line').attr('stroke',C.pop).attr('stroke-width',2).attr('stroke-dasharray','4 3').attr('opacity',0);
+  const links=svg.append('g').selectAll('line').data(D).join('line').attr('stroke',C.sc1).attr('stroke-width',2).attr('opacity',0);
+  const dish=(cls,key,col)=>{const g=svg.append('g').selectAll('g').data(D).join('g');g.append('circle').attr('r',13).attr('fill',col).attr('stroke','#fff').attr('stroke-width',2);
+    g.append('text').attr('y',5).attr('text-anchor','middle').style('font-size','13px').style('fill','#fff').style('font-family','var(--serif)').text(d=>d.i+1);return g};
+  const gc=dish('c','c',C.ink2),gt=dish('t','t',C.pc2);
+  const colLab=svg.append('g').attr('opacity',0);colLab.append('text').attr('class','lbl').attr('x',xp.c).attr('y',H-6).attr('text-anchor','middle').text('all control dishes');
+  colLab.append('text').attr('class','lbl purple').attr('x',xp.t).attr('y',H-6).attr('text-anchor','middle').text('all treated dishes');
+  const dp=svg.append('g').attr('opacity',0);
+  dp.append('line').attr('x1',xdiff-50).attr('x2',xdiff+50).attr('y1',y(0)).attr('y2',y(0)).attr('stroke',C.pc1).attr('stroke-dasharray','5 4');
+  dp.append('line').attr('x1',xdiff-50).attr('x2',xdiff+50).attr('y1',y(1)).attr('y2',y(1)).attr('stroke',C.sc1).attr('stroke-width',1.5);
+  dp.append('text').attr('class','lbl pink').attr('x',xdiff+52).attr('y',y(1)+4).style('font-size','12px').text('truth +1');
+  dp.append('text').attr('class','lbl').attr('x',xdiff).attr('y',m.t-14).attr('text-anchor','middle').style('font-size','14px').text('treated − control');
+  dp.append('text').attr('class','lbl').attr('x',xdiff).attr('y',m.t+2).attr('text-anchor','middle').style('font-size','13px').style('fill',C.muted).text('(same donor)');
+  const jit=D.map((d,i)=>(i-2.5)*14);
+  dp.selectAll('circle').data(D).join('circle').attr('cx',(d,i)=>xdiff+jit[i]).attr('cy',d=>y(d.t-d.c)).attr('r',9).attr('fill',C.sc1).attr('stroke','#fff').attr('stroke-width',1.5);
+  const dishX=(d,k)=>xd(d.i)+xd.bandwidth()/2+(k==='c'?-16:16);
+  const TX=[['1 · The experiment','<p>Six donors give cells. Each donor\'s cells are split into <b>two dishes</b>; a coin flip decides which dish gets the drug.</p><p>So every donor contributes one <span style="color:var(--ink2)">control</span> and one <span style="color:var(--pc2)">treated</span> dish: 12 dishes in total.</p>'],
+    ['2 · Donors differ','<p>Each donor has their own baseline level (dashed line): genetics, age, sample handling.</p><p>Two dishes from the <b>same</b> donor are much more alike than dishes from different donors. Both dishes rise or fall together.</p>'],
+    ['3 · Ignore the donors','<p>An unpaired t-test pools all 6 controls and all 6 treated dishes.</p><p>Donor-to-donor differences now count as noise, and the two clouds <b>overlap</b>: the treatment effect is hard to see.</p>'],
+    ['4 · Compare each donor with itself','<p>Take treated − control <b>within each donor</b>. The donor\'s baseline cancels out.</p><p>All six differences are positive and close to the true +1. This is a paired t-test, or a model with <code>+ donor</code>.</p>'],
+    ['5 · A block, in general','<p>A <b>block</b> is a group of experimental units that are more alike than units from different groups: a donor, litter, cell line, cage, plate, day.</p><p>Two rules: <b>randomise within each block</b> (every block gets every treatment), and <b>keep the block in the analysis</b>.</p>']];
+  const st=stepper('biSteps',5,s=>{document.getElementById('biText').innerHTML=`<h3>${TX[s][0]}</h3>${TX[s][1]}`;const T=700;
+    const pos=(d,k)=>{if(s===0)return[dishX(d,k),m.t+30];if(s===2)return[xp[k]+(d.i-2.5)*16,y(d[k])];return[dishX(d,k),y(d[k])]};
+    [[gc,'c'],[gt,'t']].forEach(([g,k])=>g.transition().duration(T).attr('transform',d=>`translate(${pos(d,k)})`));
+    ax.transition().duration(T).attr('opacity',s===0?0:1);donors.transition().duration(T).attr('opacity',s===2?.15:1);
+    band.transition().duration(T).attr('x1',d=>xd(d.i)).attr('x2',d=>xd(d.i)+xd.bandwidth()).attr('y1',d=>y(d.lvl)).attr('y2',d=>y(d.lvl)).attr('opacity',s===1?1:0);
+    links.transition().duration(T).attr('x1',d=>dishX(d,'c')).attr('x2',d=>dishX(d,'t')).attr('y1',d=>y(d.c)).attr('y2',d=>y(d.t)).attr('opacity',s>=3?1:0);
+    colLab.transition().duration(T).attr('opacity',s===2?1:0);dp.transition().duration(T).attr('opacity',s>=3?1:0)});
+  this.st=st;st.go(0);
+},enter(){this.st.go(0)}};
 
 /* ---- 6 blocking ---- */
 hooks['block']={init(){
