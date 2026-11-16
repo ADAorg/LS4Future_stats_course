@@ -241,7 +241,7 @@ ul.clean.x li::before{background:var(--sc1);border-radius:2px;transform:rotate(4
 <!-- ============ 7 POIS vs NB ============ -->
 <section class="slide" id="poisnb">
   <h1>Same rate ratios, <em>different</em> confidence.</h1>
-  <div class="controls"><div class="seg" id="pnDs"><span class="lab">Dataset</span></div></div>
+  <div class="controls"><div class="seg" id="pnDs"><span class="lab">Dataset</span></div><span class="small" id="pnF" style="margin-left:14px"></span></div>
   <div class="row" style="gap:24px">
     <div class="col" style="flex:1.9"><svg id="pnSvg" width="740" height="390"></svg></div>
     <div class="col" style="flex:1">
@@ -695,6 +695,7 @@ hooks['poisnb']={init(){
        .on('mousemove',(ev,d)=>showTip(ev,`${key==='p'?'Poisson':'NB'}: ${d3.format('.3f')(d[key].rr)} [${d3.format('.3f')(d[key].lo)}, ${d3.format('.3f')(d[key].hi)}]`)).on('mouseleave',hideTip)});
     r.filter(d=>d.t).append('path').attr('d',d=>`M${x(d.t)},0v${y.bandwidth()}`).attr('stroke',C.pc1).attr('stroke-width',2);
     r.filter(d=>d.t).append('text').attr('class','lbl').attr('x',d=>x(d.t)+4).attr('y',-2).style('font-size','12px').text(d=>`truth ${d.t}`);
+    document.getElementById('pnF').innerHTML={gbsg2:'Both models: <b style="color:var(--pc1)">pnodes ~ tsize + tgrade</b> &nbsp;(reference: grade I)',sim:'Both models: <b style="color:var(--pc1)">lesions ~ age + genotype</b> &nbsp;(reference: AA)'}[k];
     document.getElementById('pnPear').innerHTML=`${fmt1(F.p.pearson)} <small>(≈ 1 if Poisson fits)</small>`;document.getElementById('pnAlpha').textContent=fmt2(F.n.alpha)+(ds.alpha?` (truth ${ds.alpha})`:'');
     const wr=d3.mean(items,d=>(Math.log(d.b.hi)-Math.log(d.b.lo))/(Math.log(d.p.hi)-Math.log(d.p.lo)));document.getElementById('pnWide').innerHTML=`${fmt1(wr)}× <small>on average</small>`}
   segButtons('pnDs',[['gbsg2','GBSG2'],['sim','Simulated']],'gbsg2',draw);draw('gbsg2');
