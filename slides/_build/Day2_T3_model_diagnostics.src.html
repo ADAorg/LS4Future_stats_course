@@ -279,12 +279,6 @@ function diagPanels(svg,f,W,H,hl){svg.selectAll('*').remove();const pw=W/2,ph=H/
     g.append('line').attr('x1',m.l).attr('x2',pw-m.r).attr('y1',y(4/n)).attr('y2',y(4/n)).attr('stroke',C.sc1).attr('stroke-dasharray','4 3');
     g.append('text').attr('class','lbl pink').attr('x',pw-m.r).attr('y',y(4/n)-4).attr('text-anchor','end').style('font-size','11px').text('4/n')}
   return P}
-function stepper(id,n,onStep){const el=document.getElementById(id);let cur=0;const dots=[];
-  const prev=document.createElement('button');prev.className='btn';prev.textContent='‹ Back';const next=document.createElement('button');next.className='btn primary';next.textContent='Next step ›';
-  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='dot';d.textContent=i+1;d.onclick=()=>go(i);el.appendChild(d);dots.push(d)}
-  el.appendChild(prev);el.appendChild(next);
-  function go(i){cur=Math.max(0,Math.min(n-1,i));dots.forEach((d,k)=>{d.className='dot'+(k===cur?' on':(k<cur?' done':''))});prev.disabled=cur===0;next.disabled=cur===n-1;onStep(cur)}
-  prev.onclick=()=>go(cur-1);next.onclick=()=>go(cur+1);return{go}}
 
 /* ---- 3 residuals ---- */
 hooks['residuals']={init(){

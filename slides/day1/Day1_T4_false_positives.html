@@ -102,6 +102,13 @@ ul.clean.x li::before{background:var(--sc1);border-radius:2px;transform:rotate(4
 .qcard .tag{font-size:14px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;color:var(--muted)}
 .qcard.shown.ok .tag{color:var(--pc2)}
 .qcard.shown.no .tag{color:var(--sc1)}
+/* step widget */
+.steps{display:flex;gap:8px;align-items:center;margin:4px 0 10px}
+.steps .dot{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--pc1);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--pc1);cursor:pointer;transition:all .2s}
+.steps .dot.on{background:var(--pc2);border-color:var(--pc2);color:#fff}
+.steps .dot.done{background:var(--line);border-color:var(--line)}
+.stepbox h3{font-weight:400;font-size:24px;margin:0 0 8px;color:var(--pc2)}
+.stepbox p{font-size:19px;line-height:1.5;margin:0 0 10px}
 </style>
 <style>
 .err{display:grid;grid-template-columns:170px 1fr 1fr;gap:10px;margin-top:10px}
@@ -454,6 +461,21 @@ function lowess(xs,ys,frac=2/3,it=3){const n=xs.length,o=d3.range(n).sort((a,b)=
       const den=sw*sxx-sx*sx;fit[i]=Math.abs(den)<1e-12?sy/sw:((sxx*sy-sx*sxy)+(sw*sxy-sx*sy)*x[i])/den}
     if(t===it)break;const res=y.map((v,i)=>Math.abs(v-fit[i])),med=[...res].sort((a,b)=>a-b)[Math.floor(n/2)]||1e-12;rw=res.map(e=>{const u=e/(6*med);return u<1?(1-u*u)**2:0})}
   return x.map((v,i)=>[v,fit[i]])}
+/* ---------- logistic regression (IRLS), checked against statsmodels ---------- */
+function logitFit(X,y,iter=30){const n=y.length,k=X[0].length;let b=new Array(k).fill(0),V;
+  for(let t=0;t<iter;t++){const A=Array.from({length:k},()=>new Array(k).fill(0)),g=new Array(k).fill(0);
+    for(let i=0;i<n;i++){const r=X[i],eta=r.reduce((s,v,j)=>s+v*b[j],0),p=1/(1+Math.exp(-eta)),w=Math.max(p*(1-p),1e-10);
+      for(let a=0;a<k;a++){g[a]+=r[a]*(y[i]-p);for(let c=0;c<k;c++)A[a][c]+=w*r[a]*r[c]}}
+    V=matInv(A);const step=V.map(row=>row.reduce((s,v,j)=>s+v*g[j],0));b=b.map((v,j)=>v+step[j]);if(Math.max(...step.map(Math.abs))<1e-10)break}
+  const coef=b.map((v,i)=>{const se=Math.sqrt(V[i][i]),z=v/se;return{est:v,se,z,p:chi2SF(z*z,1),or:Math.exp(v),lo:Math.exp(v-1.959964*se),hi:Math.exp(v+1.959964*se)}});
+  const pred=r=>1/(1+Math.exp(-r.reduce((s,v,j)=>s+v*b[j],0)));return{coef,b,pred}}
+/* ---------- step widget: numbered dots + Back / Next inside a container ---------- */
+function stepper(id,n,onStep){const el=document.getElementById(id);let cur=0;const dots=[];
+  const prev=document.createElement('button');prev.className='btn';prev.textContent='‹ Back';const next=document.createElement('button');next.className='btn primary';next.textContent='Next step ›';
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='dot';d.textContent=i+1;d.onclick=()=>go(i);el.appendChild(d);dots.push(d)}
+  el.appendChild(prev);el.appendChild(next);
+  function go(i){cur=Math.max(0,Math.min(n-1,i));dots.forEach((d,k)=>{d.className='dot'+(k===cur?' on':(k<cur?' done':''))});prev.disabled=cur===0;next.disabled=cur===n-1;onStep(cur)}
+  prev.onclick=()=>go(cur-1);next.onclick=()=>go(cur+1);return{go}}
 /* ---------- concept-check cards: Q = [[isCorrect, statement, explanation], ...] ---------- */
 function qcards(id,Q){const box=document.getElementById(id);
   Q.forEach(([ok,q,a],i)=>{const d=document.createElement('div');d.className='qcard '+(ok?'ok':'no');

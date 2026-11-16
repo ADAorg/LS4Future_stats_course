@@ -96,3 +96,10 @@ ul.clean.x li::before{background:var(--sc1);border-radius:2px;transform:rotate(4
 .qcard .tag{font-size:14px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;color:var(--muted)}
 .qcard.shown.ok .tag{color:var(--pc2)}
 .qcard.shown.no .tag{color:var(--sc1)}
+/* step widget */
+.steps{display:flex;gap:8px;align-items:center;margin:4px 0 10px}
+.steps .dot{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--pc1);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--pc1);cursor:pointer;transition:all .2s}
+.steps .dot.on{background:var(--pc2);border-color:var(--pc2);color:#fff}
+.steps .dot.done{background:var(--line);border-color:var(--line)}
+.stepbox h3{font-weight:400;font-size:24px;margin:0 0 8px;color:var(--pc2)}
+.stepbox p{font-size:19px;line-height:1.5;margin:0 0 10px}

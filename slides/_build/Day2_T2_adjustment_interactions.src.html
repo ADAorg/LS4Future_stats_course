@@ -292,14 +292,6 @@ function crudeAdj(ds){const lev=ds.levels,ref=lev[0],rows=ds.rows;
   const D=dummies(rows.map(r=>r.g),lev,ref);const y=rows.map(r=>r.y);
   const crude=ols(D.map(d=>[1,...d]),y),adj=ols(D.map((d,i)=>[1,...d,rows[i].x]),y);return{crude,adj}}
 
-/* ---------- step widget ---------- */
-function stepper(id,n,onStep){const el=document.getElementById(id);let cur=0;const dots=[];
-  const prev=document.createElement('button');prev.className='btn';prev.textContent='‹ Back';
-  const next=document.createElement('button');next.className='btn primary';next.textContent='Next step ›';
-  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='dot';d.textContent=i+1;d.onclick=()=>go(i);el.appendChild(d);dots.push(d)}
-  el.appendChild(prev);el.appendChild(next);
-  function go(i){cur=Math.max(0,Math.min(n-1,i));dots.forEach((d,k)=>{d.className='dot'+(k===cur?' on':(k<cur?' done':''))});prev.disabled=cur===0;next.disabled=cur===n-1;onStep(cur)}
-  prev.onclick=()=>go(cur-1);next.onclick=()=>go(cur+1);return{go,get cur(){return cur}}}
 
 /* ---- 2 puzzle ---- */
 hooks['puzzle']={init(){

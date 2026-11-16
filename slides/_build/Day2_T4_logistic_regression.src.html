@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 2 · Logistic regression</title>
+<style>/*CSS*/</style>
+<style>
+.ttab{border-collapse:collapse;font-size:17px;font-variant-numeric:tabular-nums;width:100%}
+.ttab th{font-weight:400;font-size:13px;letter-spacing:.06em;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
+.ttab td{padding:7px 8px;border-bottom:1px solid var(--line)}
+.ttab td.hi{color:var(--sc1)} .ttab td.pu{color:var(--pc2)}
+.scale-read{font-size:22px;line-height:1.6;font-variant-numeric:tabular-nums}
+.scale-read b{font-weight:400;color:var(--pc2)}
+.scale-read .k{display:inline-block;width:150px;color:var(--ink2);font-size:18px}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:170px">
+    <h1 style="font-size:84px;margin-bottom:22px">Logistic <em>regression</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:800px;margin:0">When the outcome is yes or no: probabilities, odds, and why "twice the odds" is not "twice as likely".</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Day 2 · Topic 4 · Practical statistics for biomedical researchers</span></div>
+  <aside class="notes">Afternoon opening. Many biomedical outcomes are yes/no: responded, relapsed, died, has the mutation. The model is the same idea as this morning's, on a different scale. The difficulty is the scale, so we take it one step at a time: probability, then odds, then log-odds.</aside>
+</section>
+
+<!-- ============ 2 LINE BREAKS ============ -->
+<section class="slide" id="line">
+  <h1>A straight line <em>breaks</em>.</h1>
+  <div class="controls"><div class="seg" id="lnM"><span class="lab">Model</span></div><span style="width:12px"></span><label class="small"><input type="checkbox" id="lnBins" checked> show observed proportions</label></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.2"><svg id="lnSvg" width="800" height="430"></svg></div>
+    <div class="col" style="flex:1;padding-top:4px">
+      <p class="small" style="margin-top:0">GBSG2: does a patient have <b>4 or more positive nodes</b>? Each dot is a patient at 0 (no) or 1 (yes).</p>
+      <div class="stat"><span class="k">PREDICTED PROBABILITIES RANGE</span><span class="v num" id="lnRange"></span></div>
+      <p class="small" id="lnMsg"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section A</span></div>
+  <aside class="notes">The pink dots are the observed share of "yes" in bins of tumour size: that's what we want to model. A straight line ("linear probability model") rushes through the pink zone above 1: a 129% chance makes no sense. The logistic model bends to stay between 0 and 1, and follows the observed proportions, flattening at the extremes. How it does that is the next two slides.</aside>
+</section>
+
+<!-- ============ 3 SCALES ============ -->
+<section class="slide" id="scales">
+  <h1>One chance, <em>three scales</em>.</h1>
+  <div class="row" style="gap:30px">
+    <div class="col" style="flex:1">
+      <div class="controls"><span class="seg"><span class="lab">Probability of "yes"</span></span><input type="range" id="scP" min="0.02" max="0.98" step="0.01" value="0.25" style="width:280px;accent-color:#9933ff"></div>
+      <svg id="scIcons" width="520" height="140"></svg>
+      <div class="scale-read" id="scRead"></div>
+    </div>
+    <div class="col" style="flex:1.1">
+      <svg id="scLines" width="600" height="330"></svg>
+      <p class="small" style="margin-top:4px">Only the log-odds scale runs from −∞ to +∞ with no walls. That's where the model can draw a straight line.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · step 1 of 3</span></div>
+  <aside class="notes">Drag the slider. 20 patients, the pink ones have the outcome. Probability = pink out of all 20. Odds = pink per grey: "5 to 15" is 1 to 3, odds 0.33. Odds go from 0 to infinity; at 50% they're exactly 1. Log-odds stretch that to the whole number line, symmetric around 0 (50%). Bookmakers and epidemiologists think in odds; the model thinks in log-odds; patients and clinicians think in probabilities.</aside>
+</section>
+
+<!-- ============ 4 S CURVE ============ -->
+<section class="slide" id="scurve">
+  <h1>A straight line on log-odds is an <em>S</em> on probability.</h1>
+  <div class="steps" id="sgSteps"></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:2.1"><svg id="sgSvg" width="780" height="430"></svg></div>
+    <div class="col" style="flex:1"><div class="stepbox" id="sgText"></div></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · step 2 of 3</span></div>
+  <aside class="notes">Step 1: the model is an ordinary straight line, but on the log-odds scale. Step 2: watch the same line as the y-axis is converted back to probabilities: it bends into the S-curve, flattening near 0 and 1 because those walls can't be crossed. Step 3: the observed proportions sit on the curve. Nothing new mathematically: same b₀ + b₁x as this morning, read through a different lens.</aside>
+</section>
+
+<!-- ============ 5 OR MEANING ============ -->
+<section class="slide" id="ormean">
+  <h1>exp(b) is an <em>odds ratio</em>.</h1>
+  <div class="controls"><span class="seg"><span class="lab">Tumour size</span></span><input type="range" id="omX" min="5" max="90" step="1" value="20" style="width:300px;accent-color:#9933ff"><span class="num" id="omXv" style="font-size:20px;min-width:140px"></span></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.8"><svg id="omSvg" width="700" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <table class="ttab" id="omTab"></table>
+      <p class="small" style="margin-top:12px">Every 10 mm multiplies the <em>odds</em> by the same factor, wherever you start. The change in <em>probability</em> depends on where you start.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · step 3 of 3</span></div>
+  <aside class="notes">Drag the slider. The two dots are a patient at size x and one 10 mm larger. Their odds ratio stays fixed (exp(10 × b₁)) along the whole curve. But the gap in probability is small at the flat ends of the S and largest in the steep middle. That's why an odds ratio alone doesn't tell a clinician "how much more likely": you need a starting probability.</aside>
+</section>
+
+<!-- ============ 6 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <h1 style="font-size:58px">Hands-on 4: <em>logistic regression</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day2_HO4_logistic_regression.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">DATASET</p>
+        <p style="margin:0 0 22px;font-size:22px;color:rgba(255,255,255,.85)"><b>gbsg2</b>: 4+ positive nodes · <b>lung</b>: lost weight · then <b>simulated</b>: disease, truth known.</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">SECTIONS</p>
+        <p style="margin:0;font-size:20px;line-height:1.55;color:rgba(255,255,255,.85)">A · line vs S-curve &nbsp; B · odds ratios<br>C · back to probabilities &nbsp; D · OR vs risk ratio</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">If the odds ratio is 2.5, is the outcome "2.5 times as likely"?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">IN SECTION D, NOTE</p>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">How common the outcome is. It decides the answer.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
+  <aside class="notes">Same dataset split as the morning. The AI prompt is a known failure point, generated from each pair's own model: "OR = X means X times more likely" for a common outcome.</aside>
+</section>
+
+<!-- ============ 7 FOREST ============ -->
+<section class="slide" id="forest">
+  <h1>Reading <em>your</em> odds ratios.</h1>
+  <div class="controls"><div class="seg" id="foDs"><span class="lab">Dataset</span></div></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.8"><svg id="foSvg" width="720" height="380"></svg></div>
+    <div class="col" style="flex:1">
+      <div class="stat"><span class="k">OUTCOME</span><span class="v num" id="foOut" style="font-size:22px"></span></div>
+      <div class="stat"><span class="k">HOW COMMON</span><span class="v num" id="foPrev"></span></div>
+      <p class="small" style="margin-top:8px">OR &gt; 1: higher odds than the reference (or per unit). OR = 1: no difference. The axis is on a <em>log scale</em>, so 2 and 0.5 are equally far from 1.</p>
+      <p class="small" id="foTruth"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section B</span></div>
+  <aside class="notes">One model per dataset: outcome ~ numeric predictor + group. The numeric OR is per one unit (one mm, one year), so it looks close to 1; per 10 units it's that number to the tenth power. Each group OR compares with the reference group at the same value of the numeric predictor: adjustment works exactly as this morning. On the simulated data, the truth lines show how well 300 people recover the built-in ORs; the CIs are wide, which is typical for logistic models.</aside>
+</section>
+
+<!-- ============ 8 PROBABILITIES ============ -->
+<section class="slide" id="probs">
+  <h1>Same odds ratio, <em>different</em> probability gaps.</h1>
+  <div class="controls">
+    <div class="seg" id="prDs"><span class="lab">Dataset</span></div><span style="width:12px"></span>
+    <div class="seg" id="prScale"><span class="lab">y-axis</span></div>
+  </div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.9"><svg id="prSvg" width="740" height="400"></svg>
+      <div class="controls" style="margin-top:4px"><span class="seg"><span class="lab" id="prXl"></span></span><input type="range" id="prX" style="width:340px;accent-color:#9933ff"><span class="num" id="prXv" style="font-size:18px"></span></div>
+    </div>
+    <div class="col" style="flex:1"><table class="ttab" id="prTab"></table><p class="small" id="prMsg" style="margin-top:10px"></p></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section C · Gemini check</span></div>
+  <aside class="notes">One curve per group from the model in section B. On the probability scale the curves are not parallel: the gap between groups depends on the numeric predictor. Switch the y-axis to log-odds and they become parallel straight lines: the odds ratio is a constant shift there. This is the answer to the Gemini prompt ("are the lines parallel on the probability scale? They shouldn't be"). Use the slider to read predicted probabilities at a low, middle and high value.</aside>
+</section>
+
+<!-- ============ 9 OR vs RR ============ -->
+<section class="slide" id="orrr">
+  <h1>Odds ratios are not <em>risk ratios</em>.</h1>
+  <div class="row" style="gap:26px">
+    <div class="col" style="flex:1.15">
+      <div class="controls"><span class="seg"><span class="lab">Odds ratio</span></span><input type="range" id="rrOR" min="1" max="6" step="0.1" value="2.5" style="width:130px;accent-color:#9933ff"><span class="num" id="rrORv" style="font-size:18px;min-width:40px"></span>
+        <span class="seg" style="margin-left:10px"><span class="lab">Risk in reference</span></span><input type="range" id="rrP0" min="0.01" max="0.8" step="0.01" value="0.32" style="width:130px;accent-color:#9933ff"><span class="num" id="rrP0v" style="font-size:18px"></span></div>
+      <svg id="rrIcons" width="600" height="150"></svg>
+      <svg id="rrCurve" width="600" height="250"></svg>
+    </div>
+    <div class="col" style="flex:.9">
+      <p class="small" style="margin:0 0 6px">In the workshop datasets (crude, two groups):</p>
+      <table class="ttab" id="rrTab"></table>
+      <p class="callout" style="margin-top:14px;font-size:18px">OR ≈ RR only when the outcome is <em>rare</em> (under ~10%) in both groups. For common outcomes the OR is further from 1, so "times as likely" overstates the effect.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Debrief · section D · concept check</span></div>
+  <aside class="notes">Fix the odds ratio at 2.5 and slide the reference risk. When the outcome is rare (a few percent), the risk ratio is almost 2.5 too. As it becomes common, the risk ratio falls towards 1, because a probability can't exceed 100% while odds can grow without limit. The icon arrays show it: at 32% baseline (GBSG2 grade I), OR 2.5 means about 54% vs 32%, a risk ratio of 1.7, not 2.5. The lung row is the most dramatic example: an OR of about 2.7 corresponds to a risk ratio of 1.3.</aside>
+</section>
+
+<!-- ============ 10 STATEMENTS ============ -->
+<section class="slide" id="statements">
+  <h1>Which statements are <em>correct</em>?</h1>
+  <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
+  <div class="qcards" id="qcards"></div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
+  <aside class="notes">Statement 1 is the AI failure point. Statement 4 is discussion question 1: report the OR for the model, but give probabilities (or risk differences) to clinicians.</aside>
+</section>
+
+<!-- ============ 11 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <h1>"Two times the odds" ≠ "<em>twice as likely</em>".</h1>
+  <div class="row" style="gap:36px;margin-top:6px">
+    <div class="col" style="flex:1.1">
+      <p class="small" style="margin:0 0 6px">🎓 The notebook builds this prompt from your model. With GBSG2:</p>
+      <div class="prompt" id="aiPrompt"></div>
+      <div class="chips" style="margin-top:12px"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+      <p class="small" style="margin:14px 0 0">Discussion: the lung outcome "lost weight" depends on how long patients were followed. When is a yes/no outcome really a hidden <em>time-to-event</em> outcome? (Day 3)</p>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">Watch for:</p>
+      <ul class="clean x" style="margin-bottom:12px"><li style="font-size:19px" id="aiBad"></li><li style="font-size:19px">"grade III causes more nodal spread"</li></ul>
+      <p class="small" style="margin:0 0 4px">A good answer, in probabilities a clinician can use:</p>
+      <div class="card"><span style="font-size:18px" id="aiGood"></span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure point</span></div>
+  <aside class="notes">The prompt includes how common the outcome is (45%), which is exactly the information needed to avoid the slip, and most AI answers still say "about twice as likely". The good answer converts to predicted probabilities at a typical tumour size: those numbers come from the model on this slide.</aside>
+</section>
+
+<!-- ============ 12 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:30px">
+    <h1 style="font-size:56px">Four things to <em>keep</em>.</h1>
+    <ol class="big" style="padding-left:34px;margin:22px 0 34px;max-width:1080px">
+      <li style="font-size:27px">Yes/no outcomes: model a straight line on the <em>log-odds</em> scale.</li>
+      <li style="font-size:27px">exp(coefficient) = <em>odds ratio</em>, constant across the predictor.</li>
+      <li style="font-size:27px">Probability gaps are not constant: report <em>predicted probabilities</em> too.</li>
+      <li style="font-size:27px">OR ≈ RR only for <em>rare</em> outcomes. Otherwise, don't say "times as likely".</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">Count outcomes</span>: numbers of nodes, lesions, reads. Poisson and its overdispersed cousin.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Take home</span></div>
+  <aside class="notes">Bridge to Hands-on 5: counts get the same treatment, a straight line on the log scale, and their exponentiated coefficients are rate ratios. Those, unlike odds ratios, do read as "times as many".</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const LUNG = __JSON:lung__;
+const hooks = {};
+const expit=v=>1/(1+Math.exp(-v)),logit=p=>Math.log(p/(1-p));
+/* ---------- datasets (roles as in the notebook) ---------- */
+function simBinary(seed=2026,n=300){const r=mulberry32(seed),rows=[];for(let i=0;i<n;i++){const u=r(),g=u<.4?'AA':(u<.8?'AB':'BB');r();const age=30+50*r()+(g==='BB'?8:0);
+  const lo=-1+.05*(age-50)+{AA:0,AB:.4,BB:1}[g];rows.push({x:age,g,y:r()<expit(lo)?1:0})}return rows}
+const DS={
+  gbsg2:{label:'GBSG2',rows:DATA.pnodes.map((v,i)=>({y:v>=4?1:0,x:DATA.tsize[i],g:['I','II','III'][DATA.tgrade[i]-1]})),yl:'4 or more positive nodes',xl:'Tumour size (mm)',xs:'tumour size',xu:'mm',gl:'grade',levels:['I','II','III']},
+  lung:{label:'Lung',rows:LUNG.age.map((a,i)=>({y:LUNG.wt_loss[i]==null?null:(LUNG.wt_loss[i]>0?1:0),x:a,g:LUNG.ecog[i]>=2?'2+':String(LUNG.ecog[i])})).filter(r=>r.y!=null),yl:'Lost weight in last 6 months',xl:'Age (years)',xs:'age',xu:'year',gl:'ECOG',levels:['0','1','2+']},
+  sim:{label:'Simulated',rows:simBinary(),yl:'Disease present',xl:'Age (years)',xs:'age',xu:'year',gl:'genotype',levels:['AA','AB','BB'],truth:{x:1.05,AB:1.49,BB:2.72}}};
+function fitDS(ds){const lev=ds.levels,X=ds.rows.map(r=>[1,r.x,...lev.slice(1).map(l=>r.g===l?1:0)]);return logitFit(X,ds.rows.map(r=>r.y))}
+const GB=DS.gbsg2,GBfit=fitDS(GB),GBsimple=logitFit(GB.rows.map(r=>[1,r.x]),GB.rows.map(r=>r.y));
+function bins(rows,edges){return edges.slice(0,-1).map((a,i)=>{const b=edges[i+1],v=rows.filter(r=>r.x>=a&&r.x<b);return v.length>=8?{x:mean(v.map(r=>r.x)),p:mean(v.map(r=>r.y)),n:v.length}:null}).filter(Boolean)}
+
+/* ---- 2 line ---- */
+hooks['line']={init(){
+  let mode='linear';const W=800,H=430,m={l:56,r:20,t:20,b:50},rows=GB.rows;
+  const svg=d3.select('#lnSvg');const x=d3.scaleLinear().domain([0,122]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([-.3,1.35]).range([H-m.b,m.t]);
+  svg.append('rect').attr('x',m.l).attr('width',W-m.l-m.r).attr('y',y(1.35)).attr('height',y(1)-y(1.35)).attr('fill',C.sc1).attr('opacity',.08);
+  svg.append('rect').attr('x',m.l).attr('width',W-m.l-m.r).attr('y',y(0)).attr('height',y(-.3)-y(0)).attr('fill',C.sc1).attr('opacity',.08);
+  svg.append('text').attr('class','lbl pink').attr('x',W-m.r-6).attr('y',y(1.3)).attr('text-anchor','end').style('font-size','14px').text('impossible: probability above 1');
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,7,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>d3.format('.0%')(d)));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,12));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Tumour size (mm)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('P(4+ positive nodes)');
+  const jr=mulberry32(5);svg.append('g').selectAll('circle').data(rows).join('circle').attr('r',2.5).attr('fill',C.pc2).attr('opacity',.25).attr('cx',r=>x(r.x+(jr()-.5))).attr('cy',r=>y(r.y+(jr()-.5)*.07));
+  const bn=svg.append('g');bn.selectAll('circle').data(bins(rows,[0,10,15,20,25,30,35,40,50,60,80,125])).join('circle').attr('r',d=>Math.min(12,3+Math.sqrt(d.n)/1.5)).attr('fill',C.sc1).attr('stroke','#fff').attr('stroke-width',1.5).attr('cx',d=>x(d.x)).attr('cy',d=>y(d.p))
+    .on('mousemove',(ev,d)=>showTip(ev,`around ${fmt1(d.x)} mm: ${d3.format('.0%')(d.p)} have 4+ nodes (n = ${d.n})`)).on('mouseleave',hideTip);
+  const path=svg.append('path').attr('fill','none').attr('stroke',C.pc1).attr('stroke-width',3);
+  const lin=ols(rows.map(r=>[1,r.x]),rows.map(r=>r.y)),xs=d3.range(0,122.5,.5);
+  function draw(){const f=mode==='linear'?(v=>lin.coef[0].est+lin.coef[1].est*v):(v=>GBsimple.pred([1,v]));
+    path.transition().duration(700).attr('d',d3.line().x(v=>x(v)).y(v=>y(f(v)))(xs));
+    const pr=rows.map(r=>f(r.x));document.getElementById('lnRange').innerHTML=`${d3.format('.2f')(d3.min(pr))} <small>to</small> ${d3.format('.2f')(d3.max(pr))}`;
+    document.getElementById('lnMsg').innerHTML=mode==='linear'?'The straight line predicts a probability <b>above 1</b> for the largest tumours.':'The S-curve stays between 0 and 1 and follows the observed proportions (pink).'}
+  segButtons('lnM',[['linear','straight line'],['logistic','logistic']],mode,v=>{mode=v;draw()});
+  document.getElementById('lnBins').onchange=e=>bn.attr('opacity',e.target.checked?1:0);draw();
+}};
+
+/* ---- 3 scales ---- */
+hooks['scales']={init(){
+  const ic=d3.select('#scIcons');const N=20;
+  const icons=ic.selectAll('g').data(d3.range(N)).join('g').attr('transform',i=>`translate(${20+(i%10)*48},${30+Math.floor(i/10)*58})`);
+  icons.append('circle').attr('cy',-8).attr('r',9);icons.append('path').attr('d','M-13,22 Q-13,4 0,4 Q13,4 13,22 Z');
+  const W=600,H=330,m={l:110,r:30};const sv=d3.select('#scLines');
+  const rows=[{k:'probability',y:50,dom:[0,1],f:p=>p,ticks:[0,.25,.5,.75,1],fmt:d3.format('.0%'),wall:'walls at 0 and 1'},
+    {k:'odds',y:150,dom:[0,10],f:p=>Math.min(p/(1-p),10),ticks:[0,1,2,4,6,8,10],fmt:d=>d===10?'10+':d,wall:'wall at 0, no ceiling'},
+    {k:'log-odds',y:250,dom:[-4,4],f:p=>Math.max(-4,Math.min(4,logit(p))),ticks:[-4,-2,0,2,4],fmt:d=>d,wall:'no walls'}];
+  const mk=rows.map(r=>{const x=d3.scaleLinear().domain(r.dom).range([m.l,W-m.r]);sv.append('text').attr('class','lbl').attr('x',0).attr('y',r.y+5).style('font-size','18px').text(r.k);
+    sv.append('g').attr('transform',`translate(0,${r.y})`).call(g=>g.call(d3.axisBottom(x).tickValues(r.ticks).tickFormat(r.fmt).tickSize(6)).attr('class','axis'));
+    sv.append('text').attr('class','lbl').attr('x',W-m.r).attr('y',r.y+36).attr('text-anchor','end').style('font-size','13px').style('fill',C.muted).text(r.wall);
+    return{r,x,dot:sv.append('circle').attr('r',9).attr('cy',r.y).attr('fill',C.sc1).attr('stroke','#fff').attr('stroke-width',2)}});
+  const sl=document.getElementById('scP');
+  function draw(){const p=+sl.value,k=Math.round(p*N);icons.attr('fill',i=>i<k?C.sc1:C.popL);
+    mk.forEach(o=>o.dot.attr('cx',o.x(o.r.f(p))));const od=p/(1-p);
+    document.getElementById('scRead').innerHTML=`<span class="k">probability</span><b>${d3.format('.0%')(p)}</b> <small>(${k} of ${N} patients)</small><br><span class="k">odds</span><b>${d3.format('.2f')(od)}</b> <small>(${k} with : ${N-k} without${od<1?`, 1 to ${d3.format('.1f')(1/od)}`:''})</small><br><span class="k">log-odds</span><b>${d3.format('+.2f')(Math.log(od))}</b> <small>(0 = even, 50%)</small>`}
+  sl.oninput=draw;draw();
+}};
+
+/* ---- 4 S-curve ---- */
+hooks['scurve']={init(){
+  const W=780,H=430,m={l:60,r:20,t:20,b:50},rows=GB.rows,[b0,b1]=GBsimple.b;
+  const svg=d3.select('#sgSvg');const x=d3.scaleLinear().domain([0,122]).range([m.l,W-m.r]);
+  const yLO=d3.scaleLinear().domain([-3,3.5]).range([H-m.b,m.t]),yP=d3.scaleLinear().domain([0,1]).range([H-m.b,m.t]);
+  const axLO=svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,yLO,7,W-m.l-m.r));
+  const axP=svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,yP,5,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>d3.format('.0%')(d))).attr('opacity',0);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,12));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Tumour size (mm)');
+  const yl=svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle');
+  const xs=d3.range(0,122.5,1);const path=svg.append('path').attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',3.5);
+  const bn=svg.append('g').selectAll('circle').data(bins(rows,[0,10,15,20,25,30,35,40,50,60,80,125])).join('circle').attr('r',7).attr('fill',C.sc1).attr('stroke','#fff').attr('stroke-width',1.5).attr('opacity',0);
+  const ann=svg.append('g');let t=0;
+  const yAt=(v,tt)=>{const lo=b0+b1*v;return(1-tt)*yLO(Math.max(-3,Math.min(3.5,lo)))+tt*yP(expit(lo))};
+  function setT(tt,dur){path.transition().duration(dur).attrTween('d',function(){const t0=t;return u=>{const cur=t0+(tt-t0)*u;return d3.line().x(v=>x(v)).y(v=>yAt(v,cur))(xs)}}).on('end',()=>{t=tt});
+    axLO.transition().duration(dur).attr('opacity',1-tt);axP.transition().duration(dur).attr('opacity',tt)}
+  const T=[['1 · A straight line on log-odds',`<p>The model: <b>log-odds = ${fmt2(b0)} + ${d3.format('.4f')(b1)} × tumour size</b>.</p><p>Exactly like this morning's regression, but the y-axis is log-odds. Every extra mm adds ${d3.format('.4f')(b1)} to the log-odds.</p>`],
+    ['2 · Translate back to probability','<p>Same line, y-axis converted from log-odds to probability.</p><p>Near 0% and 100% it must flatten, because probability has walls. The result is the <b>S-curve</b>.</p>'],
+    ['3 · Check it against the data','<p>The pink dots are the observed share with 4+ nodes in bins of tumour size.</p><p>The S-curve follows them. That\'s the fitted logistic model.</p>']];
+  this.st=stepper('sgSteps',3,s=>{document.getElementById('sgText').innerHTML=`<div class="stepbox"><h3>${T[s][0]}</h3>${T[s][1]}</div>`;
+    yl.text(s===0?'log-odds of 4+ positive nodes':'P(4+ positive nodes)');setT(s===0?0:1,s===0?400:1600);
+    bn.transition().duration(500).attr('cx',d=>x(d.x)).attr('cy',d=>yP(d.p)).attr('opacity',s===2?1:0);
+    ann.selectAll('*').remove();if(s===0){ann.append('text').attr('class','lbl purple').attr('x',x(70)).attr('y',yLO(b0+b1*70)-14).text(`slope ${d3.format('.4f')(b1)} per mm`)}});
+  this.st.go(0);
+},enter(){this.st&&this.st.go(0)}};
+
+/* ---- 5 OR meaning ---- */
+hooks['ormean']={init(){
+  const W=700,H=400,m={l:60,r:20,t:20,b:50},[b0,b1]=GBsimple.b;const svg=d3.select('#omSvg');
+  const x=d3.scaleLinear().domain([0,110]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,1]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r)).call(g=>g.selectAll('.tick text').text(d=>d3.format('.0%')(d)));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,11));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Tumour size (mm)');
+  svg.append('path').attr('d',d3.line().x(v=>x(v)).y(v=>y(expit(b0+b1*v)))(d3.range(0,110.5,.5))).attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',3);
+  const br=svg.append('path').attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2.5);const bt=svg.append('text').attr('class','lbl pink');
+  const d1=svg.append('circle').attr('r',8).attr('fill',C.pc1).attr('stroke','#fff').attr('stroke-width',2),d2=svg.append('circle').attr('r',8).attr('fill',C.sc1).attr('stroke','#fff').attr('stroke-width',2);
+  const sl=document.getElementById('omX');
+  function draw(){const a=+sl.value,b=a+10,pa=expit(b0+b1*a),pb=expit(b0+b1*b),oa=pa/(1-pa),ob=pb/(1-pb);
+    d1.attr('cx',x(a)).attr('cy',y(pa));d2.attr('cx',x(b)).attr('cy',y(pb));br.attr('d',`M${x(b)+14},${y(pa)}h8V${y(pb)}h-8`);bt.attr('x',x(b)+28).attr('y',(y(pa)+y(pb))/2+5).text(`+${fmt1(100*(pb-pa))} points`);
+    document.getElementById('omXv').textContent=`${a} mm vs ${b} mm`;
+    document.getElementById('omTab').innerHTML=`<tr><th></th><th>${a} mm</th><th>${b} mm</th><th>change</th></tr>
+      <tr><td>probability</td><td>${d3.format('.1%')(pa)}</td><td>${d3.format('.1%')(pb)}</td><td class="hi">+${fmt1(100*(pb-pa))} points</td></tr>
+      <tr><td>odds</td><td>${d3.format('.3f')(oa)}</td><td>${d3.format('.3f')(ob)}</td><td class="pu">× ${d3.format('.3f')(ob/oa)}</td></tr>
+      <tr><td>log-odds</td><td>${d3.format('+.3f')(Math.log(oa))}</td><td>${d3.format('+.3f')(Math.log(ob))}</td><td>+${d3.format('.3f')(Math.log(ob/oa))}</td></tr>`}
+  sl.oninput=draw;draw();
+}};
+
+/* ---- 7 forest ---- */
+hooks['forest']={init(){
+  const W=720,H=380,m={l:230,r:30,t:30,b:50};const svg=d3.select('#foSvg');const g=svg.append('g');
+  function draw(k){const ds=DS[k],f=fitDS(ds),lev=ds.levels;g.selectAll('*').remove();
+    const items=[{n:`${ds.xs} (per ${ds.xu})`,c:f.coef[1],t:ds.truth?.x},...lev.slice(1).map((l,i)=>({n:`${ds.gl} ${l} vs ${lev[0]}`,c:f.coef[i+2],t:ds.truth?.[l]}))];
+    const x=d3.scaleLog().domain([Math.min(.4,...items.map(d=>d.c.lo))*.9,Math.max(4,...items.map(d=>d.c.hi))*1.1]).range([m.l,W-m.r]);const y=d3.scaleBand().domain(items.map(d=>d.n)).range([m.t,H-m.b]).padding(.4);
+    g.append('g').attr('transform',`translate(0,${H-m.b})`).call(gg=>gg.call(d3.axisBottom(x).tickValues([.25,.5,1,2,4,8].filter(v=>v>=x.domain()[0]&&v<=x.domain()[1])).tickFormat(d3.format('~g')).tickSize(5)).attr('class','axis'));
+    g.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('odds ratio (log scale), 95% CI');
+    g.append('line').attr('x1',x(1)).attr('x2',x(1)).attr('y1',m.t-10).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-dasharray','5 4');
+    const r=g.append('g').selectAll('g').data(items).join('g').attr('transform',d=>`translate(0,${y(d.n)+y.bandwidth()/2})`);
+    r.append('text').attr('class','lbl').attr('x',0).attr('y',5).text(d=>d.n);
+    r.append('line').attr('x1',d=>x(d.c.lo)).attr('x2',d=>x(d.c.hi)).attr('stroke',C.pc2).attr('stroke-width',3);
+    r.append('circle').attr('cx',d=>x(d.c.or)).attr('r',8).attr('fill',C.pc2).attr('stroke','#fff').attr('stroke-width',2);
+    r.append('text').attr('class','lbl').attr('x',d=>x(d.c.hi)+8).attr('y',5).style('font-size','14px').text(d=>`${d3.format('.2f')(d.c.or)} [${d3.format('.2f')(d.c.lo)}, ${d3.format('.2f')(d.c.hi)}]`);
+    r.filter(d=>d.t).append('path').attr('d',d=>`M${x(d.t)},-16v32`).attr('stroke',C.sc1).attr('stroke-width',2.5);
+    r.filter(d=>d.t).append('text').attr('class','lbl pink').attr('x',d=>x(d.t)).attr('y',-20).attr('text-anchor','middle').style('font-size','12px').text(d=>`truth ${d.t}`);
+    document.getElementById('foOut').textContent=ds.yl;document.getElementById('foPrev').innerHTML=`${d3.format('.0%')(mean(ds.rows.map(r=>r.y)))} <small>of ${ds.rows.length}</small>`;
+    document.getElementById('foTruth').innerHTML=ds.truth?'Pink ticks: the odds ratios built into the simulation.':''}
+  segButtons('foDs',[['gbsg2','GBSG2'],['lung','Lung'],['sim','Simulated']],'gbsg2',draw);draw('gbsg2');
+}};
+
+/* ---- 8 probabilities ---- */
+hooks['probs']={init(){
+  let k='gbsg2',sc='p';const W=740,H=400,m={l:60,r:70,t:20,b:50};const svg=d3.select('#prSvg');
+  const x=d3.scaleLinear().range([m.l,W-m.r]),y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gx=svg.append('g').attr('transform',`translate(0,${H-m.b})`),gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  const xl=svg.append('text').attr('class','axlab').attr('x',(W-m.r+m.l)/2).attr('y',H-8).attr('text-anchor','middle');const yl=svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle');
+  const lines=svg.append('g'),mark=svg.append('line').attr('stroke',C.pc1).attr('stroke-dasharray','3 4'),dots=svg.append('g');
+  const cols=[C.ink2,C.pc2,C.sc1];const sl=document.getElementById('prX');
+  function draw(){const ds=DS[k],f=fitDS(ds),lev=ds.levels;const ex=d3.extent(ds.rows,r=>r.x);x.domain(ex);
+    const pr=(v,j)=>{const lo=f.b[0]+f.b[1]*v+(j?f.b[j+1]:0);return sc==='p'?expit(lo):lo};
+    const xs=d3.range(ex[0],ex[1]+.01,(ex[1]-ex[0])/120);const all=lev.flatMap((l,j)=>xs.map(v=>pr(v,j)));
+    y.domain(sc==='p'?[0,1]:d3.extent(all)).nice();gx.transition().duration(400).call(g=>axisB(g,x,8));
+    gy.call(g=>axisL(g,y,5,W-m.l-m.r));if(sc==='p')gy.selectAll('.tick text').text(d=>d3.format('.0%')(d));
+    xl.text(ds.xl);yl.text(sc==='p'?`P(${ds.yl.toLowerCase()})`:'log-odds');
+    lines.selectAll('path').data(lev).join('path').attr('fill','none').attr('stroke-width',3).attr('stroke',(l,j)=>cols[j]).transition().duration(500).attr('d',(l,j)=>d3.line().x(v=>x(v)).y(v=>y(pr(v,j)))(xs));
+    const ly=lev.map((l,j)=>({j,y:y(pr(ex[1],j))})).sort((a,b)=>a.y-b.y);for(let i=1;i<ly.length;i++)if(ly[i].y-ly[i-1].y<17)ly[i].y=ly[i-1].y+17;const LY={};ly.forEach(o=>LY[o.j]=o.y);
+    lines.selectAll('text').data(lev).join('text').attr('class','lbl').style('fill',(l,j)=>cols[j]).transition().duration(500).attr('x',x(ex[1])+6).attr('y',(l,j)=>LY[j]+5).text(l=>`${ds.gl} ${l}`);
+    sl.min=ex[0];sl.max=ex[1];sl.step=(ex[1]-ex[0])/100;if(+sl.value<ex[0]||+sl.value>ex[1]||sl.dataset.k!==k){sl.value=d3.median(ds.rows,r=>r.x);sl.dataset.k=k}
+    document.getElementById('prXl').textContent=ds.xs;
+    const v=+sl.value;document.getElementById('prXv').textContent=`${fmt1(v)} ${ds.xu==='mm'?'mm':'years'}`;
+    mark.attr('x1',x(v)).attr('x2',x(v)).attr('y1',m.t).attr('y2',H-m.b);
+    dots.selectAll('circle').data(lev).join('circle').attr('r',7).attr('fill',(l,j)=>cols[j]).attr('stroke','#fff').attr('stroke-width',2).attr('cx',x(v)).attr('cy',(l,j)=>y(pr(v,j)));
+    const ps=lev.map((l,j)=>expit(f.b[0]+f.b[1]*v+(j?f.b[j+1]:0)));
+    document.getElementById('prTab').innerHTML=`<tr><th>${ds.gl}</th><th>predicted P</th><th>vs ${lev[0]}</th><th>OR</th></tr>`+lev.map((l,j)=>`<tr><td>${l}</td><td>${d3.format('.1%')(ps[j])}</td><td>${j?d3.format('+.1f')(100*(ps[j]-ps[0]))+' pts':'–'}</td><td>${j?d3.format('.2f')(f.coef[j+1].or):'1'}</td></tr>`).join('');
+    document.getElementById('prMsg').innerHTML=sc==='p'?'On the probability scale the curves are <b>not parallel</b>: the gap between groups changes with '+ds.xs+'.':'On the log-odds scale the lines are <b>parallel</b>: the odds ratio is the same everywhere.'}
+  segButtons('prDs',[['gbsg2','GBSG2'],['lung','Lung'],['sim','Simulated']],k,v=>{k=v;draw()});segButtons('prScale',[['p','probability'],['lo','log-odds']],sc,v=>{sc=v;draw()});
+  sl.oninput=draw;draw();
+}};
+
+/* ---- 9 OR vs RR ---- */
+hooks['orrr']={init(){
+  const ic=d3.select('#rrIcons'),N=20;
+  const grp=[['reference',10],['comparison',320]].map(([t,x0])=>{const g=ic.append('g').attr('transform',`translate(${x0},0)`);g.append('text').attr('class','lbl').attr('x',0).attr('y',16).text(t);
+    const ics=g.selectAll('g.i').data(d3.range(N)).join('g').attr('class','i').attr('transform',i=>`translate(${12+(i%10)*26},${44+Math.floor(i/10)*46})`);ics.append('circle').attr('cy',-6).attr('r',6);ics.append('path').attr('d','M-9,16 Q-9,3 0,3 Q9,3 9,16 Z');
+    const lab=g.append('text').attr('class','lbl').attr('x',0).attr('y',146).style('font-size','15px');return{ics,lab}});
+  const W=600,H=250,m={l:56,r:20,t:20,b:44};const cv=d3.select('#rrCurve');
+  const x=d3.scaleLinear().domain([0,.8]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([1,6]).range([H-m.b,m.t]);
+  cv.append('rect').attr('x',x(0)).attr('width',x(.1)-x(0)).attr('y',m.t).attr('height',H-m.b-m.t).attr('fill',C.pc2).attr('opacity',.1);
+  cv.append('text').attr('class','lbl purple').attr('x',x(.005)).attr('y',m.t+14).style('font-size','12px').text('rare');
+  cv.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,8)).call(g=>g.selectAll('.tick text').text(d=>d3.format('.0%')(d)));
+  cv.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,5,W-m.l-m.r));
+  cv.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-6).attr('text-anchor','middle').text('risk in the reference group');
+  const orl=cv.append('line').attr('stroke',C.sc1).attr('stroke-dasharray','5 4').attr('stroke-width',2).attr('x1',m.l).attr('x2',W-m.r),orT=cv.append('text').attr('class','lbl pink').attr('x',W-m.r).attr('text-anchor','end').style('font-size','14px');
+  const rrp=cv.append('path').attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',3),rrT=cv.append('text').attr('class','lbl purple').style('font-size','14px'),dot=cv.append('circle').attr('r',7).attr('fill',C.pc2).attr('stroke','#fff').attr('stroke-width',2);
+  const sOR=document.getElementById('rrOR'),sP=document.getElementById('rrP0');
+  const p1of=(p0,OR)=>{const o=OR*p0/(1-p0);return o/(1+o)};
+  function draw(){const OR=+sOR.value,p0=+sP.value,p1=p1of(p0,OR),RR=p1/p0;
+    document.getElementById('rrORv').textContent=fmt1(OR);document.getElementById('rrP0v').textContent=d3.format('.0%')(p0);
+    [[grp[0],p0],[grp[1],p1]].forEach(([g,p])=>{const k=Math.round(p*N);g.ics.attr('fill',i=>i<k?C.sc1:C.popL);g.lab.text(`${d3.format('.0%')(p)} have the outcome`)});
+    orl.attr('y1',y(OR)).attr('y2',y(OR));orT.attr('y',y(OR)-6).text(`odds ratio ${fmt1(OR)} (same everywhere)`);
+    const xs=d3.range(.005,.801,.005);rrp.attr('d',d3.line().x(v=>x(v)).y(v=>y(p1of(v,OR)/v))(xs));
+    dot.attr('cx',x(p0)).attr('cy',y(RR));rrT.attr('x',x(p0)+10).attr('y',y(RR)+18).text(`risk ratio ${d3.format('.2f')(RR)}`)}
+  sOR.oninput=draw;sP.oninput=draw;draw();
+  const rows=[['GBSG2, 4+ nodes','grade III vs I',DS.gbsg2,'III','I'],['Lung, lost weight','ECOG 2+ vs 0',DS.lung,'2+','0'],['Simulated, disease','BB vs AA',DS.sim,'BB','AA']];
+  document.getElementById('rrTab').innerHTML='<tr><th>outcome</th><th>risks</th><th>RR</th><th>OR</th></tr>'+rows.map(([o,c,ds,a,b])=>{const pa=mean(ds.rows.filter(r=>r.g===a).map(r=>r.y)),pb=mean(ds.rows.filter(r=>r.g===b).map(r=>r.y));
+    return`<tr><td>${o}<br><small>${c}</small></td><td>${d3.format('.0%')(pa)} vs ${d3.format('.0%')(pb)}</td><td class="pu">${d3.format('.2f')(pa/pb)}</td><td class="hi">${d3.format('.2f')((pa/(1-pa))/(pb/(1-pb)))}</td></tr>`}).join('');
+}};
+
+/* ---- 10 statements ---- */
+hooks['statements']={init(){qcards('qcards',[
+  [false,'An odds ratio of 2.5 for grade III means grade III patients are 2.5 times as likely to have 4+ nodes.','Only for rare outcomes. Here about 45% have 4+ nodes, so the risk ratio is much smaller than 2.5. Say "2.5 times the odds", or give probabilities.'],
+  [true,'In a logistic model, the odds ratio for tumour size is the same for small and large tumours.','Correct: the model is a straight line on the log-odds scale, so the odds ratio per mm is constant.'],
+  [false,'Because the odds ratio is constant, the difference in probability between grades is the same at every tumour size.','The probability gap depends on where you are on the S-curve: largest in the steep middle, small near 0% or 100%.'],
+  [true,'For a paper, report the odds ratio with its CI; for a clinician, also give predicted probabilities.','Correct (discussion question 1). Odds are hard to feel; probabilities aren\'t.']])}};
+
+/* ---- 11 AI ---- */
+hooks['ai-tutor']={init(){const c=GBfit.coef[3],prev=mean(GB.rows.map(r=>r.y)),med=d3.median(GB.rows,r=>r.x);
+  document.getElementById('aiPrompt').textContent=`In a logistic regression of "4 or more positive lymph nodes" (which occurs in ${d3.format('.0%')(prev)} of patients), the odds ratio for tgrade: III vs I is ${fmt2(c.or)} (95% CI ${fmt2(c.lo)}–${fmt2(c.hi)}). Explain this result to a clinician in two sentences.`;
+  document.getElementById('aiBad').innerHTML=`"grade III patients are ${fmt2(c.or)} times more likely to have 4+ nodes"`;
+  const pI=GBfit.pred([1,med,0,0]),pIII=GBfit.pred([1,med,0,1]);
+  document.getElementById('aiGood').innerHTML=`"For a typical ${med} mm tumour, the model predicts 4+ positive nodes in about <b>${d3.format('.0%')(pIII)}</b> of grade III patients versus <b>${d3.format('.0%')(pI)}</b> of grade I patients (odds ratio ${fmt2(c.or)}, 95% CI ${fmt2(c.lo)}–${fmt2(c.hi)}). Grade III is <em>associated with</em> more nodal involvement; this doesn't show it causes it."`}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>
