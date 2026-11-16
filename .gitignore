@@ -1,0 +1,11 @@
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
+*.tmp
+
+# Facilitator notes live in their own private repo (nested here, never pushed with this one)
+facilitator/

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 1 · Sampling variability</title>
+<style>
+:root{
+  --pc1:#240046; --pc2:#9933ff; --sc1:#ff0066; --sc3:#ff99cc;
+  --ink:#240046; --ink2:#5b4b6e; --muted:#8a7d99; --line:#e6e1ec; --pop:#a799b5; --paper:#ffffff; --wash:#f6f3f9;
+  --serif:"Freight Big Pro","Freight Big","Times New Roman",Times,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#120024;overflow:hidden;font-family:var(--serif);color:var(--ink)}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1280px;height:720px;position:relative;transform-origin:center center;background:var(--paper);box-shadow:0 10px 60px rgba(0,0,0,.4);overflow:hidden}
+.slide{position:absolute;inset:0;padding:48px 64px 64px;opacity:0;pointer-events:none;transition:opacity .45s ease;background:var(--paper)}
+.slide.active{opacity:1;pointer-events:auto}
+.slide.dark{background:var(--pc1);color:#fff}
+.kicker{font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--pc2);margin-bottom:10px}
+.dark .kicker{color:var(--sc3)}
+h1{font-weight:400;font-size:50px;line-height:1.08;margin:0 0 18px}
+h1 em{font-style:italic;color:var(--pc2)}
+.dark h1 em{color:var(--sc3)}
+p,li{font-size:22px;line-height:1.4}
+.lead{font-size:24px;color:var(--ink2);max-width:980px;margin:0 0 14px}
+.small{font-size:17px;color:var(--ink2);line-height:1.4}
+.tiny{font-size:14px;color:var(--muted)}
+em{font-style:italic}
+.row{display:flex;gap:36px;align-items:flex-start}
+.col{flex:1}
+.footer{position:absolute;left:64px;right:64px;bottom:18px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+.footer img{height:52px;margin-left:-10px}
+.dark .footer{color:rgba(255,255,255,.55)}
+/* controls */
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 8px}
+.btn{font-family:var(--serif);font-size:17px;padding:7px 16px;border-radius:999px;border:1.5px solid var(--pc1);background:#fff;color:var(--pc1);cursor:pointer;transition:all .15s}
+.btn:hover{background:var(--wash)}
+.btn.primary{background:var(--pc1);color:#fff}
+.btn.primary:hover{background:#3a0a6b}
+.btn.on{background:var(--pc2);border-color:var(--pc2);color:#fff}
+.btn:disabled{opacity:.4;cursor:default}
+.seg{display:inline-flex;gap:6px;align-items:center}
+.seg .lab{font-size:15px;color:var(--muted);margin-right:4px}
+/* readouts */
+.stat{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-top:1px solid var(--line)}
+.stat .k{font-size:14px;color:var(--muted);letter-spacing:.04em}
+.stat .v{font-size:30px;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:16px;color:var(--ink2)}
+.card{background:var(--wash);border-radius:14px;padding:16px 20px}
+.callout{border-left:3px solid var(--sc1);padding:4px 0 4px 16px;font-size:20px;line-height:1.4;color:var(--ink)}
+/* svg */
+svg{display:block;overflow:visible}
+.axis text{font-family:var(--serif);font-size:14px;fill:var(--ink2)}
+.axis path,.axis line{stroke:#c9c1d3}
+.axlab{font-family:var(--serif);font-size:15px;fill:var(--ink2)}
+.grid line{stroke:var(--line)}
+.grid path{display:none}
+.lbl{font-family:var(--serif);font-size:15px;fill:var(--ink)}
+.lbl.pink{fill:var(--sc1)}
+.lbl.purple{fill:var(--pc2)}
+/* tooltip */
+#tip{position:fixed;pointer-events:none;background:var(--pc1);color:#fff;font-family:var(--serif);font-size:14px;padding:6px 10px;border-radius:8px;opacity:0;transition:opacity .12s;z-index:50;white-space:nowrap}
+/* crescents */
+.crescents{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.85}
+/* nav + notes */
+#nav{position:absolute;right:20px;bottom:14px;display:flex;gap:6px;z-index:20}
+#nav button{width:34px;height:34px;border-radius:50%;border:1px solid rgba(36,0,70,.25);background:rgba(255,255,255,.85);color:var(--pc1);font-size:16px;cursor:pointer;font-family:var(--serif)}
+#progress{position:absolute;left:0;bottom:0;height:4px;background:var(--pc2);transition:width .4s;z-index:20}
+#counter{position:absolute;right:104px;bottom:22px;font-size:13px;color:var(--muted);z-index:20}
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;background:rgba(18,0,36,.96);color:#eee;font-family:var(--serif);font-size:17px;line-height:1.5;padding:16px 28px;transform:translateY(100%);transition:transform .25s;z-index:40}
+#notes.show{transform:none}
+#notes h4{margin:0 0 6px;font-weight:400;color:var(--sc3);font-size:14px;letter-spacing:.12em;text-transform:uppercase}
+aside.notes{display:none}
+#help{position:fixed;left:14px;bottom:10px;color:rgba(255,255,255,.4);font-size:12px;font-family:var(--serif);z-index:30}
+/* tables */
+table.room{border-collapse:collapse;font-size:18px}
+table.room th{font-weight:400;color:var(--muted);font-size:14px;letter-spacing:.04em;text-align:left;padding:4px 10px;border-bottom:1px solid var(--line)}
+table.room td{padding:3px 10px;border-bottom:1px solid var(--line)}
+table.room input{width:74px;font-family:var(--serif);font-size:18px;border:1px solid var(--line);border-radius:6px;padding:3px 6px;color:var(--ink)}
+.prompt{background:var(--wash);border-radius:12px;padding:14px 18px;font-size:19px;line-height:1.45;font-style:italic}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--pc2);color:var(--pc2);border-radius:999px;padding:4px 14px;font-size:18px}
+.big li{font-size:30px;line-height:1.55;margin-bottom:8px}
+ul.clean{list-style:none;padding:0;margin:0}
+ul.clean li{padding:6px 0 6px 26px;position:relative}
+ul.clean li::before{content:"";position:absolute;left:4px;top:17px;width:9px;height:9px;border-radius:50%;background:var(--pc2)}
+ul.clean.x li::before{background:var(--sc1);border-radius:2px;transform:rotate(45deg)}
+.num{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:150px">
+    <div class="kicker">Day 1 · Topic 1 · Practical statistics for biomedical researchers</div>
+    <h1 style="font-size:84px;margin-bottom:22px">Sampling <em>variability</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:720px;margin:0">Your study is one draw from many possible studies. How much could the answer have wobbled?</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span></span></div>
+  <aside class="notes">Opening (1 min). Today is about one idea that everything else this week builds on: your data are one sample, and a different sample would have given a different answer. Confidence intervals, p-values and power are all ways of putting a number on that wobble. Every chart in this deck is a live simulation on the real GBSG2 data, the same data as in the notebooks.</aside>
+</section>
+
+<!-- ============ 2 ESTIMATE ============ -->
+<section class="slide" id="estimate">
+  <div class="kicker">The problem</div>
+  <h1>Every number you report is an <em>estimate</em>.</h1>
+  <div class="row" style="margin-top:20px">
+    <div class="col" style="flex:1.1">
+      <svg id="estSvg" width="560" height="400"></svg>
+    </div>
+    <div class="col">
+      <p class="lead" style="font-size:22px">You want a fact about a <em>population</em> (all patients, all cells of that type). You only ever measure a <em>sample</em>.</p>
+      <table class="room" style="margin:10px 0 18px;width:100%">
+        <tr><th></th><th>Population</th><th>Your sample</th></tr>
+        <tr><td class="small">Name</td><td>parameter</td><td>estimate</td></tr>
+        <tr><td class="small">Mean</td><td><em>μ</em> (unknown)</td><td><em>x̄</em></td></tr>
+        <tr><td class="small">SD</td><td><em>σ</em> (unknown)</td><td><em>s</em></td></tr>
+      </table>
+      <p class="small" style="margin:0 0 6px">Things in your lab that are estimates:</p>
+      <ul class="clean small" style="font-size:18px">
+        <li>mean fold change across 3 biological replicates</li>
+        <li>% of 40 patients who respond to a drug</li>
+        <li>a hazard ratio from a clinical trial</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <aside class="notes">Ask: who has re-run an experiment and got a different answer? That difference is not necessarily a mistake. Part of it is sampling variability: you measured different mice, cells or patients. The rest of the hour is about how big that wobble is and what controls it. Click the left panel to draw a new sample: the highlighted dots change every time, and so does the sample mean.</aside>
+</section>
+
+<!-- ============ 3 POPULATION ============ -->
+<section class="slide" id="population">
+  <div class="kicker">Our playground · GBSG2 breast cancer trial</div>
+  <h1>Meet the <em>population</em>.</h1>
+  <div class="row">
+    <div class="col" style="flex:2.1">
+      <div class="controls"><div class="seg" id="popVar"><span class="lab">Variable</span></div></div>
+      <svg id="popSvg" width="780" height="430"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:52px">
+      <p class="small" style="margin-top:0">We cheat: we treat all <b>686 patients</b> as the <em>whole</em> population, so we know the true answer and can watch what samples do.</p>
+      <div class="stat"><span class="k">TRUE MEAN (μ)</span><span class="v num" id="popMean"></span></div>
+      <div class="stat"><span class="k">MEDIAN</span><span class="v num" id="popMed"></span></div>
+      <div class="stat"><span class="k">STANDARD DEVIATION (σ)</span><span class="v num" id="popSd"></span></div>
+      <p class="small" id="popShape" style="margin-top:12px"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <aside class="notes">Notebook section A. Tumour size is right-skewed: most tumours are 15–35 mm, with a long tail of big ones that pulls the mean above the median. Switch to positive nodes for an even more skewed variable, and to age for a roughly symmetric one. We will come back to the skew: it matters for whether the "bell curve" shows up later. Hover over the bars for counts.</aside>
+</section>
+
+<!-- ============ 4 ONE STUDY ============ -->
+<section class="slide" id="one-study">
+  <div class="kicker">Notebook section B</div>
+  <h1>One study = <em>one draw</em>.</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:3">
+      <svg id="oneSvg" width="900" height="470"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:6px">
+      <div class="card" style="margin-bottom:14px"><span class="small"><b>Predict first.</b> Five studies of 20 patients each. How far apart will the five means be?</span></div>
+      <button class="btn primary" id="oneRun" style="width:100%">Run a study (n = 20)</button>
+      <div class="stat" style="margin-top:14px"><span class="k">STUDIES RUN</span><span class="v num" id="oneCount">0</span></div>
+      <div class="stat"><span class="k">RANGE OF STUDY MEANS</span><span class="v num" id="oneRange">–</span></div>
+      <div class="stat"><span class="k">TRUE MEAN</span><span class="v num" id="oneTrue"></span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <aside class="notes">Get a few guesses out loud before clicking. Then click 5–6 times. Each click recruits 20 random patients (pink dots in the population), drops them into a study row and marks that study's mean (pink bar). The dashed line is the truth. Point out: no single study is "wrong", there was no error in measurement, yet the means typically span 8–12 mm. That's sampling variability, nothing else.</aside>
+</section>
+
+<!-- ============ 5 MANY STUDIES ============ -->
+<section class="slide" id="many-studies">
+  <div class="kicker">Notebook section C</div>
+  <h1>Thousands of studies make the <em>sampling distribution</em>.</h1>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:3">
+      <div class="controls">
+        <button class="btn primary" id="manyOne">+1 study</button>
+        <button class="btn" id="manyTen">+10</button>
+        <button class="btn" id="manyHundred">+100</button>
+        <button class="btn" id="manyAll">Run to 2,000</button>
+        <button class="btn" id="manyReset">Reset</button>
+      </div>
+      <svg id="manySvg" width="880" height="470"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:52px">
+      <div class="stat"><span class="k">STUDIES (n = 20 EACH)</span><span class="v num" id="manyCount">0</span></div>
+      <div class="stat"><span class="k">MIDDLE 95% OF STUDY MEANS</span><span class="v num" id="manyRange">–</span></div>
+      <div class="stat"><span class="k">SPREAD OF STUDY MEANS (SD)</span><span class="v num" id="manySpread">–</span></div>
+      <p class="small" style="margin-top:12px">Same x-axis as the patients above. The study means are packed far more tightly than the patients.</p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <aside class="notes">Click +1 a few times: each study's 20 patients flash on the population (top), and the study's mean drops into the bottom histogram. Then +100 and "Run to 2,000". The bottom histogram is the sampling distribution of the mean: the answers you could have got. Its spread is what the notebook prints as "spread of the study means". Don't reveal how it changes with n: that's what the room will find in the hands-on.</aside>
+</section>
+
+<!-- ============ 6 SD vs SE ============ -->
+<section class="slide" id="sd-vs-se">
+  <div class="kicker">The most common mix-up in papers</div>
+  <h1>Two spreads, <em>two questions</em>.</h1>
+  <div class="row" style="gap:30px">
+    <div class="col" style="flex:1.05">
+      <div class="card" style="margin-bottom:14px">
+        <div class="kicker" style="margin:0 0 4px;color:var(--ink2)">Standard deviation · SD</div>
+        <p style="margin:0;font-size:21px">How different are <em>patients</em> from each other?<br><span class="small">A property of the biology. More patients won't make it smaller.</span></p>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="kicker" style="margin:0 0 4px;color:var(--sc1)">Standard error · SE</div>
+        <p style="margin:0;font-size:21px">How much would my <em>mean</em> move if I repeated the study?<br><span class="small">A property of the design: the spread of the sampling distribution. It shrinks as <em>n</em> grows. How fast? You'll find out.</span></p>
+      </div>
+      <p class="callout">Error bars: ± SD to show <em>variability</em>, ± SE (or a CI) to show <em>precision</em>. Always say which.</p>
+    </div>
+    <div class="col" style="flex:1">
+      <div class="controls"><button class="btn" id="seNew">New sample of 20</button></div>
+      <svg id="seSvg" width="540" height="430"></svg>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <aside class="notes">Same 20 patients, two error bars. Mean ± SD says "patients vary by about ±14 mm". Mean ± SE says "if I repeated the study, my mean would typically move by about ±3 mm", the spread of the histogram on the previous slide. Ask: which one should go on a figure? Depends on the message, but always say which. A bar chart with ±SE bars can make noisy data look very precise. In practice we don't have 2,000 studies; we estimate the SE from one sample. The notebook's tutor prompt tests exactly this.</aside>
+</section>
+
+<!-- ============ 7 HANDS-ON ============ -->
+<section class="slide dark" id="hands-on">
+  <div class="crescents">
+    <div class="blob" style="width:520px;height:520px;right:-160px;bottom:-160px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:300px;height:300px;right:220px;bottom:-140px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative">
+    <div class="kicker">Your turn · about 30 minutes · in pairs</div>
+    <h1 style="font-size:58px">Hands-on 1: <em>sampling variability</em>.</h1>
+    <div class="row" style="margin-top:22px;gap:56px">
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">OPEN</p>
+        <p style="margin:0 0 22px;font-size:26px">Day1_HO1_sampling_variability.ipynb</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">IN SECTION C, SET n TO YOUR PAIR'S VALUE</p>
+        <div style="display:flex;gap:12px;margin-bottom:22px">
+          <span class="chip" style="border-color:#fff;color:#fff">5</span><span class="chip" style="border-color:#fff;color:#fff">10</span><span class="chip" style="border-color:#fff;color:#fff">20</span><span class="chip" style="border-color:#fff;color:#fff">40</span><span class="chip" style="border-color:#fff;color:#fff">80</span><span class="chip" style="border-color:#fff;color:#fff">160</span>
+        </div>
+        <p style="margin:0;font-size:21px;color:rgba(255,255,255,.85)">📋 Enter <b>n</b> and the <b>spread</b> in the shared sheet.</p>
+      </div>
+      <div class="col">
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
+        <p style="margin:0 0 22px;font-size:24px">If you go from 20 to 80 patients, what happens to the spread of the study means?</p>
+        <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">TWO AI ROLES, KEPT APART</p>
+        <p style="margin:0;font-size:20px;line-height:1.5;color:rgba(255,255,255,.85)">🧮 Gemini in Colab = <em>calculator</em>, for code.<br>🎓 Claude / ChatGPT = <em>tutor you must check</em>, for interpretation.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span></span></div>
+  <aside class="notes">Assign values: two pairs per n (5, 10, 20, 40, 80, 160). Make sure everyone writes a guess for the 20→80 question before starting; most will say "a quarter". Remind them: one "CHANGE THIS" line per cell, driver and navigator swap halfway. While they work, open the next slide and type in the shared-sheet values as they arrive.</aside>
+</section>
+
+<!-- ============ 8 ROOM ============ -->
+<section class="slide" id="room">
+  <div class="kicker">Debrief · after the hands-on</div>
+  <h1>What did the <em>room</em> find?</h1>
+  <div class="row" style="gap:36px">
+    <div class="col" style="flex:0 0 360px">
+      <table class="room" id="roomTable">
+        <tr><th>n</th><th>Pair A spread</th><th>Pair B spread</th></tr>
+      </table>
+      <div class="controls" style="margin-top:14px">
+        <button class="btn" id="roomFill">Fill from simulation</button>
+        <button class="btn" id="roomClear">Clear</button>
+      </div>
+      <div class="controls"><button class="btn primary" id="roomCurve">Reveal the rule</button></div>
+      <p class="small" id="roomMsg" style="margin-top:6px"></p>
+    </div>
+    <div class="col">
+      <svg id="roomSvg" width="700" height="460"></svg>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <aside class="notes">Type the shared-sheet values into the table (or click "Fill from simulation" if the sheet isn't working). Ask: compare n = 20 with n = 80. Four times the patients, but the spread only halves. Same for 40 → 160. Then "Reveal the rule". Expected values are in the facilitator notes. Pairs with the same n will differ slightly: the spread itself is estimated from 2,000 random studies.</aside>
+</section>
+
+<!-- ============ 9 SQRT N ============ -->
+<section class="slide" id="sqrt-n">
+  <div class="kicker">Notebook section D</div>
+  <h1>Precision grows with <em>√n</em>, not with <em>n</em>.</h1>
+  <div class="row" style="gap:28px">
+    <div class="col" style="flex:2">
+      <div class="controls">
+        <span class="seg"><span class="lab">Patients per study</span></span>
+        <input type="range" id="sqrtSlider" min="0" max="8" step="1" value="3" style="width:300px;accent-color:#9933ff">
+        <span class="num" id="sqrtN" style="font-size:24px;min-width:60px"></span>
+      </div>
+      <svg id="sqrtSvg" width="760" height="440"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:6px">
+      <div class="card" style="text-align:center;margin-bottom:6px"><span style="font-size:30px">SE = <em>σ</em> / √<em>n</em></span></div>
+      <div class="stat"><span class="k">SIMULATED SPREAD (2,000 STUDIES)</span><span class="v num" id="sqrtSim"></span></div>
+      <div class="stat"><span class="k">FORMULA: 14.3 / √n</span><span class="v num" id="sqrtFor"></span></div>
+      <div class="stat"><span class="k">TO HALVE THIS SE YOU NEED</span><span class="v num" id="sqrtHalve"></span></div>
+      <svg id="sqrtMini" width="300" height="150" style="margin-top:6px"></svg>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <aside class="notes">Drag the slider. The histogram is 2,000 freshly simulated studies at each n; the pink bracket is ±1 SE. The practical punchline: 10 → 40 mice halves your SE; to halve it again you need 160. Diminishing returns are built into statistics, which is why sample-size planning (Hands-on 5) matters. In real life σ is unknown, so we plug in the sample SD: SE ≈ s/√n.</aside>
+</section>
+
+<!-- ============ 10 CLT ============ -->
+<section class="slide" id="clt">
+  <div class="kicker">Concept check 1 · the central limit theorem</div>
+  <h1>Averages <em>forget</em> the shape of the data.</h1>
+  <div class="controls">
+    <div class="seg" id="cltVar"><span class="lab">Variable</span></div>
+    <span style="width:24px"></span>
+    <div class="seg" id="cltN"><span class="lab">n per study</span></div>
+  </div>
+  <div class="row" style="gap:20px">
+    <div class="col" style="flex:0 0 380px">
+      <svg id="cltPop" width="380" height="300"></svg>
+      <p class="small" id="cltMsg" style="margin-top:14px"></p>
+    </div>
+    <div class="col">
+      <svg id="cltSvg" width="720" height="420"></svg>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <aside class="notes">Start with positive nodes at n = 1: the "means" are just patients, so the histogram is as skewed as the data. Step up n: by 30 the means sit almost exactly on the bell curve (pink line), even though the data never do. That's why tomorrow's CIs and t-tests work for non-normal data with decent n. The caveat for small studies: at n = 5 with skewed data the bell curve is still off, which is why confidence intervals in Hands-on 2 cover a bit less than 95%.</aside>
+</section>
+
+<!-- ============ 11 BIAS ============ -->
+<section class="slide" id="bias">
+  <div class="kicker">Discussion question 3 · the random sampling assumption</div>
+  <h1>More data shrinks <em>noise</em>, not <em>bias</em>.</h1>
+  <div class="row" style="gap:28px">
+    <div class="col" style="flex:2.1">
+      <div class="controls"><div class="seg" id="biasN"><span class="lab">Patients per study</span></div></div>
+      <svg id="biasSvg" width="780" height="430"></svg>
+    </div>
+    <div class="col" style="flex:1;padding-top:10px">
+      <p class="small" style="margin-top:0">A referral centre gets more large tumours: here a patient's chance of being recruited is proportional to tumour size.</p>
+      <div class="stat"><span class="k" style="color:var(--pc2)">RANDOM RECRUITMENT · AVERAGE ± SPREAD</span><span class="v num" id="biasR"></span></div>
+      <div class="stat"><span class="k" style="color:var(--sc1)">REFERRAL CENTRE · AVERAGE ± SPREAD</span><span class="v num" id="biasB"></span></div>
+      <div class="stat"><span class="k">TRUE MEAN</span><span class="v num" id="biasT"></span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <aside class="notes">Everything so far assumed patients were picked at random. Here, recruitment favours larger tumours. Increase n: both distributions get narrower, but the pink one homes in on the wrong value, about 7 mm too high. Large n gives you a very precise wrong answer. The SE and every CI or p-value built on it only describe random noise; they say nothing about how patients got into your study. Ask the room for examples from their own work: convenience samples, only the mice that survived, only the cells that attached.</aside>
+</section>
+
+<!-- ============ 12 AI ============ -->
+<section class="slide" id="ai-tutor">
+  <div class="kicker">AI as tutor · check its answer</div>
+  <h1>Does the tutor know <em>SD from SE</em>?</h1>
+  <div class="row" style="gap:40px;margin-top:8px">
+    <div class="col" style="flex:1.2">
+      <p class="small" style="margin:0 0 6px">Prompt from the notebook:</p>
+      <div class="prompt">I measured tumour size in 20 patients. The sample mean is 31 mm and the sample standard deviation is 14 mm. What is the difference between the standard deviation and the standard error here, and which one tells me how precise my estimate of the mean is?</div>
+      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
+      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
+    </div>
+    <div class="col">
+      <p class="small" style="margin:0 0 4px">A good answer says:</p>
+      <ul class="clean" style="margin-bottom:14px">
+        <li style="font-size:19px">SD describes <em>patients</em>; SE describes the <em>estimate</em></li>
+        <li style="font-size:19px">SE = 14 / √20 ≈ 3.1 mm</li>
+        <li style="font-size:19px">more patients shrink the SE, not the SD</li>
+      </ul>
+      <p class="small" style="margin:0 0 4px">Watch for:</p>
+      <ul class="clean x">
+        <li style="font-size:19px">"report the SE because it's smaller"</li>
+        <li style="font-size:19px">SE as the variability of patients</li>
+        <li style="font-size:19px">no number, only definitions (not <em>specific</em>)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span></span></div>
+  <aside class="notes">Ask two or three pairs to read out how they scored their AI answer. Most current models get the definitions right; the misses are usually in "specific" (no actual SE calculated) and "actionable" (no advice about which to report on a figure). If someone's answer recommended SE "because it looks cleaner", use it: that's a reporting choice, not a statistical reason.</aside>
+</section>
+
+<!-- ============ 13 TAKE HOME ============ -->
+<section class="slide dark" id="take-home">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:40px">
+    <div class="kicker">Take home</div>
+    <h1 style="font-size:56px">Three things to <em>keep</em>.</h1>
+    <ol class="big" style="font-size:28px;line-height:1.5;padding-left:34px;margin:26px 0 40px;max-width:1000px">
+      <li>Your result is <em>one draw</em>. A repeat study would give a different number.</li>
+      <li>SD describes <em>patients</em>. SE describes <em>your estimate</em>, and shrinks with √n.</li>
+      <li>More data shrinks <em>noise</em>, never <em>bias</em>.</li>
+    </ol>
+    <p style="font-size:22px;color:rgba(255,255,255,.75);margin:0">Next · <span style="color:var(--sc3)">Confidence intervals</span>: if a mean ± 2 SE is drawn around every study, how often does it catch the truth?</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span></span></div>
+  <aside class="notes">Bridge to Hands-on 2: on slide 5, the middle 95% of study means was roughly the true mean ± 2 spreads. Flip it round: if each study draws ± 2 SE around its own mean, most of those intervals will contain the truth. That's a confidence interval.</aside>
+</section>
+
+<div id="progress"></div>
+<div id="counter"></div>
+<div id="nav"><button id="prevBtn" aria-label="Previous">‹</button><button id="nextBtn" aria-label="Next">›</button></div>
+</div></div>
+<div id="tip"></div>
+<div id="notes"><h4>Speaker notes</h4><div id="notesBody"></div></div>
+<div id="help">← → navigate · N notes · F fullscreen</div>
+
+<script>/*D3*/</script>
+<script>
+const DATA = __DATA__;
+const C = {pc1:'#240046', pc2:'#9933ff', sc1:'#ff0066', sc3:'#ff99cc', pop:'#a799b5', popL:'#d3cce0', ink2:'#5b4b6e', line:'#e6e1ec'};
+const VARS = {
+  tsize:{label:'Tumour size', unit:'mm', bw:5, dom:[0,120]},
+  age:{label:'Age', unit:'years', bw:2, dom:[20,82]},
+  pnodes:{label:'Positive lymph nodes', unit:'nodes', bw:1, dom:[0,52]}
+};
+/* ---------- maths ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let R = mulberry32((Date.now()%1e9)|0);
+const mean = a => {let s=0;for(const v of a)s+=v;return s/a.length};
+const sdP = a => {const m=mean(a);let s=0;for(const v of a)s+=(v-m)*(v-m);return Math.sqrt(s/a.length)};
+const sdS = a => {const m=mean(a);let s=0;for(const v of a)s+=(v-m)*(v-m);return Math.sqrt(s/(a.length-1))};
+const skew = a => {const m=mean(a),s=sdP(a);let t=0;for(const v of a)t+=((v-m)/s)**3;return t/a.length};
+function sampleIdx(N,n,r=R){const o=new Array(n);for(let i=0;i<n;i++)o[i]=Math.floor(r()*N);return o}
+function studyMeans(pop,n,k,r=R,cum=null){
+  const N=pop.length,out=new Float64Array(k);
+  for(let j=0;j<k;j++){let s=0;for(let i=0;i<n;i++){let idx;
+    if(cum){const u=r()*cum[N-1];let lo=0,hi=N-1;while(lo<hi){const mid=(lo+hi)>>1;if(cum[mid]<u)lo=mid+1;else hi=mid}idx=lo}else idx=Math.floor(r()*N);
+    s+=pop[idx]}out[j]=s/n}
+  return out;
+}
+const fmt1 = d3.format('.1f'), fmt2=d3.format('.2f');
+const POP = {}; for(const k in VARS){const a=DATA[k];POP[k]={mu:mean(a),sd:sdP(a),med:d3.median(a),skew:skew(a),min:d3.min(a),max:d3.max(a)}}
+
+/* ---------- tooltip ---------- */
+const tip=document.getElementById('tip');
+function showTip(ev,html){tip.innerHTML=html;tip.style.opacity=1;let x=ev.clientX+14,y=ev.clientY-12;if(x>innerWidth-220)x=ev.clientX-200;tip.style.left=x+'px';tip.style.top=y+'px'}
+function hideTip(){tip.style.opacity=0}
+
+/* ---------- small helpers ---------- */
+function axisB(g,x,ticks,fmt){g.call(d3.axisBottom(x).ticks(ticks).tickSize(5).tickFormat(fmt||null)).attr('class','axis')}
+function axisL(g,y,ticks,w){g.call(d3.axisLeft(y).ticks(ticks).tickSize(-w).tickPadding(8)).attr('class','axis grid').call(s=>s.selectAll('.tick line').attr('stroke',C.line)).call(s=>s.select('.domain').remove())}
+function segButtons(container,items,init,onPick){
+  const el=document.getElementById(container);const btns={};
+  items.forEach(([val,label])=>{const b=document.createElement('button');b.className='btn'+(val===init?' on':'');b.textContent=label;b.onclick=()=>{Object.values(btns).forEach(x=>x.classList.remove('on'));b.classList.add('on');onPick(val)};el.appendChild(b);btns[val]=b});
+}
+function barPath(x0,x1,y0,yTop,r){ // bar with rounded top corners anchored at baseline y0
+  const w=x1-x0,h=y0-yTop; if(h<=0.5||w<=0)return `M${x0},${y0}h${Math.max(w,0)}`;
+  r=Math.min(r,w/2,h);return `M${x0},${y0}V${yTop+r}Q${x0},${yTop} ${x0+r},${yTop}H${x1-r}Q${x1},${yTop} ${x1},${yTop+r}V${y0}Z`;
+}
+
+/* =================================================================== */
+const hooks = {};
+
+/* ---- 2 estimate: population cloud & sample ---- */
+hooks['estimate']={init(){
+  const svg=d3.select('#estSvg');const W=560,H=400;
+  const r=mulberry32(7);
+  const pts=d3.range(260).map(()=>{const a=r()*2*Math.PI,d=Math.sqrt(r())*150;return{x:200+d*Math.cos(a)*1.15,y:200+d*Math.sin(a)}});
+  svg.append('text').attr('class','lbl').attr('x',200).attr('y',22).attr('text-anchor','middle').text('Population: everyone you care about');
+  const dots=svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx',d=>d.x).attr('cy',d=>d.y+10).attr('r',4).attr('fill',C.popL);
+  svg.append('text').attr('class','lbl').attr('x',480).attr('y',22).attr('text-anchor','middle').text('Your sample');
+  svg.append('circle').attr('cx',480).attr('cy',210).attr('r',62).attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',1.5).attr('stroke-dasharray','4 4');
+  const sg=svg.append('g');
+  svg.append('text').attr('class','tiny').attr('x',200).attr('y',392).attr('text-anchor','middle').attr('fill',C.ink2).style('font-size','15px').text('click to draw another sample');
+  function draw(){
+    const idx=d3.shuffle(d3.range(pts.length)).slice(0,10);
+    dots.transition().duration(300).attr('fill',(d,i)=>idx.includes(i)?C.sc1:C.popL).attr('r',(d,i)=>idx.includes(i)?6:4);
+    const tgt=idx.map((i,k)=>({sx:pts[i].x,sy:pts[i].y+10,tx:480+Math.cos(k/10*2*Math.PI)*36,ty:210+Math.sin(k/10*2*Math.PI)*36}));
+    sg.selectAll('circle').data(tgt).join('circle').attr('r',6).attr('fill',C.sc1).attr('cx',d=>d.sx).attr('cy',d=>d.sy).attr('opacity',.9)
+      .transition().delay((d,i)=>250+i*40).duration(700).ease(d3.easeCubicInOut).attr('cx',d=>d.tx).attr('cy',d=>d.ty);
+  }
+  svg.style('cursor','pointer').on('click',draw);this.draw=draw;draw();
+},enter(){this.draw&&this.draw()}};
+
+/* ---- 3 population ---- */
+hooks['population']={init(){
+  const W=780,H=430,m={l:56,r:16,t:16,b:52};
+  const svg=d3.select('#popSvg');
+  const x=d3.scaleLinear().range([m.l,W-m.r]),y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gy=svg.append('g').attr('transform',`translate(${m.l},0)`),gx=svg.append('g').attr('transform',`translate(0,${H-m.b})`);
+  const bars=svg.append('g');
+  const ml=svg.append('line').attr('stroke',C.sc1).attr('stroke-width',2.5);
+  const mdl=svg.append('line').attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  const mlab=svg.append('text').attr('class','lbl pink');
+  const mdlab=svg.append('text').attr('class','lbl');
+  const xl=svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-10).attr('text-anchor','middle');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Number of patients');
+  function draw(v){
+    const cfg=VARS[v],vals=DATA[v],P=POP[v];
+    x.domain(cfg.dom);
+    const bins=d3.bin().domain(cfg.dom).thresholds(d3.range(cfg.dom[0],cfg.dom[1],cfg.bw))(vals);
+    y.domain([0,d3.max(bins,b=>b.length)]).nice();
+    axisB(gx.transition().duration(500),x,10);axisL(gy.transition().duration(500),y,5,W-m.l-m.r);
+    bars.selectAll('path').data(bins).join('path').attr('fill',C.pop)
+      .on('mousemove',(ev,b)=>showTip(ev,`${b.x0}${cfg.bw>1?'–'+b.x1:''} ${cfg.unit}: <b>${b.length}</b> patients`)).on('mouseleave',hideTip)
+      .transition().duration(500).attr('d',b=>barPath(x(b.x0)+1,x(b.x1)-1,y(0),y(b.length),3));
+    ml.transition().duration(500).attr('x1',x(P.mu)).attr('x2',x(P.mu)).attr('y1',m.t).attr('y2',H-m.b);
+    mdl.transition().duration(500).attr('x1',x(P.med)).attr('x2',x(P.med)).attr('y1',m.t+24).attr('y2',H-m.b);
+    mlab.transition().duration(500).attr('x',x(P.mu)+8).attr('y',m.t+14).text(`mean ${fmt1(P.mu)}`);
+    mdlab.transition().duration(500).attr('x',x(P.med)-8).attr('y',m.t+38).attr('text-anchor','end').text(`median ${fmt1(P.med)}`);
+    xl.text(`${cfg.label} (${cfg.unit})`);
+    document.getElementById('popMean').innerHTML=`${fmt1(P.mu)} <small>${cfg.unit}</small>`;
+    document.getElementById('popMed').innerHTML=`${fmt1(P.med)} <small>${cfg.unit}</small>`;
+    document.getElementById('popSd').innerHTML=`${fmt1(P.sd)} <small>${cfg.unit}</small>`;
+    document.getElementById('popShape').innerHTML= P.skew>1?'<b>Skewed to the right</b>: a long tail of large values pulls the mean above the median.':(P.skew>0.4?'<b>Moderately skewed</b>.':'<b>Roughly symmetric</b>: mean and median almost coincide.');
+  }
+  segButtons('popVar',[['tsize','Tumour size'],['age','Age'],['pnodes','Positive nodes']],'tsize',draw);
+  draw('tsize');
+}};
+
+/* ---- 4 one study ---- */
+hooks['one-study']={init(){
+  const W=900,m={l:40,r:150};const pop=DATA.tsize,mu=POP.tsize.mu;
+  const x=d3.scaleLinear().domain([0,120]).range([m.l,W-m.r]);
+  const svg=d3.select('#oneSvg');
+  const jr=mulberry32(11);const jit=pop.map(()=>jr());
+  const popTop=34,popH=120,rowY0=232,rowH=38,maxRows=6;
+  svg.append('text').attr('class','lbl').attr('x',m.l).attr('y',18).text('Population: 686 patients (tumour size)');
+  const pg=svg.append('g');
+  const pc=pg.selectAll('circle').data(pop).join('circle').attr('cx',(d,i)=>x(d+(jit[i]-.5)*0.9)).attr('cy',(d,i)=>popTop+jit[(i*7)%pop.length]*popH).attr('r',2.6).attr('fill',C.pop).attr('opacity',.75);
+  svg.append('g').attr('transform',`translate(0,${popTop+popH+12})`).call(g=>axisB(g,x,12)).append('text').attr('class','axlab').attr('x',W-m.r).attr('y',36).attr('text-anchor','end').text('Tumour size (mm)');
+  svg.append('line').attr('x1',x(mu)).attr('x2',x(mu)).attr('y1',popTop-8).attr('y2',rowY0+rowH*maxRows-12).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl').attr('x',x(mu)+6).attr('y',rowY0+rowH*maxRows-14).text(`true mean ${fmt1(mu)}`);
+  const rowsG=svg.append('g');let rows=[],count=0,allMeans=[],busy=false;
+  const rowY=i=>rowY0+i*rowH;
+  const btn=document.getElementById('oneRun');
+  document.getElementById('oneTrue').innerHTML=`${fmt1(mu)} <small>mm</small>`;
+  function run(){
+    if(busy)return;busy=true;btn.disabled=true;count++;
+    const idx=sampleIdx(pop.length,20);const vals=idx.map(i=>pop[i]);const mval=mean(vals);allMeans.push(mval);
+    const set=new Set(idx);
+    pc.filter((d,i)=>set.has(i)).raise().transition().duration(250).attr('fill',C.sc1).attr('r',4.5).attr('opacity',1);
+    rows.forEach(r=>r.i++);
+    rows.forEach(r=>r.g.transition().duration(500).attr('transform',`translate(0,${rowY(r.i)})`).attr('opacity',r.i>=maxRows?0:1));
+    rows.filter(r=>r.i>=maxRows).forEach(r=>r.g.transition().delay(500).remove());
+    rows=rows.filter(r=>r.i<maxRows);
+    const g=rowsG.append('g').attr('transform',`translate(0,${rowY(0)})`);
+    g.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('stroke',C.line);
+    const pts=idx.map((pi,k)=>({sx:+pc.nodes()[pi].getAttribute('cx'),sy:+pc.nodes()[pi].getAttribute('cy')-rowY(0),tx:x(pop[pi]),ty:(jr()-.5)*16}));
+    g.selectAll('circle').data(pts).join('circle').attr('r',4).attr('fill',C.sc1).attr('opacity',0).attr('cx',d=>d.sx).attr('cy',d=>d.sy)
+      .transition().delay((d,k)=>200+k*25).duration(650).ease(d3.easeCubicInOut).attr('opacity',.85).attr('cx',d=>d.tx).attr('cy',d=>d.ty).attr('fill',C.pc2);
+    const mb=g.append('rect').attr('x',x(mval)-2).attr('width',4).attr('y',0).attr('height',0).attr('rx',2).attr('fill',C.sc1);
+    mb.transition().delay(1100).duration(300).attr('y',-15).attr('height',30);
+    g.append('text').attr('class','lbl').attr('x',W-m.r+14).attr('y',5).attr('opacity',0).html(`Study ${count}: <tspan fill="${C.sc1}">x̄ = ${fmt1(mval)}</tspan>`).transition().delay(1100).duration(300).attr('opacity',1);
+    rows.unshift({g,i:0});
+    setTimeout(()=>{pc.transition().duration(400).attr('fill',C.pop).attr('r',2.6).attr('opacity',.75);busy=false;btn.disabled=false;
+      document.getElementById('oneCount').textContent=count;
+      document.getElementById('oneRange').innerHTML=allMeans.length>1?`${fmt1(d3.min(allMeans))} – ${fmt1(d3.max(allMeans))} <small>mm</small>`:`${fmt1(mval)} <small>mm</small>`;
+    },1450);
+  }
+  btn.onclick=run;
+}};
+
+/* ---- 5 many studies ---- */
+hooks['many-studies']={init(){
+  const W=880,m={l:56,r:16};const pop=DATA.tsize,mu=POP.tsize.mu;
+  const svg=d3.select('#manySvg');
+  const x=d3.scaleLinear().domain([0,120]).range([m.l,W-m.r]);
+  const top={t:22,b:150},bot={t:215,b:420};
+  // population
+  const pb=d3.bin().domain([0,120]).thresholds(d3.range(0,120,2.5))(pop);
+  const yp=d3.scaleLinear().domain([0,d3.max(pb,b=>b.length)]).range([top.b,top.t]);
+  svg.append('text').attr('class','lbl').attr('x',m.l).attr('y',12).text('Patients (the population)');
+  svg.append('g').selectAll('path').data(pb).join('path').attr('fill',C.popL).attr('d',b=>barPath(x(b.x0)+.5,x(b.x1)-.5,yp(0),yp(b.length),2))
+     .on('mousemove',(ev,b)=>showTip(ev,`${b.x0}–${b.x1} mm: <b>${b.length}</b> patients`)).on('mouseleave',hideTip);
+  svg.append('g').attr('transform',`translate(0,${top.b})`).call(g=>axisB(g,x,12));
+  const flash=svg.append('g');
+  // sampling distribution
+  svg.append('text').attr('class','lbl purple').attr('x',m.l).attr('y',bot.t-16).text('Study means (each study: 20 random patients)');
+  const yb=d3.scaleLinear().range([bot.b,bot.t]);
+  const gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  const bars=svg.append('g');
+  svg.append('g').attr('transform',`translate(0,${bot.b})`).call(g=>axisB(g,x,12)).append('text').attr('class','axlab').attr('x',W-m.r).attr('y',38).attr('text-anchor','end').text('Tumour size (mm)');
+  svg.append('line').attr('x1',x(mu)).attr('x2',x(mu)).attr('y1',top.t).attr('y2',bot.b).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl').attr('x',x(mu)+6).attr('y',top.t+6).text(`true mean ${fmt1(mu)}`);
+  const drops=svg.append('g');
+  let means=[];const thr=d3.range(0,121,1);
+  function render(dur=300){
+    const bins=d3.bin().domain([0,120]).thresholds(thr)(means);
+    yb.domain([0,Math.max(5,d3.max(bins,b=>b.length))]).nice();
+    axisL(gy.transition().duration(dur),yb,4,W-m.l-m.r);
+    bars.selectAll('path').data(bins).join('path').attr('fill',C.pc2)
+      .on('mousemove',(ev,b)=>showTip(ev,`study means ${b.x0}–${b.x1} mm: <b>${b.length}</b> studies`)).on('mouseleave',hideTip)
+      .transition().duration(dur).attr('d',b=>barPath(x(b.x0)+.6,x(b.x1)-.6,yb(0),yb(b.length),2));
+    document.getElementById('manyCount').textContent=d3.format(',')(means.length);
+    if(means.length>=20){const s=Float64Array.from(means).sort();
+      document.getElementById('manyRange').innerHTML=`${fmt1(d3.quantileSorted(s,.025))} – ${fmt1(d3.quantileSorted(s,.975))} <small>mm</small>`;
+      document.getElementById('manySpread').innerHTML=`${fmt2(sdP(means))} <small>mm</small>`;}
+    else{document.getElementById('manyRange').textContent='–';document.getElementById('manySpread').textContent=means.length>1?'(need more studies)':'–';}
+  }
+  function one(animate=true){
+    const idx=sampleIdx(pop.length,20);const v=mean(idx.map(i=>pop[i]));
+    if(!animate){means.push(v);return}
+    flash.selectAll('*').interrupt().remove();
+    flash.selectAll('line').data(idx).join('line').attr('x1',i=>x(pop[i])).attr('x2',i=>x(pop[i])).attr('y1',top.b-4).attr('y2',top.b+8).attr('stroke',C.sc1).attr('stroke-width',2.5)
+      .transition().delay(500).duration(300).attr('opacity',0).remove();
+    drops.append('circle').attr('cx',x(v)).attr('cy',top.b+14).attr('r',6).attr('fill',C.sc1)
+      .transition().delay(250).duration(550).ease(d3.easeBounceOut).attr('cy',yb(0)-6).attr('r',4).on('end',function(){d3.select(this).remove();means.push(v);render(200)});
+  }
+  let timer=null;
+  function stopTimer(){if(timer){timer.stop();timer=null}}
+  document.getElementById('manyOne').onclick=()=>{stopTimer();one(true)};
+  document.getElementById('manyTen').onclick=()=>{stopTimer();let k=0;timer=d3.interval(()=>{one(true);if(++k>=10)stopTimer()},140)};
+  document.getElementById('manyHundred').onclick=()=>{stopTimer();for(let i=0;i<100;i++)one(false);render(500)};
+  document.getElementById('manyAll').onclick=()=>{stopTimer();let k=0;timer=d3.interval(()=>{const left=2000-means.length;const step=Math.min(left,120);for(let i=0;i<step;i++)one(false);render(120);if(means.length>=2000)stopTimer()},130)};
+  document.getElementById('manyReset').onclick=()=>{stopTimer();means=[];drops.selectAll('*').remove();render(300)};
+  render(0);this.stop=stopTimer;
+},leave(){this.stop&&this.stop()}};
+
+/* ---- 6 SD vs SE ---- */
+hooks['sd-vs-se']={init(){
+  const W=540,H=430,m={l:50,r:10,t:24,b:40};const pop=DATA.tsize;
+  const svg=d3.select('#seSvg');
+  const y=d3.scaleLinear().domain([0,125]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,6,W-m.l-m.r));
+  svg.append('text').attr('class','axlab').attr('transform',`translate(12,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Tumour size (mm)');
+  const cx=[m.l+(W-m.l)*0.28,m.l+(W-m.l)*0.74];
+  const titles=['mean ± SD','mean ± SE'];
+  titles.forEach((t,i)=>svg.append('text').attr('class','lbl').attr('x',cx[i]).attr('y',H-12).attr('text-anchor','middle').text(t));
+  const g=[svg.append('g'),svg.append('g')];
+  const ann=[svg.append('text').attr('class','lbl'),svg.append('text').attr('class','lbl pink')];
+  function draw(){
+    const vals=sampleIdx(pop.length,20).map(i=>pop[i]);const mv=mean(vals),s=sdS(vals),se=s/Math.sqrt(20);
+    const jr=mulberry32(5);const jx=vals.map(()=>(jr()-.5)*70);
+    [s,se].forEach((half,i)=>{
+      const gg=g[i];
+      gg.selectAll('circle').data(vals).join('circle').attr('r',4.5).attr('fill',C.pop).attr('opacity',.8).transition().duration(500).attr('cx',(d,k)=>cx[i]+jx[k]).attr('cy',d=>y(d));
+      const col=i===0?C.pc1:C.sc1;
+      const bar=gg.selectAll('g.eb').data([0]).join(e=>{const q=e.append('g').attr('class','eb');q.append('line').attr('class','v');q.append('line').attr('class','t');q.append('line').attr('class','b');q.append('circle');return q});
+      bar.selectAll('line').attr('stroke',col).attr('stroke-width',3);
+      bar.select('.v').transition().duration(500).attr('x1',cx[i]+60).attr('x2',cx[i]+60).attr('y1',y(mv-half)).attr('y2',y(mv+half));
+      bar.select('.t').transition().duration(500).attr('x1',cx[i]+50).attr('x2',cx[i]+70).attr('y1',y(mv+half)).attr('y2',y(mv+half));
+      bar.select('.b').transition().duration(500).attr('x1',cx[i]+50).attr('x2',cx[i]+70).attr('y1',y(mv-half)).attr('y2',y(mv-half));
+      bar.select('circle').attr('r',7).attr('fill',col).attr('stroke','#fff').attr('stroke-width',2).transition().duration(500).attr('cx',cx[i]+60).attr('cy',y(mv));
+      ann[i].transition().duration(500).attr('x',cx[i]+78).attr('y',y(mv+half)-6).text(`± ${fmt1(half)}`);
+    });
+  }
+  document.getElementById('seNew').onclick=draw;draw();
+}};
+
+/* ---- 8 room results ---- */
+hooks['room']={init(){
+  const ns=[5,10,20,40,80,160];const sigma=POP.tsize.sd;
+  const tb=document.getElementById('roomTable');
+  ns.forEach(n=>{const tr=document.createElement('tr');tr.innerHTML=`<td class="num">${n}</td><td><input type="number" step="0.01" min="0" data-n="${n}"></td><td><input type="number" step="0.01" min="0" data-n="${n}"></td>`;tb.appendChild(tr)});
+  const inputs=[...tb.querySelectorAll('input')];
+  const W=700,H=460,m={l:56,r:20,t:20,b:50};
+  const svg=d3.select('#roomSvg');
+  const x=d3.scaleLinear().domain([0,170]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,8]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(g=>axisL(g,y,8,W-m.l-m.r));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>g.call(d3.axisBottom(x).tickValues(ns).tickSize(5)).attr('class','axis'));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Patients per study (n)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Spread of study means (mm)');
+  const line=d3.line().x(d=>x(d)).y(d=>y(sigma/Math.sqrt(d))).curve(d3.curveBasis);
+  const xs=d3.range(5,171,1);
+  const curve=svg.append('path').attr('d',line(xs)).attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2.5);
+  const len=curve.node().getTotalLength();curve.attr('stroke-dasharray',`${len} ${len}`).attr('stroke-dashoffset',len);
+  const clab=svg.append('text').attr('class','lbl pink').attr('x',x(110)).attr('y',y(sigma/Math.sqrt(110))-14).attr('opacity',0).text('14.3 / √n');
+  // 20 -> 80 annotation
+  const ann=svg.append('g').attr('opacity',0);
+  ann.append('line').attr('x1',x(20)).attr('x2',x(80)).attr('y1',y(sigma/Math.sqrt(20))).attr('y2',y(sigma/Math.sqrt(20))).attr('stroke',C.ink2).attr('stroke-dasharray','3 3');
+  ann.append('line').attr('x1',x(80)).attr('x2',x(80)).attr('y1',y(sigma/Math.sqrt(20))).attr('y2',y(sigma/Math.sqrt(80))).attr('stroke',C.ink2).attr('stroke-dasharray','3 3');
+  ann.append('text').attr('class','lbl').attr('x',x(84)).attr('y',y(sigma/Math.sqrt(20)*0.75)).text('4× patients → ½ the spread');
+  const ptsG=svg.append('g');
+  function render(){
+    const pts=inputs.filter(i=>i.value!=='').map(i=>({n:+i.dataset.n,v:+i.value}));
+    ptsG.selectAll('circle').data(pts,(d,i)=>d.n+'_'+i).join(e=>e.append('circle').attr('r',0).call(s=>s.transition().duration(300).attr('r',7)),u=>u,x=>x.remove())
+      .attr('cx',d=>x(d.n)).attr('cy',d=>y(Math.min(d.v,8))).attr('fill',C.pc2).attr('stroke','#fff').attr('stroke-width',2)
+      .on('mousemove',(ev,d)=>showTip(ev,`n = ${d.n}: spread <b>${fmt2(d.v)}</b> mm`)).on('mouseleave',hideTip);
+    const by=d3.rollup(pts,v=>d3.mean(v,d=>d.v),d=>d.n);
+    const msg=document.getElementById('roomMsg');
+    if(by.has(20)&&by.has(80))msg.innerHTML=`n = 20 → 80: spread ${fmt2(by.get(20))} → ${fmt2(by.get(80))} mm, ratio <b>${fmt2(by.get(80)/by.get(20))}</b>`;else msg.textContent='';
+  }
+  inputs.forEach(i=>i.addEventListener('input',render));
+  document.getElementById('roomFill').onclick=()=>{inputs.forEach(i=>{i.value=fmt2(sdP(studyMeans(DATA.tsize,+i.dataset.n,2000)))});render()};
+  document.getElementById('roomClear').onclick=()=>{inputs.forEach(i=>i.value='');render();curve.attr('stroke-dashoffset',len);clab.attr('opacity',0);ann.attr('opacity',0)};
+  document.getElementById('roomCurve').onclick=()=>{curve.transition().duration(1400).ease(d3.easeCubicOut).attr('stroke-dashoffset',0);clab.transition().delay(1200).attr('opacity',1);ann.transition().delay(1500).duration(500).attr('opacity',1)};
+  render();
+}};
+
+/* ---- 9 sqrt n ---- */
+hooks['sqrt-n']={init(){
+  const steps=[2,5,10,20,40,80,160,320,640];const pop=DATA.tsize,sigma=POP.tsize.sd,mu=POP.tsize.mu;
+  const W=760,H=440,m={l:56,r:16,t:30,b:50};
+  const svg=d3.select('#sqrtSvg');
+  const x=d3.scaleLinear().domain([0,70]).range([m.l,W-m.r]),y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,14));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Mean tumour size in one study (mm)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Number of studies');
+  const bars=svg.append('g');
+  svg.append('line').attr('x1',x(mu)).attr('x2',x(mu)).attr('y1',m.t-10).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  const br=svg.append('g');
+  const brl=br.append('path').attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2.5);
+  const brt=br.append('text').attr('class','lbl pink').attr('text-anchor','middle');
+  // mini curve
+  const mW=300,mH=150,mm={l:40,r:8,t:10,b:30};
+  const ms=d3.select('#sqrtMini');
+  const mx=d3.scaleLog().domain([2,640]).range([mm.l,mW-mm.r]),my=d3.scaleLinear().domain([0,11]).range([mH-mm.b,mm.t]);
+  ms.append('g').attr('transform',`translate(0,${mH-mm.b})`).call(g=>g.call(d3.axisBottom(mx).tickValues([2,10,40,160,640]).tickFormat(d3.format('d')).tickSize(4)).attr('class','axis'));
+  ms.append('g').attr('transform',`translate(${mm.l},0)`).call(g=>g.call(d3.axisLeft(my).ticks(3).tickSize(4)).attr('class','axis'));
+  ms.append('path').attr('d',d3.line().x(d=>mx(d)).y(d=>my(sigma/Math.sqrt(d)))(d3.range(2,641,2))).attr('fill','none').attr('stroke',C.pc2).attr('stroke-width',2);
+  ms.append('text').attr('class','axlab').attr('x',mW-mm.r).attr('y',mH-2).attr('text-anchor','end').style('font-size','12px').text('n (log scale)');
+  ms.append('text').attr('class','axlab').attr('x',mm.l+6).attr('y',mm.t+4).style('font-size','12px').text('SE (mm)');
+  const mdot=ms.append('circle').attr('r',6).attr('fill',C.sc1).attr('stroke','#fff').attr('stroke-width',2);
+  function draw(n){
+    const means=studyMeans(pop,n,2000);const s=sdP(means),se=sigma/Math.sqrt(n);
+    const bw=n>=80?0.25:0.5;
+    const bins=d3.bin().domain([0,70]).thresholds(d3.range(0,70,bw))(means);
+    y.domain([0,d3.max(bins,b=>b.length)]).nice();
+    axisL(gy.transition().duration(400),y,5,W-m.l-m.r);
+    bars.selectAll('path').data(bins).join('path').attr('fill',C.pc2)
+      .on('mousemove',(ev,b)=>showTip(ev,`${b.x0}–${b.x1} mm: <b>${b.length}</b> studies`)).on('mouseleave',hideTip)
+      .transition().duration(400).attr('d',b=>barPath(x(b.x0)+.3,x(b.x1)-.3,y(0),y(b.length),1.5));
+    const yb=m.t+6;
+    brl.transition().duration(400).attr('d',`M${x(mu-s)},${yb+10}V${yb}H${x(mu+s)}V${yb+10}`);
+    brt.attr('text-anchor','start').transition().duration(400).attr('x',x(mu+s)+8).attr('y',yb+10).text(`±1 SE = ${fmt2(s)} mm`);
+    document.getElementById('sqrtN').textContent='n = '+n;
+    document.getElementById('sqrtSim').innerHTML=`${fmt2(s)} <small>mm</small>`;
+    document.getElementById('sqrtFor').innerHTML=`${fmt2(se)} <small>mm</small>`;
+    document.getElementById('sqrtHalve').innerHTML=`n = ${4*n} <small>(4 × ${n})</small>`;
+    mdot.transition().duration(400).attr('cx',mx(n)).attr('cy',my(se));
+  }
+  const sl=document.getElementById('sqrtSlider');sl.oninput=()=>draw(steps[+sl.value]);draw(steps[+sl.value]);
+}};
+
+/* ---- 10 CLT ---- */
+hooks['clt']={init(){
+  let v='pnodes',n=1;
+  const ps=d3.select('#cltPop');const pW=380,pH=300,pm={l:44,r:10,t:30,b:44};
+  const px=d3.scaleLinear().range([pm.l,pW-pm.r]),py=d3.scaleLinear().range([pH-pm.b,pm.t]);
+  const pgx=ps.append('g').attr('transform',`translate(0,${pH-pm.b})`),pbars=ps.append('g');
+  const ptitle=ps.append('text').attr('class','lbl').attr('x',pm.l).attr('y',14);
+  const pxl=ps.append('text').attr('class','axlab').attr('x',(pW+pm.l)/2).attr('y',pH-6).attr('text-anchor','middle');
+  const svg=d3.select('#cltSvg');const W=720,H=420,m={l:56,r:16,t:34,b:50};
+  const x=d3.scaleLinear().range([m.l,W-m.r]),y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gx=svg.append('g').attr('transform',`translate(0,${H-m.b})`),gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  const bars=svg.append('g');const curve=svg.append('path').attr('fill','none').attr('stroke',C.sc1).attr('stroke-width',2.5);
+  const title=svg.append('text').attr('class','lbl purple').attr('x',m.l).attr('y',16);
+  const clab=svg.append('text').attr('class','lbl pink').attr('text-anchor','end').attr('x',W-m.r).attr('y',16).text('bell curve (normal) prediction');
+  const xl=svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Density');
+  function drawPop(){
+    const cfg=VARS[v];px.domain(cfg.dom);
+    const bins=d3.bin().domain(cfg.dom).thresholds(d3.range(cfg.dom[0],cfg.dom[1],cfg.bw))(DATA[v]);
+    py.domain([0,d3.max(bins,b=>b.length)]);
+    pgx.transition().duration(400).call(g=>axisB(g,px,6));
+    pbars.selectAll('path').data(bins).join('path').attr('fill',C.pop).transition().duration(400).attr('d',b=>barPath(px(b.x0)+.5,px(b.x1)-.5,py(0),py(b.length),2));
+    ptitle.text('The patients');pxl.text(`${cfg.label} (${cfg.unit})`);
+  }
+  function draw(){
+    const cfg=VARS[v],P=POP[v];const k=5000;
+    const means=studyMeans(DATA[v],n,k);const se=P.sd/Math.sqrt(n);
+    const s=Float64Array.from(means).sort();
+    let lo=Math.max(P.min,d3.quantileSorted(s,.0005)),hi=d3.quantileSorted(s,.9995);
+    let bw=Math.ceil(((hi-lo)/45)*n)/n; // multiple of 1/n: no combing for integer data
+    const start=Math.floor(lo*n)/n-0.5/n;const end=hi+bw;
+    const thr=d3.range(start,end,bw);
+    x.domain([start,end]);
+    const bins=d3.bin().domain([start,end]).thresholds(thr)(means).filter(b=>b.x1>b.x0);
+    const dens=b=>b.length/(k*(b.x1-b.x0));
+    const norm=t=>Math.exp(-0.5*((t-P.mu)/se)**2)/(se*Math.sqrt(2*Math.PI));
+    y.domain([0,Math.max(d3.max(bins,dens),norm(P.mu))*1.05]);
+    gx.transition().duration(400).call(g=>axisB(g,x,8));
+    axisL(gy.transition().duration(400),y,4,W-m.l-m.r);
+    bars.selectAll('path').data(bins).join('path').attr('fill',C.pc2)
+      .on('mousemove',(ev,b)=>showTip(ev,`${fmt1(b.x0)}–${fmt1(b.x1)}: <b>${b.length}</b> of ${k} studies`)).on('mouseleave',hideTip)
+      .transition().duration(400).attr('d',b=>barPath(x(b.x0)+.4,x(b.x1)-.4,y(0),y(dens(b)),1.5));
+    const xs=d3.range(0,301).map(i=>start+(end-start)*i/300);
+    curve.transition().duration(400).attr('d',d3.line().x(t=>x(t)).y(t=>y(norm(t)))(xs));
+    title.text(n===1?`n = 1: each "study mean" is one patient`:`Means of ${d3.format(',')(k)} studies, ${n} patients each`);
+    xl.text(`Study mean: ${cfg.label.toLowerCase()} (${cfg.unit})`);
+    const sk=n===1?P.skew:skew(means);
+    document.getElementById('cltMsg').innerHTML=`Skewness of the patients: <b>${fmt2(P.skew)}</b><br>Skewness of the study means: <b style="color:${C.pc2}">${fmt2(sk)}</b><br><span class="tiny">0 = symmetric. It shrinks roughly like 1/√n.</span>`;
+  }
+  segButtons('cltVar',[['tsize','Tumour size'],['age','Age'],['pnodes','Positive nodes']],v,val=>{v=val;drawPop();draw()});
+  segButtons('cltN',[[1,'1'],[2,'2'],[5,'5'],[10,'10'],[30,'30'],[100,'100']],n,val=>{n=val;draw()});
+  drawPop();draw();
+}};
+
+/* ---- 11 bias ---- */
+hooks['bias']={init(){
+  const pop=DATA.tsize,mu=POP.tsize.mu;let n=10;
+  const cum=new Float64Array(pop.length);let acc=0;pop.forEach((v,i)=>{acc+=v;cum[i]=acc});
+  const W=780,H=430,m={l:56,r:16,t:20,b:50};
+  const svg=d3.select('#biasSvg');
+  const x=d3.scaleLinear().domain([15,50]).range([m.l,W-m.r]),y=d3.scaleLinear().range([H-m.b,m.t]);
+  const gy=svg.append('g').attr('transform',`translate(${m.l},0)`);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,7));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Mean tumour size in one study (mm)');
+  svg.append('text').attr('class','axlab').attr('transform',`translate(14,${(H-m.b+m.t)/2}) rotate(-90)`).attr('text-anchor','middle').text('Number of studies');
+  const aR=svg.append('path').attr('fill',C.pc2).attr('fill-opacity',.22).attr('stroke',C.pc2).attr('stroke-width',2);
+  const aB=svg.append('path').attr('fill',C.sc1).attr('fill-opacity',.18).attr('stroke',C.sc1).attr('stroke-width',2);
+  svg.append('line').attr('x1',x(mu)).attr('x2',x(mu)).attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-width',1.5).attr('stroke-dasharray','5 4');
+  svg.append('text').attr('class','lbl').attr('x',x(mu)-6).attr('y',m.t+4).attr('text-anchor','end').text('truth');
+  const lR=svg.append('text').attr('class','lbl purple').attr('text-anchor','middle'),lB=svg.append('text').attr('class','lbl pink').attr('text-anchor','middle');
+  function hist(ms){const bw=n<=10?1:(n<=40?0.5:0.25);return d3.bin().domain([15,50]).thresholds(d3.range(15,50,bw))(ms).map(b=>({x0:b.x0,x1:b.x1,c:b.length}))}
+  function stepPts(h){const p=[];h.forEach(b=>{p.push([b.x0,b.c]);p.push([b.x1,b.c])});return p}
+  function draw(){
+    const mr=studyMeans(pop,n,2000),mb=studyMeans(pop,n,2000,R,cum);
+    const hr=hist(mr),hb=hist(mb);
+    y.domain([0,Math.max(d3.max(hr,b=>b.c),d3.max(hb,b=>b.c))*1.12]).nice();
+    axisL(gy.transition().duration(500),y,5,W-m.l-m.r);
+    const area=d3.area().x(d=>x(d[0])).y0(y(0)).y1(d=>y(d[1]));
+    aR.transition().duration(500).attr('d',area(stepPts(hr)));aB.transition().duration(500).attr('d',area(stepPts(hb)));
+    const pr=d3.max(hr,b=>b.c),pb=d3.max(hb,b=>b.c);
+    lR.transition().duration(500).attr('x',x(mean(mr))).attr('y',y(pr)-10).text('random');
+    lB.transition().duration(500).attr('x',x(mean(mb))).attr('y',y(pb)-10).text('referral centre');
+    document.getElementById('biasR').innerHTML=`${fmt1(mean(mr))} <small>± ${fmt1(sdP(mr))} mm</small>`;
+    document.getElementById('biasB').innerHTML=`${fmt1(mean(mb))} <small>± ${fmt1(sdP(mb))} mm</small>`;
+  }
+  document.getElementById('biasT').innerHTML=`${fmt1(mu)} <small>mm</small>`;
+  segButtons('biasN',[[10,'10'],[40,'40'],[160,'160'],[640,'640']],n,val=>{n=val;draw()});
+  draw();
+}};
+
+/* =================== deck engine =================== */
+const slides=[...document.querySelectorAll('.slide')];
+const stage=document.getElementById('stage');
+let cur=-1;const inited=new Set();
+function fit(){const s=Math.min(innerWidth/1280,innerHeight/720);stage.style.transform=`scale(${s})`}
+addEventListener('resize',fit);fit();
+const notesEl=document.getElementById('notes'),notesBody=document.getElementById('notesBody');
+function go(i,push=true){
+  i=Math.max(0,Math.min(slides.length-1,i));if(i===cur)return;
+  if(cur>=0){slides[cur].classList.remove('active');const h=hooks[slides[cur].id];h&&h.leave&&h.leave()}
+  cur=i;const s=slides[i];s.classList.add('active');hideTip();
+  const h=hooks[s.id];
+  if(h){if(!inited.has(s.id)){inited.add(s.id);try{h.init()}catch(e){console.error(e)}}else if(h.enter)h.enter()}
+  document.getElementById('progress').style.width=((i+1)/slides.length*100)+'%';
+  document.getElementById('counter').textContent=`${i+1} / ${slides.length}`;
+  const n=s.querySelector('aside.notes');notesBody.textContent=n?n.textContent.trim():'';
+  if(push){try{history.replaceState(null,'','#'+s.id)}catch(e){location.hash=s.id}}
+}
+function fromHash(){const id=location.hash.slice(1);const i=slides.findIndex(s=>s.id===id);go(i>=0?i:0,false)}
+addEventListener('hashchange',fromHash);
+document.getElementById('prevBtn').onclick=()=>go(cur-1);
+document.getElementById('nextBtn').onclick=()=>go(cur+1);
+addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(['ArrowRight','PageDown'].includes(e.key)||(e.key===' '&&e.target.tagName!=='BUTTON')){e.preventDefault();go(cur+1)}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(cur-1)}
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);
+  else if(e.key==='n'||e.key==='N')notesEl.classList.toggle('show');
+  else if(e.key==='f'||e.key==='F'){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(err){}}
+});
+fromHash();
+</script>
+</body>
+</html>
