@@ -15,9 +15,11 @@ Gulbenkian Institute for Molecular Medicine (GIMM).
 
 ## Programme
 
+Start with the course introduction, `slides/day1/Day1_T0_course_introduction.html`: objectives, how the course works (Colab, AI roles) and a clickable index of all lecture decks.
+
 - **Day 1 – Statistical inference foundations:** sampling variability, confidence intervals, p-values, false positives, power, choosing a test (GBSG2 breast cancer trial)
 - **Day 2 – Regression:** tests as linear models, multiple regression, diagnostics, logistic and count models, differential expression and FDR (airway RNA-seq)
-- **Day 3 – Survival analysis, experimental design, capstone** *(in preparation)*
+- **Day 3 – Survival analysis, experimental design, final project:** censoring, Kaplan–Meier, log-rank, Cox; pseudoreplication, batches, blocking, randomisation
 
 ## Presenting the slides
 

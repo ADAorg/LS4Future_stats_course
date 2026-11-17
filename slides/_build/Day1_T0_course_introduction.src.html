@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Course introduction · Practical statistics for biomedical researchers</title>
+<style>/*CSS*/</style>
+<style>
+.obj{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;margin-top:6px}
+.obj div{display:flex;gap:12px;align-items:flex-start;font-size:19px;line-height:1.38}
+.obj .n{flex:0 0 30px;height:30px;border-radius:50%;background:var(--pc2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;margin-top:1px}
+.obj .d{font-size:12px;letter-spacing:.1em;color:var(--muted);display:block;margin-top:2px}
+.days{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:8px}
+.day{background:var(--wash);border-radius:14px;padding:16px 18px}
+.day h3{font-weight:400;font-size:24px;margin:0 0 4px;color:var(--pc1)}
+.day .tag{font-size:13px;letter-spacing:.12em;color:var(--pc2);text-transform:uppercase}
+.day .blk{margin-top:12px;font-size:17px;line-height:1.4;color:var(--ink2)}
+.day .blk b{font-weight:400;color:var(--ink);display:block;font-size:18px}
+.flow{display:flex;gap:10px;align-items:stretch;margin-top:10px}
+.flow .st{flex:1;background:var(--wash);border-radius:14px;padding:14px 16px;position:relative}
+.flow .st h3{font-weight:400;font-size:22px;margin:4px 0 6px;color:var(--pc1)}
+.flow .st p{font-size:17px;line-height:1.4;margin:0;color:var(--ink2)}
+.flow .st .t{font-size:13px;letter-spacing:.1em;color:var(--pc2)}
+.flow .ar{align-self:center;color:var(--pop);font-size:28px}
+.nb{background:#fff;border:1px solid var(--line);border-radius:10px;font-family:Menlo,Consolas,monospace;font-size:14px;line-height:1.55;padding:10px 14px;color:#333;white-space:pre}
+.nb .c{color:#7c7c7c}.nb .k{color:#9933ff}.nb .h{background:#fff3c4}
+.nbmd{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:16px;line-height:1.45;margin-bottom:8px}
+.legend td{font-size:17px;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.legend td:first-child{font-size:20px;width:34px;text-align:center}
+.idx{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:4px}
+.idx .col{background:var(--wash);border-radius:14px;padding:12px 14px}
+.idx h3{font-weight:400;font-size:20px;margin:0 0 2px;color:var(--pc1)}
+.idx .bl{font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:10px 0 4px}
+.idx a{display:flex;gap:8px;align-items:baseline;text-decoration:none;color:var(--ink);font-size:16.5px;line-height:1.3;padding:4px 6px;border-radius:8px}
+.idx a:hover{background:#fff;color:var(--pc2)}
+.idx a .k{font-size:12px;color:var(--pc2);flex:0 0 38px;letter-spacing:.04em}
+.idx .nbk{font-size:12.5px;color:var(--muted);padding:0 6px 4px 52px;font-family:Menlo,Consolas,monospace}
+.ds{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:8px}
+.ds .card h3{font-weight:400;font-size:21px;margin:2px 0 6px;color:var(--pc1)}
+.ds .card p{font-size:16px;line-height:1.4;margin:0 0 6px;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- ============ 1 TITLE ============ -->
+<section class="slide dark" id="title">
+  <div class="crescents">
+    <div class="blob" style="width:620px;height:620px;right:-140px;top:-180px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:420px;height:420px;right:160px;bottom:-200px;background:radial-gradient(circle,#ff0066 0%,transparent 70%);opacity:.7"></div>
+    <div class="blob" style="width:300px;height:300px;right:40px;top:260px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.6"></div>
+  </div>
+  <div style="position:relative;margin-top:140px">
+    <p style="margin:0 0 18px;color:var(--sc3);font-size:18px;letter-spacing:.14em">2–4 DECEMBER 2026 · GIMM</p>
+    <h1 style="font-size:76px;margin-bottom:22px">Practical statistics for <em>biomedical researchers</em>.</h1>
+    <p style="font-size:28px;color:rgba(255,255,255,.8);max-width:860px;margin:0">Three days of inference, models, survival and design: with simulations, real data, and AI as a learning partner.</p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Course introduction</span></div>
+  <aside class="notes">Welcome. Quick round of introductions if the group is small: name, lab, and one analysis you are working on or worried about. Keep a note of the analyses mentioned; they make good examples throughout the three days and for the "apply it to my work" prompts.</aside>
+</section>
+
+<!-- ============ 2 HOOK ============ -->
+<section class="slide" id="hook">
+  <h1>Same question, same patients, <em>different answers</em>.</h1>
+  <div class="controls"><button class="btn primary" id="hkRun">▶ run the study again</button><button class="btn" id="hkMany">+ 100 studies</button><button class="btn" id="hkReset">reset</button></div>
+  <div class="row" style="gap:24px">
+    <div class="col" style="flex:1.45"><svg id="hkSvg" width="580" height="400"></svg></div>
+    <div class="col" style="flex:1">
+      <p class="small" style="margin-top:0">Do grade III breast tumours tend to be larger than grade I? Each study draws <b>15 patients per grade</b> from the 686 in the GBSG2 trial and runs a t-test.</p>
+      <div class="stat"><span class="k">THIS STUDY</span><span class="v num" id="hkP" style="font-size:24px"></span></div>
+      <div class="stat"><span class="k">STUDIES WITH p &lt; 0.05</span><span class="v num" id="hkTally"></span></div>
+      <p class="small" id="hkMsg"></p>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Why this course</span></div>
+  <aside class="notes">Press run a few times. The true difference in the full trial is about 5 mm, yet small studies flip between "significant" and "not significant", and the estimated difference jumps around. Then add 100 studies: only a minority are significant, although the effect is real. Everything in Day 1 explains this slide: sampling variability, confidence intervals, p-values, power. The rest of the course builds on it.</aside>
+</section>
+
+<!-- ============ 3 OBJECTIVES ============ -->
+<section class="slide" id="objectives">
+  <h1>By the end, you will be able to…</h1>
+  <div class="obj">
+    <div><span class="n">1</span><span>Interpret confidence intervals and p-values correctly, and recognise common misinterpretations.<span class="d">DAY 1</span></span></div>
+    <div><span class="n">5</span><span>Extend regression to binary and count outcomes, including the negative binomial model behind RNA-seq.<span class="d">DAY 2</span></span></div>
+    <div><span class="n">2</span><span>Explain Type I and II errors, and use simulation to estimate the power and sample size of a planned experiment.<span class="d">DAY 1</span></span></div>
+    <div><span class="n">6</span><span>Explain why multiple testing inflates false positives, and apply false discovery rate control.<span class="d">DAY 2</span></span></div>
+    <div><span class="n">3</span><span>Choose an appropriate test for common designs (two groups, paired, proportions, non-normal data) and state its assumptions.<span class="d">DAY 1</span></span></div>
+    <div><span class="n">7</span><span>Analyse time-to-event data with Kaplan–Meier, log-rank and Cox regression, and interpret hazard ratios correctly.<span class="d">DAY 3</span></span></div>
+    <div><span class="n">4</span><span>See t-tests and ANOVA as linear models, and fit and interpret regressions with several predictors and interactions.<span class="d">DAY 2</span></span></div>
+    <div><span class="n">8</span><span>Identify pseudoreplication, confounding and batch effects, and use blocking to improve an experiment.<span class="d">DAY 3</span></span></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Learning objectives</span></div>
+  <aside class="notes">Eight objectives, roughly three per day. The emphasis is on interpretation and design decisions, not on memorising formulas or writing code. You will not leave as programmers; you will leave able to read an analysis critically, choose a sensible approach, and ask the right questions of a statistician or an AI.</aside>
+</section>
+
+<!-- ============ 4 PROGRAMME ============ -->
+<section class="slide" id="programme">
+  <h1>Three days, <em>six blocks</em>.</h1>
+  <div class="days">
+    <div class="day"><span class="tag">Day 1 · 2 December</span><h3>Foundations of inference</h3>
+      <div class="blk"><b>Morning · From samples to conclusions</b>Sampling variability, confidence intervals, p-values and their misreadings</div>
+      <div class="blk"><b>Afternoon · Errors, power, choosing a test</b>False positives, power and sample size by simulation, parametric and rank-based tests</div></div>
+    <div class="day"><span class="tag">Day 2 · 3 December</span><h3>Statistical models</h3>
+      <div class="blk"><b>Morning · The linear model</b>Tests as linear models, adjustment and interactions, model diagnostics</div>
+      <div class="blk"><b>Afternoon · Beyond normal outcomes</b>Logistic regression, count models, RNA-seq differential expression and false discovery rate</div></div>
+    <div class="day"><span class="tag">Day 3 · 4 December</span><h3>Time, design, and your own analysis</h3>
+      <div class="blk"><b>Morning · Survival and experimental design</b>Censoring, Kaplan–Meier, log-rank, Cox; pseudoreplication, batches, blocking, randomisation</div>
+      <div class="blk"><b>Afternoon · Final project</b>A less-guided analysis in groups, short presentations, discussion and wrap-up</div></div>
+  </div>
+  <p class="small" style="margin-top:16px">Each day builds on the one before: Day 2's models reuse Day 1's uncertainty; Day 3 applies both to time-to-event data and to the design of the experiment itself.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Programme</span></div>
+  <aside class="notes">The order is deliberate: uncertainty first, then models, then survival (which is a regression model for time with censoring), then design, which ties everything together. The final project on Day 3 uses a dataset you will have met on Days 1 and 2.</aside>
+</section>
+
+<!-- ============ 5 SESSION RHYTHM ============ -->
+<section class="slide" id="rhythm">
+  <h1>How every session <em>works</em>.</h1>
+  <div class="flow">
+    <div class="st"><span class="t">~15 MIN</span><h3>1 · Short lecture</h3><p>Interactive slides like these: the idea, shown with a simulation where we know the truth.</p></div>
+    <div class="ar">›</div>
+    <div class="st"><span class="t">~30–40 MIN · IN PAIRS</span><h3>2 · Hands-on notebook</h3><p>Run, predict, change one thing, run again. One person drives, the other reads and questions; swap halfway.</p></div>
+    <div class="ar">›</div>
+    <div class="st"><span class="t">~15 MIN</span><h3>3 · Debrief</h3><p>Results from every pair, collected in a shared sheet, discussed together. Your numbers make the point.</p></div>
+    <div class="ar">›</div>
+    <div class="st"><span class="t">ANY TIME</span><h3>4 · Go deeper with AI</h3><p>Three prompts per topic to explain, simulate, and apply it to your own work.</p></div>
+  </div>
+  <div class="row" style="gap:28px;margin-top:22px">
+    <div class="col"><p class="callout" style="font-size:20px"><b>Predict before you run.</b> Every exercise asks for a guess first. Wrong guesses are the most useful part of the course.</p></div>
+    <div class="col"><p class="callout" style="font-size:20px"><b>You will not write code from scratch.</b> All code is provided; you change one marked line and interpret the result.</p></div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">How the course works</span></div>
+  <aside class="notes">Stress pair work: the navigator's job is to predict and question, not to watch. Different pairs get different settings (sample size, seed, dataset), so the shared sheet adds up to a picture no single pair could produce alone: that's what the debrief is built around.</aside>
+</section>
+
+<!-- ============ 6 COLAB ============ -->
+<section class="slide" id="colab">
+  <h1>Google Colab: <em>reading a notebook</em>.</h1>
+  <div class="row" style="gap:28px">
+    <div class="col" style="flex:1.15">
+      <div class="nbmd"><b>A. Why censoring matters</b><br>✍️ <b>Predict first:</b> will the naive median be too short or too long?</div>
+      <div class="nb"><span class="c"># 🔧 CHANGE THIS: how long the study runs (12, 24, 48, 120)</span>
+<span class="h">study_length = 48</span>
+
+km = KaplanMeierFitter().fit(observed, event)
+print(f<span class="k">"KM median = {km.median_survival_time_:.1f}"</span>)
+print(f<span class="k">"📋 study_length = {study_length}: ..."</span>)</div>
+      <div class="nbmd" style="margin-top:8px">✅ <b>Concept check</b> · ▸ <i>Show answer</i></div>
+      <p class="small" style="margin:10px 0 0">Open from the link we share, then <b>File › Save a copy in Drive</b> so your changes are kept. Run cells top to bottom with <b>Shift + Enter</b>.</p>
+    </div>
+    <div class="col" style="flex:1">
+      <table class="legend" style="border-collapse:collapse;width:100%">
+        <tr><td>▶️</td><td><b>Setup cell</b>: run it first; it installs and loads everything.</td></tr>
+        <tr><td>🔧</td><td>The <b>one line</b> per cell you are meant to change.</td></tr>
+        <tr><td>✍️</td><td><b>Predict first</b>: write down a guess before running.</td></tr>
+        <tr><td>📋</td><td>A result to copy into the <b>shared sheet</b>.</td></tr>
+        <tr><td>🎯</td><td>The <b>true value</b> behind simulated data, to compare with your estimate.</td></tr>
+        <tr><td>✅</td><td><b>Concept check</b>: answer hidden until you click.</td></tr>
+        <tr><td>⭐</td><td><b>Optional</b> section for pairs who finish early.</td></tr>
+        <tr><td>💬</td><td><b>Discuss</b> with your partner, often about your own data.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">How the course works · Google Colab</span></div>
+  <aside class="notes">Colab runs Python in the browser: nothing to install, a Google account is enough. If a cell errors, rerun the setup cell and run from the top. If something is badly broken: Runtime › Disconnect and delete runtime, then start again; the notebooks are built so each one runs independently. Many notebooks let you switch dataset from a dropdown, and some accept your own CSV.</aside>
+</section>
+
+<!-- ============ 7 AI ROLES ============ -->
+<section class="slide" id="ai">
+  <h1>Two AI roles: <em>keep them apart</em>.</h1>
+  <div class="row" style="gap:26px;margin-top:4px">
+    <div class="col"><div class="card" style="min-height:330px">
+      <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧮 GEMINI IN COLAB = CALCULATOR</p>
+      <p style="font-size:19px;line-height:1.45;margin:6px 0 10px">Lives inside the notebook. Use it to <b>write, change, fix or explain code</b>, including new simulations.</p>
+      <div class="prompt" style="font-size:17px">"Add a second curve for α = 0.01 to this plot."</div>
+      <div class="prompt" style="font-size:17px;margin-top:8px">"This cell gives an error. Explain it and fix it."</div>
+      <p class="small" style="margin:10px 0 0">Check: does the new output make sense, and did it change only what you asked?</p>
+    </div></div>
+    <div class="col"><div class="card" style="min-height:330px">
+      <p style="margin:0 0 4px;color:var(--sc1);font-size:15px;letter-spacing:.12em">🎓 CLAUDE / CHATGPT = TUTOR</p>
+      <p style="font-size:19px;line-height:1.45;margin:6px 0 10px">In another browser tab. Use it to <b>explain ideas, quiz you, and critique your own analysis</b>.</p>
+      <div class="prompt" style="font-size:17px">"Explain a confidence interval with a lab analogy, then ask me 3 questions, one at a time."</div>
+      <div class="prompt" style="font-size:17px;margin-top:8px">"Here is my design: […]. What is the experimental unit? Ask me questions first."</div>
+      <p class="small" style="margin:10px 0 0">Check: ask for the reasoning, and verify one claim yourself in the notebook.</p>
+    </div></div>
+  </div>
+  <p class="small" style="margin-top:14px"><b>Give it the whole design.</b> AI answers the question you ask: if you call paired data "two groups" or forget to mention censoring, you get a correct answer to the wrong question. · <b>Never paste identifiable patient data</b> into a public chatbot.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">How the course works · AI as a learning partner</span></div>
+  <aside class="notes">Mixing the roles is the usual trap: asking the code assistant to interpret results, or pasting code into a chatbot and running whatever comes back. Gemini sees your notebook, so it's good at code that fits it. The chatbot is better at explaining, questioning and critiquing. Both are confident when they're wrong, which is why each slide says "check". Day 1's choosing-a-test cards show the failure that remains common: the AI answers exactly the question you typed.</aside>
+</section>
+
+<!-- ============ 8 DATASETS ============ -->
+<section class="slide" id="datasets">
+  <h1>The data we'll <em>live with</em>.</h1>
+  <div class="ds">
+    <div class="card"><p class="tiny" style="margin:0">DAYS 1–3</p><h3>GBSG2</h3><p>German Breast Cancer Study Group trial: 686 patients. Tumour size and grade, lymph nodes, hormone receptors, hormone therapy, recurrence-free survival.</p></div>
+    <div class="card"><p class="tiny" style="margin:0">DAYS 2–3 · FINAL PROJECT</p><h3>Lung</h3><p>NCCTG advanced lung cancer study: 228 patients. Performance scores, weight loss, age, sex, survival time.</p></div>
+    <div class="card"><p class="tiny" style="margin:0">DAY 2</p><h3>Airway RNA-seq</h3><p>Airway smooth muscle cells from 4 donors, with and without dexamethasone (GEO GSE52778): about 19,000 genes.</p></div>
+    <div class="card"><p class="tiny" style="margin:0">EVERY DAY</p><h3>Simulated</h3><p>Data generated with known effects, so you can check whether a method recovers the truth (🎯 lines).</p></div>
+  </div>
+  <p class="callout" style="margin-top:20px;font-size:20px">Most notebooks also accept <b>your own CSV</b>: describe the columns once, and every cell adapts.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Datasets</span></div>
+  <aside class="notes">Real data keep the examples honest (skew, outliers, missing values, censoring); simulated data let us check methods against a known truth. Encourage participants to bring a small, de-identified dataset of their own for the "my_data" option and the Day 3 project discussion.</aside>
+</section>
+
+<!-- ============ 9 INDEX ============ -->
+<section class="slide" id="index">
+  <h1>The lectures: <em>index</em>.</h1>
+  <div class="idx" id="idx"></div>
+  <p class="tiny" style="margin-top:8px">Click a lecture to open it. Each lecture has a matching hands-on notebook (shown in grey).</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Index of slide decks</span></div>
+  <aside class="notes">All decks are single HTML files that work offline: open them from the course folder on your laptop or USB stick. Arrow keys to navigate, N for speaker notes, F for fullscreen. Every deck ends with "Go deeper with AI" prompts for after the course.</aside>
+</section>
+
+<!-- ============ 10 BEFORE WE START ============ -->
+<section class="slide" id="checklist">
+  <h1>Before we <em>start</em>.</h1>
+  <div class="row" style="gap:40px;margin-top:10px">
+    <div class="col">
+      <ul class="clean" style="margin:0">
+        <li>Signed in to a <b>Google account</b>, and Colab opens in your browser.</li>
+        <li>The Day 1 notebook open, <b>saved as a copy</b> in your Drive.</li>
+        <li>The <b>setup cell</b> has run without errors (▶️ at the top).</li>
+        <li><b>Claude or ChatGPT</b> open in a second tab.</li>
+        <li>The <b>shared results sheet</b> open (link from the facilitators).</li>
+        <li>A partner, and an agreement on who drives first.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="card">
+        <p style="margin:0 0 8px;color:var(--pc2);font-size:15px;letter-spacing:.12em">FOUR HABITS FOR THREE DAYS</p>
+        <ol style="margin:0;padding-left:22px">
+          <li style="font-size:20px">Predict before you run.</li>
+          <li style="font-size:20px">Every number comes with its uncertainty.</li>
+          <li style="font-size:20px">Think about the design before the test.</li>
+          <li style="font-size:20px">AI explains; <em>you</em> decide, and check.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Practicalities</span></div>
+  <aside class="notes">Give five minutes to work through the checklist; walk around and fix Colab sign-in problems now rather than during the first hands-on. Then go straight into Day 1 · Topic 1, sampling variability.</aside>
+</section>
+
+<!-- ============ 11 NEXT ============ -->
+<section class="slide dark" id="next">
+  <div class="crescents">
+    <div class="blob" style="width:560px;height:560px;left:-200px;top:-220px;background:radial-gradient(circle,#9933ff 0%,transparent 70%)"></div>
+    <div class="blob" style="width:380px;height:380px;right:-120px;bottom:-160px;background:radial-gradient(circle,#ff99cc 0%,transparent 70%);opacity:.55"></div>
+  </div>
+  <div style="position:relative;margin-top:150px">
+    <p style="margin:0 0 14px;color:var(--sc3);font-size:18px;letter-spacing:.14em">DAY 1 · TOPIC 1</p>
+    <h1 style="font-size:72px">Let's start with <em>sampling variability</em>.</h1>
+    <p style="font-size:26px;color:rgba(255,255,255,.8);max-width:900px;margin:10px 0 0">Why did the studies on slide 2 disagree, and how much should we expect them to?</p>
+    <p style="margin:26px 0 0"><a id="nextLink" class="btn" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.6);text-decoration:none">Open the first lecture ›</a></p>
+  </div>
+  <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Next</span></div>
+  <aside class="notes">Bridge: the first lecture answers the hook slide directly.</aside>
+</section>
+
+</div></div>
+
+<script>/*D3*/</script>
+<script>/*DECKJS*/</script>
+<script>/*GBSG2*/</script>
+<script>
+const hooks = {};
+/* ---------- lecture index: local file when opened offline, published page otherwise ---------- */
+const DECKS=[
+  {day:1,block:'Morning · From samples to conclusions',k:'T1',t:'Sampling variability',f:'day1/Day1_T1_sampling_variability.html',u:'H94yKFgupwtQsn3AbN1iw9',nb:'Day1_HO1_sampling_variability'},
+  {day:1,block:'Morning · From samples to conclusions',k:'T2',t:'Confidence intervals',f:'day1/Day1_T2_confidence_intervals.html',u:'CkS288TMJn5TnFvpoE8R1T',nb:'Day1_HO2_confidence_intervals'},
+  {day:1,block:'Morning · From samples to conclusions',k:'T3',t:'p-values',f:'day1/Day1_T3_p_values.html',u:'XEPFriEFbFXjPkZP52brKj',nb:'Day1_HO3_p_values'},
+  {day:1,block:'Afternoon · Errors, power, choosing a test',k:'T4',t:'False positives',f:'day1/Day1_T4_false_positives.html',u:'5gdG2b4sM1mLPoBTRADnts',nb:'Day1_HO4_false_positives'},
+  {day:1,block:'Afternoon · Errors, power, choosing a test',k:'T5',t:'Power and sample size',f:'day1/Day1_T5_power_sample_size.html',u:'J9HLfw5Unkb6trq6Zjj4Di',nb:'Day1_HO5_power_sample_size'},
+  {day:1,block:'Afternoon · Errors, power, choosing a test',k:'T6',t:'Choosing a test',f:'day1/Day1_T6_choosing_a_test.html',u:'2CeAVt3Uf2zhi7HVnqucf6',nb:'Day1_HO6_choosing_a_test'},
+  {day:2,block:'Morning · The linear model',k:'T1',t:'Tests as linear models',f:'day2/Day2_T1_tests_as_linear_models.html',u:'8NeXzC6vq6FvLipUPMBg4M',nb:'Day2_HO1_tests_as_linear_models'},
+  {day:2,block:'Morning · The linear model',k:'T2',t:'Adjustment and interactions',f:'day2/Day2_T2_adjustment_interactions.html',u:'CsDiBEeRUQW53xrnsjaera',nb:'Day2_HO2_multiple_regression_interactions'},
+  {day:2,block:'Morning · The linear model',k:'T3',t:'Model diagnostics',f:'day2/Day2_T3_model_diagnostics.html',u:'7H6aoPJn8Y8rJK7QuLR95g',nb:'Day2_HO3_model_diagnostics'},
+  {day:2,block:'Afternoon · Beyond normal outcomes',k:'T4',t:'Logistic regression',f:'day2/Day2_T4_logistic_regression.html',u:'LYRDyccyVwtvbhe3JA9enN',nb:'Day2_HO4_logistic_regression'},
+  {day:2,block:'Afternoon · Beyond normal outcomes',k:'T5',t:'Count models',f:'day2/Day2_T5_count_models.html',u:'VEKSpp2GLUy9Egho9kp81X',nb:'Day2_HO5_count_models'},
+  {day:2,block:'Afternoon · Beyond normal outcomes',k:'T6',t:'Differential expression and FDR',f:'day2/Day2_T6_DE_and_FDR.html',u:'6KggZxhG2wxMSTapdMmhgP',nb:'Day2_HO6_DE_and_FDR'},
+  {day:3,block:'Morning · Survival and design',k:'T1',t:'Survival analysis',f:'day3/Day3_T1_survival_analysis.html',u:'5i2j9VMGf1zfmWmKBB6VAp',nb:'Day3_HO1_survival_analysis'},
+  {day:3,block:'Morning · Survival and design',k:'T2',t:'Experimental design',f:'day3/Day3_T2_experimental_design.html',u:'TGH2R9wtPw4r4FLFtxtUz8',nb:'Day3_HO2_experimental_design'}];
+const LOCAL=location.protocol==='file:';
+const href=d=>LOCAL?'../'+d.f:'https://claude.ai/artifact/'+d.u;
+(function(){const box=document.getElementById('idx'),names={1:'Day 1 · Foundations of inference',2:'Day 2 · Statistical models',3:'Day 3 · Time, design, your own analysis'};
+  [1,2,3].forEach(day=>{const col=document.createElement('div');col.className='col';col.innerHTML=`<h3>${names[day]}</h3>`;let blk='';
+    DECKS.filter(d=>d.day===day).forEach(d=>{if(d.block!==blk){blk=d.block;col.insertAdjacentHTML('beforeend',`<div class="bl">${blk}</div>`)}
+      col.insertAdjacentHTML('beforeend',`<a href="${href(d)}" target="_blank" rel="noopener"><span class="k">${d.k}</span><span>${d.t}</span></a><div class="nbk">${d.nb}</div>`)});
+    if(day===3)col.insertAdjacentHTML('beforeend','<div class="bl">Afternoon · Final project</div><div style="font-size:16.5px;padding:4px 6px;color:var(--ink2)">Group analysis of the lung data, presentations, wrap-up</div>');
+    box.appendChild(col)});
+  const nl=document.getElementById('nextLink');nl.href=href(DECKS[0]);nl.target='_blank';nl.rel='noopener'})();
+
+/* ---- 2 hook: repeated small studies from GBSG2 ---- */
+hooks['hook']={init(){
+  const g1=DATA.tsize.filter((_,i)=>DATA.tgrade[i]===1),g3=DATA.tsize.filter((_,i)=>DATA.tgrade[i]===3),N=15,TRUE=mean(g3)-mean(g1);
+  const W=580,H=400,m={l:60,r:20,t:20,b:50},svg=d3.select('#hkSvg');
+  const x=d3.scaleLinear().domain([-25,30]).range([m.l,W-m.r]),y=d3.scaleLinear().domain([0,40]).range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(g=>axisB(g,x,10));
+  svg.append('text').attr('class','axlab').attr('x',(W+m.l)/2).attr('y',H-8).attr('text-anchor','middle').text('Estimated difference, grade III − grade I (mm), with 95% CI');
+  svg.append('line').attr('x1',x(0)).attr('x2',x(0)).attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.pc1).attr('stroke-dasharray','5 4');
+  svg.append('line').attr('x1',x(TRUE)).attr('x2',x(TRUE)).attr('y1',m.t).attr('y2',H-m.b).attr('stroke',C.sc1).attr('stroke-width',2);
+  svg.append('text').attr('class','lbl pink').attr('x',x(TRUE)+5).attr('y',m.t+10).style('font-size','13px').text(`all 686 patients: ${fmt1(TRUE)} mm`);
+  const g=svg.append('g');let studies=[];
+  function one(){const a=d3.range(N).map(()=>g1[Math.floor(R()*g1.length)]),b=d3.range(N).map(()=>g3[Math.floor(R()*g3.length)]),w=welch(b,a),tc=tQuantile(.975,w.df);
+    return{d:w.diff,lo:w.diff-tc*w.se,hi:w.diff+tc*w.se,p:w.p}}
+  function draw(){const show=studies.slice(-40),yy=d3.scaleLinear().domain([0,40]).range([H-m.b-6,m.t+16]);
+    const rows=g.selectAll('g.s').data(show,d=>d.id).join(en=>{const s=en.append('g').attr('class','s');s.append('line');s.append('circle').attr('r',4);return s});
+    rows.attr('transform',(d,i)=>`translate(0,${yy(show.length-1-i)})`).attr('opacity',(d,i)=>i===show.length-1?1:.55);
+    rows.select('line').attr('x1',d=>x(Math.max(-25,d.lo))).attr('x2',d=>x(Math.min(30,d.hi))).attr('stroke',d=>d.p<.05?C.pc2:C.pop).attr('stroke-width',(d,i)=>i===show.length-1?4:2);
+    rows.select('circle').attr('cx',d=>x(d.d)).attr('fill',d=>d.p<.05?C.pc2:C.pop);
+    const last=studies[studies.length-1],sig=studies.filter(d=>d.p<.05).length;
+    document.getElementById('hkP').innerHTML=last?`difference ${d3.format('+.1f')(last.d)} mm · p = ${fmtP(last.p)} <small>${last.p<.05?'"significant"':'"not significant"'}</small>`:'–';
+    document.getElementById('hkTally').innerHTML=studies.length?`${sig} <small>of ${studies.length} (${d3.format('.0%')(sig/studies.length)})</small>`:'–';
+    document.getElementById('hkMsg').innerHTML=studies.length>=20?'The difference is real in every study, yet most small studies miss it, and the estimates scatter widely. <b>Day 1</b> is about why, and what to report instead.':'Purple: p &lt; 0.05. Grey: not significant. The pink line is the difference in the whole trial.'}
+  let id=0;const add=k=>{for(let i=0;i<k;i++)studies.push({...one(),id:id++});draw()};
+  document.getElementById('hkRun').onclick=()=>add(1);document.getElementById('hkMany').onclick=()=>add(100);document.getElementById('hkReset').onclick=()=>{studies=[];g.selectAll('*').remove();draw()};
+  add(1);
+}};
+
+startDeck(hooks);
+</script>
+</body>
+</html>
