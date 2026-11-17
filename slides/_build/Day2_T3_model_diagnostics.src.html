@@ -115,7 +115,7 @@
     </div>
   </div>
   <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
-  <aside class="notes">Spread the five problems across pairs. In the debrief each problem is shown by the pair that had it, using the gallery on the next slide. The AI prompt is a known failure point: "Shapiro p = 0.001, abandon regression".</aside>
+  <aside class="notes">Spread the five problems across pairs. In the debrief each problem is shown by the pair that had it, using the gallery on the next slide.</aside>
 </section>
 
 <!-- ============ 6 GALLERY ============ -->
@@ -195,28 +195,33 @@
   <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
   <div class="qcards" id="qcards"></div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
-  <aside class="notes">Statement 1 is the AI failure point of this notebook. Statement 2 is discussion question 3.</aside>
+  <aside class="notes">Statement 1 is the most common overreaction. Statement 2 is discussion question 3.</aside>
 </section>
 
 <!-- ============ 11 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>"Shapiro p = 0.001": should you <em>abandon</em> the model?</h1>
-  <div class="row" style="gap:36px;margin-top:6px">
-    <div class="col">
-      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook, a known failure point:</p>
-      <div class="prompt">My linear regression has 686 observations. A Shapiro–Wilk test on the residuals gives p = 0.001. Should I abandon linear regression and use a non-parametric test instead?</div>
-      <p class="small" style="margin:14px 0 4px">A good answer says:</p>
-      <ul class="clean"><li style="font-size:18px">with large n, normality tests flag trivial departures: look at the plots</li><li style="font-size:18px">shape and spread matter more than normality</li><li style="font-size:18px">fix it (transform, robust SEs), don't throw the model away</li></ul>
-      <ul class="clean x"><li style="font-size:18px">"use Mann–Whitney / Kruskal–Wallis": loses the adjustment for other predictors</li></ul>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 6px">🧮 Calculator check: <em>"Refit with heteroscedasticity-robust standard errors (HC3)."</em> On GBSG2:</p>
-      <table class="ttab" id="hcTab"></table>
-      <p class="small" style="margin-top:10px">Estimates identical, standard errors (and so CIs and p-values) change. That's what robust SEs do: they fix the uncertainty, not the line.</p>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about model diagnostics: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain what each regression diagnostic plot checks: residuals vs fitted, Q–Q, scale–location and leverage. Then describe 4 plots to me in words and ask which assumption fails in each.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Simulate four datasets: one that fits a straight line, one curved, one with a funnel of growing spread, and one with an outlier. Show the residuals-vs-fitted plot for each in a 2 × 2 grid.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">My residual plot looks like this: [describe]. What are my options, and how does each one change the way I interpret the coefficients?</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure point</span></div>
-  <aside class="notes">Most AI answers are reasonable here but many still recommend switching to a rank test, which can't handle grade and nodes at the same time. The HC3 table is computed live: note the node coefficient's SE goes up by about half, because the spread grows with fitted size (the funnel we saw).</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: A log transform should make the funnel disappear (section C).</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 12 TAKE HOME ============ -->
@@ -391,8 +396,7 @@ hooks['statements']={init(){qcards('qcards',[
   [false,'If removing one data point changes your conclusion, delete it and report the cleaner result.','Check the point: delete only errors, and report results with and without it. A conclusion that depends on one patient is fragile either way.']])}};
 
 /* ---- 11 AI / HC3 ---- */
-hooks['ai-tutor']={init(){const R=REAL.gbsg2,f=olsDiag(R.X,R.y);
-  document.getElementById('hcTab').innerHTML='<tr><th>term</th><th>estimate</th><th>classic SE</th><th>HC3 SE</th></tr>'+f.coef.map((c,i)=>`<tr><td>${R.names[i]}</td><td>${d3.format('.3f')(c.est)}</td><td>${d3.format('.3f')(c.se)}</td><td class="${Math.abs(f.seHC3[i]/c.se-1)>.15?'ch':''}">${d3.format('.3f')(f.seHC3[i])}</td></tr>`).join('')}};
+
 
 startDeck(hooks);
 </script>

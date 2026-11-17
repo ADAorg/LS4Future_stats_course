@@ -192,24 +192,29 @@
 </section>
 
 <!-- ============ 11 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>Why does DESeq2 use the <em>negative binomial</em>?</h1>
-  <div class="row" style="gap:36px;margin-top:6px">
-    <div class="col">
-      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook:</p>
-      <div class="prompt">Why does DESeq2 use a negative binomial model rather than a Poisson model or a t-test for RNA-seq counts?</div>
-      <p class="small" style="margin:14px 0 4px">A good answer mentions:</p>
-      <ul class="clean"><li style="font-size:18px">biological variation between replicates: overdispersion (you just saw it)</li><li style="font-size:18px">the variance depends on the mean</li><li style="font-size:18px">dispersion is <em>shared across genes</em> to cope with few replicates</li></ul>
-      <ul class="clean x"><li style="font-size:18px">"because counts aren't normal", and nothing more (not <em>specific</em>)</li></ul>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 6px">🧮 Calculator check: <em>"Fit both models and show their rate ratios and CIs side by side."</em> On GBSG2:</p>
-      <table class="ttab" id="aiTab"></table>
-      <p class="small" style="margin-top:10px">Rate ratios nearly identical; NB intervals roughly twice as wide.</p>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about count models: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain overdispersion with an example from counting cells or colonies, and why it makes Poisson p-values too small. Then give me 2 datasets (mean and variance only) and ask: Poisson or negative binomial?</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Simulate 2,000 two-group experiments with overdispersed counts (negative binomial, α = 0.8) and no true difference. Compare how often a Poisson and a negative binomial model give p < 0.05.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">I count [cells / colonies / lesions] in my experiments: [describe how]. Which model fits, and do I need an offset, for example for the area imaged or the number of fields?</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
-  <aside class="notes">This prompt usually gets a decent answer; the scoring is about completeness. "Shares information across genes" is the point most answers miss, and it's the one that matters for the next hands-on.</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: The Poisson false-positive rate should be well above 5%; the negative binomial close to 5%.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 12 TAKE HOME ============ -->
@@ -407,8 +412,7 @@ hooks['statements']={init(){qcards('qcards',[
   [false,'Log-transforming counts and using a linear model is always wrong.','Often acceptable when counts are large and never zero. It breaks down with small counts and zeros (log 0), where count models shine.']])}};
 
 /* ---- 11 AI ---- */
-hooks['ai-tutor']={init(){const F=fits('gbsg2'),nm=['tumour size (per mm)','grade II vs I','grade III vs I'];
-  document.getElementById('aiTab').innerHTML='<tr><th>term</th><th>Poisson RR [95% CI]</th><th>NB RR [95% CI]</th></tr>'+nm.map((n,i)=>{const p=F.p.coef[i+1],b=F.n.coef[i+1];return`<tr><td>${n}</td><td class="pu">${d3.format('.3f')(p.rr)} [${d3.format('.3f')(p.lo)}, ${d3.format('.3f')(p.hi)}]</td><td class="hi">${d3.format('.3f')(b.rr)} [${d3.format('.3f')(b.lo)}, ${d3.format('.3f')(b.hi)}]</td></tr>`}).join('')}};
+
 
 startDeck(hooks);
 </script>

@@ -179,33 +179,29 @@
 </section>
 
 <!-- ============ 9 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>One of 20 biomarkers, p = 0.04: what does the tutor <em>say</em>?</h1>
-  <div class="row" style="gap:40px;margin-top:8px">
-    <div class="col" style="flex:1.2">
-      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook:</p>
-      <div class="prompt">I measured 20 serum biomarkers in treated and control mice. One of them, IL-6, differed with p = 0.04. Can I conclude that the treatment affects IL-6?</div>
-      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
-      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-      <p class="small" style="margin:22px 0 6px">🧮 Calculator check: after zooming the histogram to p between 0 and 0.1, are the bars still roughly flat?</p>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">A good answer mentions:</p>
-      <ul class="clean" style="margin-bottom:14px">
-        <li style="font-size:19px">20 tests → about 1 false positive expected</li>
-        <li style="font-size:19px">a correction (Bonferroni: 0.05 / 20 = 0.0025) or FDR</li>
-        <li style="font-size:19px">replication in an independent experiment</li>
-        <li style="font-size:19px">the size of the IL-6 difference, not only p</li>
-      </ul>
-      <p class="small" style="margin:0 0 4px">Watch for:</p>
-      <ul class="clean x">
-        <li style="font-size:19px">"yes, p &lt; 0.05 so the effect is significant"</li>
-        <li style="font-size:19px">a correction suggested, but not applied to the numbers</li>
-      </ul>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about multiple testing: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain the multiple-comparisons problem with a lab example. Then describe 3 short studies to me, one at a time, and ask whether each one needs a correction and why.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Simulate 1,000 studies that each test 20 biomarkers with no real effect. Show the share of studies with at least one p < 0.05, with no correction, with Bonferroni and with Benjamini–Hochberg.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Here is everything I compared in my last experiment, including what I didn't report: [list]. How many tests did I really run, and how should I report the one that was significant?</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
-  <aside class="notes">Most current models raise multiple testing here, because the prompt says "20 biomarkers". A useful follow-up for pairs who finish early: remove "20 serum biomarkers" from the prompt and just say "IL-6 differed with p = 0.04". Does the tutor ask how many other things were measured? Usually not, and neither do reviewers.</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: Without correction, about 64% of studies should have at least one false positive (1 − 0.95²⁰).</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 10 TAKE HOME ============ -->

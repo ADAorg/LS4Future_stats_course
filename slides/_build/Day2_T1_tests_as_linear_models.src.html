@@ -92,7 +92,7 @@
     </div>
   </div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The lecture · notebook section B</span></div>
-  <aside class="notes">Three groups need two 0/1 columns ("dummies"), one per non-reference group. The reference group is the one with no column. Every coefficient is therefore a difference from the reference, never a group mean by itself. That's the AI failure point of this notebook. The ANOVA F-test asks whether b₁ and b₂ are both zero.</aside>
+  <aside class="notes">Three groups need two 0/1 columns ("dummies"), one per non-reference group. The reference group is the one with no column. Every coefficient is therefore a difference from the reference, never a group mean by itself. That's the most common misreading. The ANOVA F-test asks whether b₁ and b₂ are both zero.</aside>
 </section>
 
 <!-- ============ 5 HANDS-ON ============ -->
@@ -120,7 +120,7 @@
     </div>
   </div>
   <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
-  <aside class="notes">Assign datasets. The AI prompt in this notebook is generated from each pair's own model output; it's a known failure point (coefficient read as a group mean). Pairs that finish early: section C, correlation as a model.</aside>
+  <aside class="notes">Assign datasets. Pairs that finish early: section C, correlation as a model.</aside>
 </section>
 
 <!-- ============ 6 IDENTICAL ============ -->
@@ -183,32 +183,33 @@
   <p class="lead" style="font-size:21px">Model: tumour size ~ grade, with grade I as the reference. Click a statement to reveal.</p>
   <div class="qcards" id="qcards"></div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
-  <aside class="notes">Statement 2 is the AI failure point of this notebook. Statement 4 connects to diagnostics (Hands-on 3).</aside>
+  <aside class="notes">Statement 2 is the most common misreading. Statement 4 connects to diagnostics (Hands-on 3).</aside>
 </section>
 
 <!-- ============ 10 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>Coefficient or <em>group mean</em>?</h1>
-  <div class="row" style="gap:40px;margin-top:8px">
-    <div class="col" style="flex:1.2">
-      <p class="small" style="margin:0 0 6px">🎓 The notebook builds this prompt from your own model. With GBSG2 it reads:</p>
-      <div class="prompt" id="aiPrompt"></div>
-      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
-      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">A good answer computes:</p>
-      <div class="card" style="margin-bottom:14px"><span style="font-size:22px" id="aiGood"></span></div>
-      <p class="small" style="margin:0 0 4px">Watch for:</p>
-      <ul class="clean x">
-        <li style="font-size:19px" id="aiBad"></li>
-        <li style="font-size:19px">no mention of the reference group at all</li>
-        <li style="font-size:19px">"grade III causes larger tumours" (that's the next topic's failure point)</li>
-      </ul>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about tests as linear models: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Show me, with a tiny example of 6 numbers, how a two-sample t-test, a one-way ANOVA and a linear model with a dummy variable are the same model. Then quiz me on what each coefficient means.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Fit outcome ~ group with statsmodels on my data and run scipy's t-test on the same two groups. Print both p-values. Then change the reference level and show which numbers change and which don't.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Here is the coefficient table from my model: [paste]. For each row, say in plain words what it compares. Then ask me to explain one row back to you.</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
-  <aside class="notes">Numbers on this slide are computed live from GBSG2. Ask pairs with the lung dataset what their prompt said: the same slip happens with ECOG groups. A useful habit: whenever you read a coefficient table, say out loud "compared with the reference".</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: A coefficient is a difference from the reference group; intercept + coefficient should equal that group's mean.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 11 TAKE HOME ============ -->
@@ -372,12 +373,7 @@ hooks['statements']={init(){qcards('qcards',[
   [true,'Like the Student t-test, this model assumes the same spread of tumour sizes in every grade.','Correct. One residual variance for everyone; checking it is Hands-on 3.']])}};
 
 /* ---- 10 AI ---- */
-hooks['ai-tutor']={init(){
-  const {fit}=fitGroups('I');const b0=fit.coef[0].est,b2=fit.coef[2].est;
-  document.getElementById('aiPrompt').textContent=`My linear model of Tumour size (mm) on Tumour grade gives an intercept of ${fmt2(b0)} and a coefficient of ${d3.format('.3f')(b2)} for "tgrade: III vs I". What is the average Tumour size (mm) in that group, and what does the coefficient mean?`;
-  document.getElementById('aiGood').innerHTML=`grade III mean = ${fmt2(b0)} + ${fmt2(b2)} = <b style="color:var(--pc2)">${fmt2(b0+b2)} mm</b>; the coefficient is the difference from grade I.`;
-  document.getElementById('aiBad').innerHTML=`"the average tumour size in grade III is ${fmt2(b2)} mm"`;
-}};
+
 
 startDeck(hooks);
 </script>

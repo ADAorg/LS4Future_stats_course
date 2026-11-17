@@ -121,12 +121,12 @@
         <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
         <p style="margin:0 0 22px;font-size:24px">For <b>age</b>: will the p-value be large or small?</p>
         <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">TWO AI ROLES, KEPT APART</p>
-        <p style="margin:0;font-size:20px;line-height:1.5;color:rgba(255,255,255,.85)">🧮 Gemini in Colab = <em>calculator</em>, for code.<br>🎓 Claude / ChatGPT = <em>tutor you must check</em>, for interpretation.</p>
+        <p style="margin:0;font-size:20px;line-height:1.5;color:rgba(255,255,255,.85)">🧮 Gemini in Colab = <em>calculator</em>, for code.<br>🎓 Claude / ChatGPT = <em>tutor</em>, to explain, quiz you and critique your work.</p>
       </div>
     </div>
   </div>
   <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 20 minutes · in pairs</span></div>
-  <aside class="notes">No shared sheet this time. Ask everyone to commit to a guess for age before running. Most expect a large p-value ("it's a trial, the groups should be similar"). The tutor prompt in this notebook is a known failure point: p = 0.03 read as "3% chance the null is true" or as "a large effect".</aside>
+  <aside class="notes">No shared sheet this time. Ask everyone to commit to a guess for age before running. Most expect a large p-value ("it's a trial, the groups should be similar").</aside>
 </section>
 
 <!-- ============ 6 BASELINE ============ -->
@@ -199,32 +199,29 @@
 </section>
 
 <!-- ============ 10 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>p = 0.03: what does the tutor <em>say</em>?</h1>
-  <div class="row" style="gap:40px;margin-top:8px">
-    <div class="col" style="flex:1.2">
-      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook, a known failure point:</p>
-      <div class="prompt">In a study comparing tumour size between two treatment groups I got p = 0.03. Explain what this p-value means for my conclusions.</div>
-      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
-      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-      <p class="small" style="margin:22px 0 6px">🧮 Calculator check: when Gemini tested every baseline variable in one table, did it use a t-test for numbers and a chi-square test for categories?</p>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">Watch for:</p>
-      <ul class="clean x" style="margin-bottom:14px">
-        <li style="font-size:19px">"3% probability the null is true" or "97% chance the effect is real"</li>
-        <li style="font-size:19px">"the difference is large" or "clinically important"</li>
-        <li style="font-size:19px">no mention of the effect size and its CI</li>
-      </ul>
-      <p class="small" style="margin:0 0 4px">A good answer says:</p>
-      <ul class="clean">
-        <li style="font-size:19px">if there were no difference, a gap this large would be unusual (about 3 in 100)</li>
-        <li style="font-size:19px">report how big the difference is, with its CI</li>
-      </ul>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about p-values: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain what a p-value is to a cell biologist using a non-statistical analogy. Then ask me 3 questions, one at a time, and tell me where my answers go wrong.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Simulate 10,000 two-group experiments with no true difference and plot the histogram of p-values. Then repeat with a real difference of half an SD. Explain why the two histograms look different.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Here is a results sentence from a paper I'm reading: [paste]. Rewrite it so that it says only what the p-value and the effect estimate support.</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
-  <aside class="notes">Collect one good and one flawed answer from the room. A common pattern: the definition is right in the first paragraph, and the "practical implications" paragraph then reads p as the probability the finding is real. For the calculator check: a chi-square on age or a t-test on menopausal status would be a silent error. The code runs; the answer is wrong.</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: With no true difference the histogram should be flat: about 5% of p-values below 0.05.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 11 TAKE HOME ============ -->

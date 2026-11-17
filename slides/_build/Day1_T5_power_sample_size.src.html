@@ -187,32 +187,29 @@
 </section>
 
 <!-- ============ 10 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>Ask the tutor for a <em>sample size</em>.</h1>
-  <div class="row" style="gap:40px;margin-top:8px">
-    <div class="col" style="flex:1.2">
-      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook:</p>
-      <div class="prompt">I'm planning a two-group trial. I expect the treatment to reduce mean tumour size by 5 mm, and the standard deviation of tumour size is about 14 mm. How many patients per group do I need for 80% power at α = 0.05?</div>
-      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
-      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-      <p class="small" style="margin:22px 0 6px">🧮 Calculator check: is the α = 0.01 curve lower than the α = 0.05 one? Why?</p>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">Compare its number with your sections C and D, then check:</p>
-      <ul class="clean" style="margin-bottom:14px">
-        <li style="font-size:19px">did it show the calculation (d = 5 / 14 ≈ 0.36)?</li>
-        <li style="font-size:19px">did it say which test it assumed?</li>
-        <li style="font-size:19px">did it mention drop-outs, or that tumour sizes are skewed?</li>
-      </ul>
-      <p class="small" style="margin:0 0 4px">Watch for:</p>
-      <ul class="clean x">
-        <li style="font-size:19px">a confident number with no working (often off by a factor of 2: total vs per group)</li>
-        <li style="font-size:19px">"n = 30 is usually enough"</li>
-      </ul>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about power and sample size: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain statistical power and the four things it depends on, using the analogy of spotting a faint band on a western blot. Then ask me to predict what happens to power when each one changes, one at a time.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Estimate the power of a two-group t-test by simulating 2,000 experiments for each n from 5 to 100 per group (effect 5 mm, SD 14 mm). Overlay the curve from statsmodels' power calculation.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">I'm planning this experiment: [describe]. Help me choose a realistic effect size and SD for a power calculation. Ask me questions first, and tell me where each number you use comes from.</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
-  <aside class="notes">This is a case where AI is usually close, and checking is cheap: you now have a simulation and a formula. The common slip is mixing up per-group and total sample size. Ask pairs how far their AI answer was from the formula, and whether it said "per group".</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: The simulated curve and the formula should agree within a few percentage points.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 11 TAKE HOME ============ -->

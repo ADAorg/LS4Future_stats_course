@@ -149,7 +149,7 @@
     </div>
   </div>
   <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
-  <aside class="notes">The answer differs by dataset, which is the point of the debrief: GBSG2 shrinks, lung barely moves, simulated shrinks towards the truth. The AI prompt is a known failure point (causal language), generated from each pair's own adjusted model.</aside>
+  <aside class="notes">The answer differs by dataset, which is the point of the debrief: GBSG2 shrinks, lung barely moves, simulated shrinks towards the truth.</aside>
 </section>
 
 <!-- ============ 8 ROOM ADJUST ============ -->
@@ -216,27 +216,29 @@
 </section>
 
 <!-- ============ 12 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>"Associated with", not "<em>causes</em>".</h1>
-  <div class="row" style="gap:36px;margin-top:6px">
-    <div class="col" style="flex:1.2">
-      <p class="small" style="margin:0 0 6px">🎓 The notebook builds this prompt from your adjusted model. With GBSG2:</p>
-      <div class="prompt" id="aiPrompt" style="font-size:16px;white-space:pre-wrap"></div>
-      <div class="chips" style="margin-top:12px"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">Watch for:</p>
-      <ul class="clean x" style="margin-bottom:12px">
-        <li style="font-size:19px"><em>causes</em>, <em>increases</em>, <em>leads to</em>, <em>effect of</em></li>
-        <li style="font-size:19px">"each extra node <em>would</em> make the tumour 0.8 mm larger"</li>
-      </ul>
-      <p class="small" style="margin:0 0 4px">A good answer:</p>
-      <div class="card"><span style="font-size:18px" id="aiGood"></span></div>
-      <p class="small" style="margin:12px 0 0">🧮 Gemini: "Add the group variable from section A to this model as well." Did the formula change as expected? Did the slopes move?</p>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about adjustment and interactions: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain confounding and adjustment with a non-medical example, then explain an interaction with a dose–response example. Quiz me with 3 scenarios: confounding, interaction, or neither?</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Simulate 500 patients where age affects both who gets a treatment and the outcome. Fit the crude and the age-adjusted model and compare the treatment coefficient with the true value. Then add an interaction and plot the two slopes.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Here is my adjusted model output: [paste]. Write one sentence per coefficient using 'associated with' language, and list variables I might be missing that could confound the main result.</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure point</span></div>
-  <aside class="notes">The prompt even says "observational data", and causal verbs still appear in most answers. Ask pairs to read out their AI's two sentences and count the causal words. "Holding nodes constant" is the phrase that shows the writer understands adjustment.</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: In the simulation, only the adjusted coefficient should land near the true value.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 13 TAKE HOME ============ -->
@@ -511,11 +513,7 @@ hooks['statements']={init(){const {adj}=crudeAdj(DS.gbsg2);const b3=adj.coef[2].
   [false,'The interaction between nodes and menopausal status has p = 0.2, so the node slope is the same before and after menopause.','A large p means the data can\'t distinguish the slopes. Look at the CI: interactions are estimated imprecisely.']])}};
 
 /* ---- 12 AI ---- */
-hooks['ai-tutor']={init(){const {adj}=crudeAdj(DS.gbsg2);const n=['Intercept','tgrade: II vs I','tgrade: III vs I','pnodes'];
-  const t=adj.coef.map((c,i)=>`${n[i].padEnd(18)}${d3.format('8.3f')(c.est)}  [${fmt2(c.lo)}, ${fmt2(c.hi)}]  p = ${fmtP(c.p)}`).join('\n');
-  document.getElementById('aiPrompt').textContent=`I fitted a linear regression of Tumour size (mm) on Tumour grade and Positive lymph nodes in observational data. Results:\n${t}\nWrite two sentences interpreting these results for the results section of a paper.`;
-  document.getElementById('aiGood').innerHTML=`"Grade III tumours were on average ${fmt1(adj.coef[2].est)} mm larger than grade I tumours in patients with the same number of positive nodes (95% CI ${fmt1(adj.coef[2].lo)} to ${fmt1(adj.coef[2].hi)}). Each additional positive node was <em>associated with</em> ${fmt2(adj.coef[3].est)} mm larger tumours, holding grade constant."`;
-}};
+
 
 startDeck(hooks);
 </script>

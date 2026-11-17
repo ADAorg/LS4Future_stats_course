@@ -251,31 +251,29 @@
 </section>
 
 <!-- ============ 10 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>Where did the tutor <em>go wrong</em>?</h1>
-  <div class="row" style="gap:40px;margin-top:8px">
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">Built-in failure points:</p>
-      <ul class="clean x" style="margin-bottom:16px">
-        <li style="font-size:19px"><b>Card 2:</b> the prompt says "groups", and many answers recommend an independent t-test without asking whether the mice are the same</li>
-        <li style="font-size:19px"><b>Card 5:</b> the prompt doesn't mention censoring, so answers suggest a t-test or Mann–Whitney on <code>time</code></li>
-      </ul>
-      <p class="small" style="margin:0 0 4px">What fixed it, in pairs that tried:</p>
-      <ul class="clean">
-        <li style="font-size:19px">describing the <em>design</em>: "the same 10 mice, measured twice"</li>
-        <li style="font-size:19px">describing the <em>data</em>: "time to recurrence or last follow-up; 56% never recurred"</li>
-      </ul>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 6px">🧮 Calculator check (card 4):</p>
-      <div class="prompt">Add a check of normality for each group before the test.</div>
-      <p class="small" style="margin:12px 0 18px">With 8 values per group, a normality test almost never rejects. A plot tells you more.</p>
-      <p class="small" style="margin:0 0 8px">Score each tutor answer:</p>
-      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about choosing a test: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Describe 5 short experiments from biomedical research to me, one at a time. For each, ask which test I'd choose and why, then tell me what I missed.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Simulate 10 mice measured before and after treatment, with large mouse-to-mouse variation. Compare the power of an unpaired and a paired t-test over 2,000 repeats, then repeat with Mann–Whitney and Wilcoxon signed-rank.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Here is how my last experiment was run: [describe]. Before suggesting a test, ask me questions about how the data were collected: pairing, independence, repeated measures, censoring.</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · discussion question 1</span></div>
-  <aside class="notes">The lesson generalises: the AI answers the question as described. It can't see your design unless you describe it, and the details that matter (pairing, censoring, how a variable was measured) are exactly the ones people leave out of a prompt. Ask the room for their best rewritten prompts.</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: Did the tutor ask about the design before answering? Cards 2 and 5 show what happens when the prompt leaves it out.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 11 DAY 1 WRAP ============ -->

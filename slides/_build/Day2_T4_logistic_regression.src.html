@@ -120,7 +120,7 @@
     </div>
   </div>
   <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
-  <aside class="notes">Same dataset split as the morning. The AI prompt is a known failure point, generated from each pair's own model: "OR = X means X times more likely" for a common outcome.</aside>
+  <aside class="notes">Same dataset split as the morning.</aside>
 </section>
 
 <!-- ============ 7 FOREST ============ -->
@@ -183,28 +183,33 @@
   <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
   <div class="qcards" id="qcards"></div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
-  <aside class="notes">Statement 1 is the AI failure point. Statement 4 is discussion question 1: report the OR for the model, but give probabilities (or risk differences) to clinicians.</aside>
+  <aside class="notes">Statement 1 is the most common misreading. Statement 4 is discussion question 1: report the OR for the model, but give probabilities (or risk differences) to clinicians.</aside>
 </section>
 
 <!-- ============ 11 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>"Two times the odds" ≠ "<em>twice as likely</em>".</h1>
-  <div class="row" style="gap:36px;margin-top:6px">
-    <div class="col" style="flex:1.1">
-      <p class="small" style="margin:0 0 6px">🎓 The notebook builds this prompt from your model. With GBSG2:</p>
-      <div class="prompt" id="aiPrompt"></div>
-      <div class="chips" style="margin-top:12px"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-      <p class="small" style="margin:14px 0 0">Discussion: the lung outcome "lost weight" depends on how long patients were followed. When is a yes/no outcome really a hidden <em>time-to-event</em> outcome? (Day 3)</p>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">Watch for:</p>
-      <ul class="clean x" style="margin-bottom:12px"><li style="font-size:19px" id="aiBad"></li><li style="font-size:19px">"grade III causes more nodal spread"</li></ul>
-      <p class="small" style="margin:0 0 4px">A good answer, in probabilities a clinician can use:</p>
-      <div class="card"><span style="font-size:18px" id="aiGood"></span></div>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about logistic regression: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain probability, odds and log-odds using 20 patients as an example. Then quiz me: ask me to convert between them three times, and correct me.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">For odds ratios of 1.5, 2.5 and 4, plot the corresponding risk ratio against the risk in the reference group, from 1% to 80%.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Here is my logistic regression output: [paste]. Turn the odds ratios into predicted probabilities for two typical patients, and write one sentence a clinician could use.</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure point</span></div>
-  <aside class="notes">The prompt includes how common the outcome is (45%), which is exactly the information needed to avoid the slip, and most AI answers still say "about twice as likely". The good answer converts to predicted probabilities at a typical tumour size: those numbers come from the model on this slide.</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: The risk ratio should be close to the odds ratio only when the reference risk is small (section D).</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 12 TAKE HOME ============ -->
@@ -425,11 +430,7 @@ hooks['statements']={init(){qcards('qcards',[
   [true,'For a paper, report the odds ratio with its CI; for a clinician, also give predicted probabilities.','Correct (discussion question 1). Odds are hard to feel; probabilities aren\'t.']])}};
 
 /* ---- 11 AI ---- */
-hooks['ai-tutor']={init(){const c=GBfit.coef[3],prev=mean(GB.rows.map(r=>r.y)),med=d3.median(GB.rows,r=>r.x);
-  document.getElementById('aiPrompt').textContent=`In a logistic regression of "4 or more positive lymph nodes" (which occurs in ${d3.format('.0%')(prev)} of patients), the odds ratio for tgrade: III vs I is ${fmt2(c.or)} (95% CI ${fmt2(c.lo)}–${fmt2(c.hi)}). Explain this result to a clinician in two sentences.`;
-  document.getElementById('aiBad').innerHTML=`"grade III patients are ${fmt2(c.or)} times more likely to have 4+ nodes"`;
-  const pI=GBfit.pred([1,med,0,0]),pIII=GBfit.pred([1,med,0,1]);
-  document.getElementById('aiGood').innerHTML=`"For a typical ${med} mm tumour, the model predicts 4+ positive nodes in about <b>${d3.format('.0%')(pIII)}</b> of grade III patients versus <b>${d3.format('.0%')(pI)}</b> of grade I patients (odds ratio ${fmt2(c.or)}, 95% CI ${fmt2(c.lo)}–${fmt2(c.hi)}). Grade III is <em>associated with</em> more nodal involvement; this doesn't show it causes it."`}};
+
 
 startDeck(hooks);
 </script>

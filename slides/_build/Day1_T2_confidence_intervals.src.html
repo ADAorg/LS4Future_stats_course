@@ -116,7 +116,7 @@
     </div>
   </div>
   <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 30 minutes · in pairs</span></div>
-  <aside class="notes">Seeds = pair numbers. Remind them that n stays at 30 in section B so the shared sheet is comparable. The tutor prompt in this notebook is a known AI failure point: ask them to read the AI answer to the very end. While they work, open the next slide and type in the shared-sheet values as they arrive.</aside>
+  <aside class="notes">Seeds = pair numbers. Remind them that n stays at 30 in section B so the shared sheet is comparable. While they work, open the next slide and type in the shared-sheet values as they arrive.</aside>
 </section>
 
 <!-- ============ 6 ROOM ============ -->
@@ -195,34 +195,33 @@
   <p class="lead" style="font-size:21px">Your study gives a 95% CI for mean tumour size of <b>[26.1, 33.4] mm</b>. Click a statement to reveal.</p>
   <div class="qcards" id="qcards"></div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
-  <aside class="notes">Take a show of hands for each statement before revealing. Statement 1 is the one almost everyone (and many AI tutors) gets wrong. "95% confident" is accepted shorthand for statement 2; the slip is to turn it into a probability about this particular interval. Statement 3 is the SD/SE mix-up from Topic 1 in disguise.</aside>
+  <aside class="notes">Take a show of hands for each statement before revealing. Statement 1 is the one almost everyone gets wrong. "95% confident" is accepted shorthand for statement 2; the slip is to turn it into a probability about this particular interval. Statement 3 is the SD/SE mix-up from Topic 1 in disguise.</aside>
 </section>
 
 <!-- ============ 10 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>Read the tutor's answer <em>to the end</em>.</h1>
-  <div class="row" style="gap:40px;margin-top:8px">
-    <div class="col" style="flex:1.2">
-      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook, a known failure point:</p>
-      <div class="prompt">I computed a 95% confidence interval for mean tumour size: [26.1, 33.4] mm. Does this mean there is a 95% probability that the true mean lies between 26.1 and 33.4 mm?</div>
-      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
-      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-      <p class="small" style="margin:22px 0 6px">🧮 Calculator check: after "sort the intervals by their mean", did the number of red lines change? Why not?</p>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">The typical pattern:</p>
-      <ul class="clean" style="margin-bottom:14px">
-        <li style="font-size:19px">opens correctly: "No, the 95% refers to the method…"</li>
-        <li style="font-size:19px">explains repeated sampling well</li>
-      </ul>
-      <ul class="clean x">
-        <li style="font-size:19px">then closes with "…so there is a 95% chance the true mean is in your interval"</li>
-        <li style="font-size:19px">or never says what the interval <em>is</em> useful for (values compatible with the data)</li>
-      </ul>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about confidence intervals: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain what a 95% confidence interval means using the idea of many repeated studies. Then give me 4 statements about one interval, one at a time, and ask me whether each is correct.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Simulate 1,000 studies of 10 patients from the GBSG2 tumour sizes, compute a 95% t-interval for each, and count how many contain the true mean. Repeat with 50 patients per study.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Here are two results from my experiments with their 95% CIs: [paste]. What can I conclude about the difference between them, and what can't I conclude from whether the intervals overlap?</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
-  <aside class="notes">Ask a pair whose AI answer slipped to read out the last paragraph. The lesson is not that AI is bad at statistics; it's that fluent explanations can contradict themselves, and the contradiction usually sits in the summary sentence people remember. For the calculator check: sorting reorders lines but changes no interval, so the count must stay the same. If it changed, the code did something else.</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: Coverage should be close to 95% with 50 patients and a little lower with 10, because tumour sizes are skewed (section D).</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 11 TAKE HOME ============ -->

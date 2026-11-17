@@ -188,28 +188,33 @@
   <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
   <div class="qcards" id="qcards"></div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
-  <aside class="notes">Statement 1 is the AI failure point. Statement 3 is about informative censoring: the assumption behind everything today.</aside>
+  <aside class="notes">Statement 1 is the most common misreading. Statement 3 is about informative censoring: the assumption behind everything today.</aside>
 </section>
 
 <!-- ============ 12 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>"30% lower hazard" ≠ "<em>live 30% longer</em>".</h1>
-  <div class="row" style="gap:36px;margin-top:6px">
-    <div class="col" style="flex:1.1">
-      <p class="small" style="margin:0 0 6px">🎓 Paste into Claude / ChatGPT:</p>
-      <div class="prompt">A Cox model gives a hazard ratio of 0.70 (95% CI 0.54 to 0.89) for hormone therapy vs no hormone therapy, with recurrence-free survival as the outcome. Explain to a patient what this means for her.</div>
-      <div class="chips" style="margin-top:12px"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-      <p class="small" style="margin:14px 0 0">Did your tutor ask for the baseline risk? Without it, no answer for a patient is possible.</p>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">Watch for:</p>
-      <ul class="clean x" style="margin-bottom:12px"><li style="font-size:19px">"patients live 30% longer"</li><li style="font-size:19px">"30% of patients benefit"</li><li style="font-size:19px">"30% lower risk of recurrence" (without saying it's a rate, at every moment)</li></ul>
-      <p class="small" style="margin:0 0 4px">A good answer, in numbers a patient can use:</p>
-      <div class="card"><span style="font-size:18px" id="aiGood"></span></div>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about survival analysis: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain censoring, Kaplan–Meier curves and the hazard ratio to a lab scientist. Then give me 4 sentences from papers that report hazard ratios and ask me which are correct.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Simulate two groups with exponential survival times, a true hazard ratio of 0.7 and about 50% censoring. Fit a Cox model 500 times and plot the estimated hazard ratios. Then simulate curves that cross.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">My outcome is [for example: days until a tumour reaches 1,000 mm³; some mice were culled early]. Is this time-to-event data? What is censored, and could the censoring be related to prognosis?</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure point</span></div>
-  <aside class="notes">The good answer comes from the Kaplan–Meier curves on slide 5, computed here from the data. "Live 30% longer" confuses a ratio of rates with a ratio of times; under very specific assumptions (constant hazards) an HR of 0.7 corresponds to median survival about 1.4 times longer, which is not 30% either.</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: The estimated hazard ratios should centre on 0.7.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 13 TAKE HOME ============ -->
@@ -518,8 +523,7 @@ hooks['statements']={init(){qcards('qcards',[
   [true,'A non-significant log-rank test does not prove the treatment has no effect, especially if the curves cross.','Correct: early harm and late benefit cancel in the log-rank sum. Look at the curves.']])}};
 
 /* ---- 12 AI ---- */
-hooks['ai-tutor']={init(){const [a,b]=DS.gbsg2.km;
-  document.getElementById('aiGood').innerHTML=`"Among women in this trial, about <b>${pct(b.S(1825))}</b> of those on hormone therapy were recurrence-free at 5 years, versus <b>${pct(a.S(1825))}</b> without it. At any point during follow-up, the rate of recurrence among women still recurrence-free was about 30% lower with therapy (HR 0.70, 95% CI 0.54–0.89). This assumes the benefit is roughly constant over time, and your own risk depends on your tumour."`}};
+
 
 startDeck(hooks);
 </script>

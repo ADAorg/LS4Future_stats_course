@@ -162,28 +162,33 @@
   <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
   <div class="qcards" id="qcards"></div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check</span></div>
-  <aside class="notes">Statement 1 is the pseudoreplication failure point; statement 3 is the batch-correction one. Statement 4: fish in a tank with the drug in the water.</aside>
+  <aside class="notes">Statement 1 is the most common pseudoreplication mistake; statement 3 the most common batch mistake. Statement 4: fish in a tank with the drug in the water.</aside>
 </section>
 
 <!-- ============ 10 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>Ask the tutor: <em>what is n?</em></h1>
-  <div class="row" style="gap:36px;margin-top:6px">
-    <div class="col" style="flex:1.1">
-      <p class="small" style="margin:0 0 6px">🎓 Paste into Claude / ChatGPT:</p>
-      <div class="prompt">I treated 3 mice with a drug and 3 with vehicle, then measured mitochondrial length in 50 cells per mouse. A t-test on the 150 vs 150 cells gives p = 0.0003. My reviewer says this is pseudoreplication. Is she right? What should I report as n, and how should I reanalyse?</div>
-      <div class="chips" style="margin-top:12px"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-      <p class="small" style="margin:14px 0 0">Then: <em>"All my controls were sequenced in run 1 and all treated samples in run 2. Can I fix this with batch correction?"</em></p>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">Watch for:</p>
-      <ul class="clean x" style="margin-bottom:12px"><li style="font-size:19px">fixes that keep n = 150: "use a Mann–Whitney test", "report the SEM of the cells"</li><li style="font-size:19px">"use a mixed model" with no warning that it still has only 3 mice per group</li><li style="font-size:19px">"ComBat can remove the batch effect" for a fully confounded design</li></ul>
-      <p class="small" style="margin:0 0 4px">A good answer:</p>
-      <div class="card"><span style="font-size:18px">"Yes. The mouse is the experimental unit, so n = 3 per group. Average the cells per mouse and compare 3 vs 3 (or fit a mixed model with mouse as a random effect); expect a much larger p-value. Report the number of mice and cells separately. For more power, add mice, not cells."</span></div>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about experimental design: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain experimental unit vs observational unit with three lab examples. Then describe 4 experiments to me, one at a time, and ask me what n is in each.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Simulate 3 vs 3 mice with 50 cells each and no true effect, 1,000 times. Compare the false-positive rate of a t-test on cells, a t-test on mouse means and a mixed model.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Here is my planned experiment: [describe]. Act as a critical reviewer: identify the experimental unit, likely batches and blocks, and how to randomise. Ask me questions before answering.</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure points</span></div>
-  <aside class="notes">Most tutors get the diagnosis right and the fix half right. The batch question is the sharper test: a good answer says no correction can separate treatment from batch here, and proposes re-running a subset of samples across runs.</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: The t-test on cells should give far more than 5% false positives; the other two about 5%.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 11 TAKE HOME ============ -->

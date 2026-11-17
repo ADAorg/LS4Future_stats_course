@@ -141,7 +141,7 @@
     </div>
   </div>
   <div class="footer"><img src="__LOGO_NEG__" alt="GIMM" style="height:56px;margin-left:-14px"><span class="kicker">Your turn · about 35 minutes · in pairs</span></div>
-  <aside class="notes">Assign designs. The airway samples come from 4 cell lines, each measured with and without dexamethasone: a paired design. The AI prompt is a known failure point: "padj = 0.03 means a 3% chance this gene is false".</aside>
+  <aside class="notes">Assign designs. The airway samples come from 4 cell lines, each measured with and without dexamethasone: a paired design.</aside>
 </section>
 
 <!-- ============ 7 PAIRED vs UNPAIRED ============ -->
@@ -206,28 +206,33 @@
   <p class="lead" style="font-size:21px">Click a statement to reveal.</p>
   <div class="qcards" id="qcards"></div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">Concept check · discussion questions 2 and 3</span></div>
-  <aside class="notes">Statement 1 is the AI failure point. Statement 3 is discussion question 2 (qPCR follow-up). Statement 4 is discussion question 3: with 12 cytokines and a confirmatory goal, Bonferroni; for an exploratory screen, BH.</aside>
+  <aside class="notes">Statement 1 is the most common misreading. Statement 3 is discussion question 2 (qPCR follow-up). Statement 4 is discussion question 3: with 12 cytokines and a confirmatory goal, Bonferroni; for an exploratory screen, BH.</aside>
 </section>
 
 <!-- ============ 11 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>"padj = 0.03": a 3% chance of being <em>false</em>?</h1>
-  <div class="row" style="gap:36px;margin-top:6px">
-    <div class="col">
-      <p class="small" style="margin:0 0 6px">🎓 Tutor prompt from the notebook, a known failure point:</p>
-      <div class="prompt">DESeq2 gives my favourite gene an adjusted p-value (padj) of 0.03. What is the probability that this gene is a false positive?</div>
-      <p class="small" style="margin:14px 0 4px">A good answer says:</p>
-      <ul class="clean"><li style="font-size:18px">BH controls the false discovery rate of the <em>whole list</em> at the chosen cutoff</li><li style="font-size:18px">it isn't a per-gene probability of being false</li><li style="font-size:18px">genes near the cutoff are more likely false than those at the top</li></ul>
-      <ul class="clean x"><li style="font-size:18px">"there is a 3% chance this gene is a false positive"</li></ul>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 6px">🧮 Calculator check: <em>"Label the 10 genes with the smallest padj on the volcano plot."</em> Paired design:</p>
-      <table class="ttab" id="aiTab"></table>
-      <p class="small" style="margin-top:8px">Check that the labels land on the highest points, not just the biggest fold changes.</p>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about differential expression and FDR: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain the difference between a p-value, a Bonferroni-adjusted p-value and a Benjamini–Hochberg adjusted p-value using a 10-gene example. Then quiz me on what padj = 0.03 does and doesn't mean.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Simulate 10,000 genes of which 10% are truly changed. Apply BH at 5% and compute the actual share of false discoveries in the list. Repeat 100 times and plot the distribution.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Here is my RNA-seq design: [samples, conditions, batches, donors]. Write the DESeq2 design formula, and tell me what to check before I trust the gene list.</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · built-in failure point</span></div>
-  <aside class="notes">The 3% reading is the gene-level version of Day 1's p-value misreading. padj = 0.03 means: if you call every gene with padj up to 0.03, you expect about 3% of that list to be false. Gene IDs in the table are Ensembl IDs from the airway data (DUSP1 and ZBTB16 in the top 10 are classic glucocorticoid-response genes).</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: The false discovery share should average at or below 5%, but single runs vary around it.</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 12 DAY 2 WRAP ============ -->
@@ -419,8 +424,7 @@ hooks['statements']={init(){qcards('qcards',[
   [false,'Bonferroni is always better than BH because it makes fewer false calls.','It depends on the goal. For a handful of confirmatory tests, Bonferroni. For discovery screens, BH finds far more true genes at an acceptable false share.']])}};
 
 /* ---- 11 AI ---- */
-hooks['ai-tutor']={init(){const D=DE.paired;const idx=d3.range(NG).filter(i=>D.mlp[i]!=null).sort((a,b)=>D.mlp[b]-D.mlp[a]).slice(0,10);
-  document.getElementById('aiTab').innerHTML='<tr><th>rank</th><th>gene</th><th>log2 FC</th><th>−log10 p</th></tr>'+idx.map((i,k)=>`<tr><td>${k+1}</td><td style="font-size:14px">${GENES[i]}</td><td>${fmt2(D.lfc[i]/100)}</td><td>${fmt1(D.mlp[i]/100)}</td></tr>`).join('')}};
+
 const GENES = __JSON:airway_top__;
 
 startDeck(hooks);

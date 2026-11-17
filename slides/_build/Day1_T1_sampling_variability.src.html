@@ -136,7 +136,7 @@
     </div>
   </div>
   <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">The most common mix-up in papers</span></div>
-  <aside class="notes">Same 20 patients, two error bars. Mean ± SD says "patients vary by about ±14 mm". Mean ± SE says "if I repeated the study, my mean would typically move by about ±3 mm", the spread of the histogram on the previous slide. Ask: which one should go on a figure? Depends on the message, but always say which. A bar chart with ±SE bars can make noisy data look very precise. In practice we don't have 2,000 studies; we estimate the SE from one sample. The notebook's tutor prompt tests exactly this.</aside>
+  <aside class="notes">Same 20 patients, two error bars. Mean ± SD says "patients vary by about ±14 mm". Mean ± SE says "if I repeated the study, my mean would typically move by about ±3 mm", the spread of the histogram on the previous slide. Ask: which one should go on a figure? Depends on the message, but always say which. A bar chart with ±SE bars can make noisy data look very precise. In practice we don't have 2,000 studies; we estimate the SE from one sample.</aside>
 </section>
 
 <!-- ============ 7 HANDS-ON ============ -->
@@ -161,7 +161,7 @@
         <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">WRITE DOWN A GUESS NOW</p>
         <p style="margin:0 0 22px;font-size:24px">If you go from 20 to 80 patients, what happens to the spread of the study means?</p>
         <p style="margin:0 0 8px;color:var(--sc3);font-size:16px;letter-spacing:.12em">TWO AI ROLES, KEPT APART</p>
-        <p style="margin:0;font-size:20px;line-height:1.5;color:rgba(255,255,255,.85)">🧮 Gemini in Colab = <em>calculator</em>, for code.<br>🎓 Claude / ChatGPT = <em>tutor you must check</em>, for interpretation.</p>
+        <p style="margin:0;font-size:20px;line-height:1.5;color:rgba(255,255,255,.85)">🧮 Gemini in Colab = <em>calculator</em>, for code.<br>🎓 Claude / ChatGPT = <em>tutor</em>, to explain, quiz you and critique your work.</p>
       </div>
     </div>
   </div>
@@ -257,32 +257,29 @@
 </section>
 
 <!-- ============ 12 AI ============ -->
-<section class="slide" id="ai-tutor">
-  <h1>Does the tutor know <em>SD from SE</em>?</h1>
-  <div class="row" style="gap:40px;margin-top:8px">
-    <div class="col" style="flex:1.2">
-      <p class="small" style="margin:0 0 6px">Prompt from the notebook:</p>
-      <div class="prompt">I measured tumour size in 20 patients. The sample mean is 31 mm and the sample standard deviation is 14 mm. What is the difference between the standard deviation and the standard error here, and which one should I report?</div>
-      <p class="small" style="margin:18px 0 8px">Score it on four points:</p>
-      <div class="chips"><span class="chip">correct</span><span class="chip">complete</span><span class="chip">specific</span><span class="chip">actionable</span></div>
-    </div>
-    <div class="col">
-      <p class="small" style="margin:0 0 4px">A good answer says:</p>
-      <ul class="clean" style="margin-bottom:14px">
-        <li style="font-size:19px">SD describes <em>patients</em>; SE describes the <em>estimate</em></li>
-        <li style="font-size:19px">SE = 14 / √20 ≈ 3.1 mm</li>
-        <li style="font-size:19px">more patients shrink the SE, not the SD</li>
-      </ul>
-      <p class="small" style="margin:0 0 4px">Watch for:</p>
-      <ul class="clean x">
-        <li style="font-size:19px">"report the SE because it's smaller"</li>
-        <li style="font-size:19px">SE as the variability of patients</li>
-        <li style="font-size:19px">no number, only definitions (not <em>specific</em>)</li>
-      </ul>
-    </div>
+<section class="slide" id="go-deeper">
+  <h1>Go deeper with <em>AI</em>.</h1>
+  <p class="lead" style="font-size:21px">Three ways to keep learning about sampling variability: now, if you finish early, or after the workshop.</p>
+  <div class="row" style="gap:18px;align-items:stretch;margin-top:6px">
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🎓 EXPLAIN AND QUIZ ME</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Explain the difference between a standard deviation and a standard error to a cell biologist, using an analogy from the lab. Then ask me 3 questions, one at a time, and tell me where my answers go wrong.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🧪 SEE IT IN A SIMULATION</p>
+        <p class="tiny" style="margin:0 0 10px">Gemini in Colab, in a new notebook cell</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Draw 5,000 samples of 5, 20 and 80 patients from the GBSG2 tumour sizes and plot the three histograms of sample means on the same axes. Print the SD of each set of means next to 14.3 / √n.</p>
+      </div></div>
+      <div class="col"><div class="card" style="height:100%">
+        <p style="margin:0 0 4px;color:var(--pc2);font-size:15px;letter-spacing:.12em">🔬 APPLY IT TO MY WORK</p>
+        <p class="tiny" style="margin:0 0 10px">Claude / ChatGPT · fill in the brackets</p>
+        <p style="font-size:20px;line-height:1.5;font-style:italic;margin:0">Here is a figure legend from my work: [paste]. Do my error bars show SD or SEM? Which one matches what I want the reader to conclude, and why?</p>
+      </div></div>
   </div>
-  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · check its answer</span></div>
-  <aside class="notes">Ask two or three pairs to read out how they scored their AI answer. Most current models get the definitions right; the misses are usually in "specific" (no actual SE calculated) and "actionable" (no advice about which to report on a figure). If someone's answer recommended SE "because it looks cleaner", use it: that's a reporting choice, not a statistical reason.</aside>
+  <p class="callout" style="margin-top:18px;font-size:19px">✔ Check one claim yourself: Four times as many patients should halve the spread of the sample means. Does your simulation agree?</p>
+  <div class="footer"><img src="__LOGO_POS__" alt="GIMM"><span class="kicker">AI as tutor · go deeper</span></div>
+  <aside class="notes">These prompts are for pairs who finish early and for after the workshop; the same three are at the end of the notebook. Current AI tutors explain these ideas well, so the value is not in catching their mistakes but in using them actively: being quizzed rather than reading an explanation, testing a claim with a simulation, and applying the idea to your own experiment. The one habit to keep: ask for the reasoning, and check one claim yourself.</aside>
 </section>
 
 <!-- ============ 13 TAKE HOME ============ -->
